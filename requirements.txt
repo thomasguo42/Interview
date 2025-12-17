@@ -1,0 +1,8 @@
+Flask==3.0.3
+python-dotenv==1.0.1
+requests==2.32.3
+PyPDF2==3.0.1
+kokoro==0.9.4
+onnxruntime==1.18.1
+soundfile==0.12.1
+pydub==0.25.1

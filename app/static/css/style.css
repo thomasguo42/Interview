@@ -1,0 +1,461 @@
+:root {
+    color-scheme: light;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #f5f7fb;
+    color: #0f172a;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f5f7fb 0%, #eef2ff 100%);
+}
+
+.layout {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+    display: grid;
+    gap: 1.75rem;
+}
+
+.header {
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: -0.02em;
+}
+
+.tagline {
+    margin-top: 0.5rem;
+    color: #475569;
+    font-size: 1rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.75rem;
+    box-shadow: 0 20px 45px -20px rgba(15, 23, 42, 0.2);
+}
+
+.card h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+    color: #1e293b;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+input[type="file"] {
+    flex: 1;
+    border: 1px dashed #94a3b8;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background-color: #f8fafc;
+    cursor: pointer;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    box-shadow: 0 10px 25px -12px rgba(37, 99, 235, 0.6);
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 35px -15px rgba(37, 99, 235, 0.7);
+}
+
+button:disabled {
+    background: #cbd5f5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.secondary {
+    background: #e2e8f0;
+    color: #1e293b;
+    box-shadow: none;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.hint {
+    margin-top: 0;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.status-message {
+    margin-top: 0.75rem;
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.status-message.error {
+    color: #be123c;
+}
+
+.status-message.success {
+    color: #0f766e;
+}
+
+.caption {
+    min-height: 2.5rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 1rem;
+    border: 1px solid #cbd5f5;
+}
+
+.transcript {
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    background: #f1f5f9;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.message .speaker {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #475569;
+    margin-bottom: 0.35rem;
+}
+
+.message.user {
+    background: #2563eb;
+    color: #fff;
+    align-self: flex-end;
+}
+
+.message.user .speaker {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.message.model {
+    background: #ede9fe;
+    color: #312e81;
+}
+
+.message.model .speaker {
+    color: #4c1d95;
+}
+
+.message.system {
+    background: #e2e8f0;
+    color: #0f172a;
+    font-style: italic;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* ============================================ */
+/* STRUCTURED INTERVIEW UI COMPONENTS */
+/* ============================================ */
+
+/* Interview Timer & Phase Indicator */
+.interview-timer {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+    margin: -3rem -1.5rem 1.75rem;
+}
+
+.timer-content {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.phase-badge {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+}
+
+.time-display {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+.force-transition-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.force-transition-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+}
+
+/* Mode Selector */
+.mode-selector {
+    margin-bottom: 1.5rem;
+}
+
+.mode-label {
+    font-weight: 600;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.mode-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.mode-option {
+    cursor: pointer;
+    position: relative;
+}
+
+.mode-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.mode-card {
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.mode-option input[type="radio"]:checked + .mode-card {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.mode-option:hover .mode-card {
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.mode-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.mode-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* Language Selector */
+.language-selector {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.language-selector label {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.language-selector select {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background-color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.language-selector select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Problem Statement Panel */
+.problem-panel {
+    border-left: 4px solid #7c3aed;
+}
+
+.problem-statement {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.problem-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.problem-section:not(:last-child) {
+    border-bottom: 1px dashed #cbd5e1;
+}
+
+.problem-section h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    color: #7c3aed;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.problem-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #2563eb;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.problem-section p {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.problem-update {
+    background: #fefce8;
+    border-left: 3px solid #facc15;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+/* Code Editor Section */
+.code-editor-section {
+    border-left: 4px solid #2563eb;
+}
+
+.code-editor {
+    height: 400px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .layout {
+        padding: 2rem 1rem 3rem;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .interview-timer {
+        margin: -2rem -1rem 1.75rem;
+    }
+
+    .timer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .code-editor {
+        height: 300px;
+    }
+
+    .mode-options {
+        grid-template-columns: 1fr;
+    }
+
+    .ood-workspace {
+        display: block;
+    }
+
+}
+
+/* ============================================ */
+/* OOD INTERVIEW MODE COMPONENTS */
+/* ============================================ */
+
+/* OOD Workspace Layout */
+.ood-workspace {
+    display: block;
+    max-width: none;
+}
+
+/* OOD Code Section */
+.ood-code-section {
+    border-left: 4px solid #f59e0b;
+}
+
+.ood-code-section .code-editor {
+    height: 500px;
+}

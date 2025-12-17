@@ -1,0 +1,22 @@
+# --- System & Python ---
+__pycache__/
+*.pyc
+.env
+.venv/
+.ipynb_checkpoints/
+.DS_Store
+
+# --- HEAVY DATA (Do not track these!) ---
+results/
+blade_touch_rule/
+data/
+models/
+wandb/
+
+# --- Large File Safety Net ---
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.ckpt
+*.gguf

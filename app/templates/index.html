@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Mock Interview Coach</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<main class="layout">
+    <header class="header">
+        <h1>Realtime Mock Interview Coach</h1>
+        <p class="tagline">Full structured technical interview with voice conversation and live coding.</p>
+    </header>
+
+    <!-- Interview Timer & Phase Indicator (Hidden until interview starts) -->
+    <div id="interview-timer" class="interview-timer" style="display:none;">
+        <div class="timer-content">
+            <span id="phase-indicator" class="phase-badge">Phase 1: Introduction</span>
+            <span id="time-display" class="time-display">0:00 / 60:00</span>
+            <button id="force-coding-btn" class="force-transition-btn" style="display:none;">
+                Force Coding Phase →
+            </button>
+        </div>
+    </div>
+
+    <section class="card">
+        <h2>1. Upload your resume</h2>
+        <p class="hint" style="margin-top:0;">Required for Full Interview mode. Optional for Coding Only mode.</p>
+        <form id="resume-form">
+            <label for="resume-file" class="sr-only">Resume file</label>
+            <input type="file" id="resume-file" name="file" accept=".pdf,.txt">
+            <button type="submit">Upload Resume</button>
+        </form>
+        <p id="resume-status" class="status-message"></p>
+    </section>
+
+    <section class="card">
+        <h2>1b. Optional: Target company &amp; role</h2>
+        <p class="hint" style="margin-top:0;">Gemini will tailor OOD questions to whatever you enter here.</p>
+        <form id="company-role-form">
+            <label for="company-input" class="sr-only">Company</label>
+            <input type="text" id="company-input" placeholder="Company (e.g., Stripe)">
+            <label for="role-input" class="sr-only">Role</label>
+            <input type="text" id="role-input" placeholder="Role (e.g., Payments Platform Engineer)">
+            <label for="company-role-details" class="sr-only">Details</label>
+            <textarea id="company-role-details" rows="3" placeholder="Team, product, or interview focus (optional)"></textarea>
+            <button type="submit">Save Role Context</button>
+        </form>
+        <p id="company-role-status" class="status-message"></p>
+    </section>
+
+    <section class="card">
+        <h2>1c. Boarding school context</h2>
+        <p class="hint" style="margin-top:0;">Required for the High School Interview mode. Share the school name plus highlights so the interviewer can personalize questions.</p>
+        <form id="school-context-form">
+            <label for="school-name-input" class="sr-only">Boarding school name</label>
+            <input type="text" id="school-name-input" placeholder="School name (e.g., Phillips Exeter)">
+
+            <label for="school-strengths-input" class="sr-only">School strengths</label>
+            <textarea id="school-strengths-input" rows="2" placeholder="What are this school's strengths or signature programs?"></textarea>
+
+            <label for="school-culture-input" class="sr-only">Culture notes</label>
+            <textarea id="school-culture-input" rows="2" placeholder="Campus culture, values, traditions to highlight"></textarea>
+
+            <label for="student-background-input" class="sr-only">Student background</label>
+            <textarea id="student-background-input" rows="3" placeholder="Student background, interests, or stories you'd like the interviewer to pull from"></textarea>
+
+            <button type="submit">Save School Context</button>
+        </form>
+        <p id="school-context-status" class="status-message"></p>
+    </section>
+
+    <section class="card">
+        <h2>2. Choose interview mode & settings</h2>
+
+        <div class="mode-selector">
+            <label class="mode-label">Interview Mode:</label>
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="interview-mode" value="full" checked>
+                    <div class="mode-card">
+                        <div class="mode-title">Full Interview</div>
+                        <div class="mode-desc">Complete 60-min structured interview (Intro → Resume → Coding → Questions)</div>
+                    </div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="interview-mode" value="coding_only">
+                    <div class="mode-card">
+                        <div class="mode-title">Coding Only</div>
+                        <div class="mode-desc">Skip straight to coding problem (35-40 minutes of pure coding)</div>
+                    </div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="interview-mode" value="ood">
+                    <div class="mode-card">
+                        <div class="mode-title">OOD Interview</div>
+                        <div class="mode-desc">Object-Oriented Design (40 min: 20 min design + 20 min implementation)</div>
+                    </div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="interview-mode" value="high_school">
+                    <div class="mode-card">
+                        <div class="mode-title">High School Interview</div>
+                        <div class="mode-desc">Boarding school admissions-style conversation tailored to the school and student</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="language-selector">
+            <label for="language-select">Coding Language:</label>
+            <select id="language-select">
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div class="controls">
+            <button id="start-btn" disabled>Start Interview</button>
+            <button id="stop-btn" disabled>Stop Interview</button>
+            <button id="reset-btn" disabled class="secondary">Reset Conversation</button>
+        </div>
+        <div id="live-caption" class="caption"></div>
+        <audio id="remote-audio" autoplay playsinline hidden></audio>
+    </section>
+
+    <!-- Problem Statement Panel (Hidden until coding phase) -->
+    <section id="problem-panel" class="card problem-panel" style="display:none;">
+        <h2>Coding Problem</h2>
+        <div id="problem-statement" class="problem-statement">
+            Problem will appear here during the coding phase...
+        </div>
+    </section>
+
+    <!-- Code Editor (Hidden until coding phase) -->
+    <section id="code-editor-section" class="card code-editor-section" style="display:none;">
+        <h2>Code Editor</h2>
+        <div id="code-editor" class="code-editor"></div>
+    </section>
+
+    <!-- OOD Interview Workspace (Hidden until OOD mode) -->
+    <section id="ood-workspace" class="ood-workspace" style="display:none;">
+        <section class="card ood-code-section">
+            <h2>Design &amp; Code Editor</h2>
+            <p class="hint" style="margin-top:0;">Use this single editor for brainstorming, pseudocode, and final implementation.</p>
+            <div id="ood-code-editor" class="code-editor"></div>
+        </section>
+    </section>
+
+    <section class="card">
+        <h2>Conversation</h2>
+        <div id="conversation-log" class="transcript" aria-live="polite"></div>
+    </section>
+</main>
+
+<template id="message-template">
+    <div class="message">
+        <span class="speaker"></span>
+        <p class="text"></p>
+    </div>
+</template>
+
+<!-- Monaco Editor - CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>
+console.log("HTML loaded, loading Monaco Editor and app.js...");
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+console.log("app.js loaded");
+</script>
+</body>
+</html>
