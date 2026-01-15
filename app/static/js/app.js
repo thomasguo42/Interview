@@ -13,12 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     roleInput: document.getElementById("role-input"),
     companyRoleDetails: document.getElementById("company-role-details"),
     companyRoleStatus: document.getElementById("company-role-status"),
-    schoolContextForm: document.getElementById("school-context-form"),
-    schoolNameInput: document.getElementById("school-name-input"),
-    schoolStrengthsInput: document.getElementById("school-strengths-input"),
-    schoolCultureInput: document.getElementById("school-culture-input"),
-    studentBackgroundInput: document.getElementById("student-background-input"),
-    schoolContextStatus: document.getElementById("school-context-status"),
     languageSelect: document.getElementById("language-select"),
     startButton: document.getElementById("start-btn"),
     stopButton: document.getElementById("stop-btn"),
@@ -42,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log("Elements found:", elements);
 
   loadCompanyRoleContext();
-  loadSchoolContext();
 
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -627,11 +620,6 @@ function updateStartButtonForMode() {
       elements.startButton.disabled = false;
     }
   }
-
-  if (mode === "high_school" && elements.schoolContextStatus && !elements.schoolNameInput?.value.trim()) {
-    elements.schoolContextStatus.textContent = "Enter the school details and click Save School Context before starting.";
-    elements.schoolContextStatus.className = "status-message info";
-  }
 }
 
 // Listen for mode changes
@@ -699,67 +687,6 @@ async function saveCompanyRoleContext() {
 }
 
 // ============================================================================
-// BOARDING SCHOOL CONTEXT
-// ============================================================================
-
-async function loadSchoolContext() {
-  if (!elements.schoolNameInput || !elements.schoolStrengthsInput || !elements.schoolCultureInput || !elements.studentBackgroundInput) {
-    return;
-  }
-  try {
-    const response = await fetch("/api/school_context", {
-      method: "GET",
-      credentials: "same-origin",
-    });
-    if (!response.ok) return;
-    const data = await response.json();
-    elements.schoolNameInput.value = data.name || "";
-    elements.schoolStrengthsInput.value = data.strengths || "";
-    elements.schoolCultureInput.value = data.culture || "";
-    elements.studentBackgroundInput.value = data.student_background || "";
-  } catch (error) {
-    console.warn("Failed to load school context:", error);
-  }
-}
-
-async function saveSchoolContext(options = {}) {
-  if (!elements.schoolContextForm) return false;
-  const { silent = false } = options;
-  const name = elements.schoolNameInput?.value.trim() || "";
-  const strengths = elements.schoolStrengthsInput?.value.trim() || "";
-  const culture = elements.schoolCultureInput?.value.trim() || "";
-  const student_background = elements.studentBackgroundInput?.value.trim() || "";
-
-  if (!silent && elements.schoolContextStatus) {
-    elements.schoolContextStatus.textContent = "Saving school context...";
-    elements.schoolContextStatus.className = "status-message info";
-  }
-
-  try {
-    const response = await fetch("/api/school_context", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ name, strengths, culture, student_background }),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Failed to save school context");
-    if (!silent && elements.schoolContextStatus) {
-      elements.schoolContextStatus.textContent = data.message || "Saved";
-      elements.schoolContextStatus.className = "status-message success";
-    }
-    return true;
-  } catch (error) {
-    console.error("School context error:", error);
-    if (elements.schoolContextStatus) {
-      elements.schoolContextStatus.textContent = error.message || "Failed to save";
-      elements.schoolContextStatus.className = "status-message error";
-    }
-    throw error;
-  }
-}
-
-// ============================================================================
 // RESUME UPLOAD
 // ============================================================================
 
@@ -793,11 +720,6 @@ elements.companyRoleForm?.addEventListener("submit", async (event) => {
   await saveCompanyRoleContext();
 });
 
-elements.schoolContextForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  await saveSchoolContext();
-});
-
 // ============================================================================
 // INTERVIEW CONTROLS
 // ============================================================================
@@ -827,25 +749,6 @@ elements.startButton?.addEventListener("click", async () => {
   console.log("Starting interview with mode:", mode, "language:", language);
 
   try {
-    if (mode === "high_school") {
-      const schoolName = elements.schoolNameInput?.value.trim();
-      if (!schoolName) {
-        if (elements.schoolContextStatus) {
-          elements.schoolContextStatus.textContent = "Please enter the school name and save the context before starting.";
-          elements.schoolContextStatus.className = "status-message error";
-        }
-        setStatus("High school interviews need a school name.", "error");
-        return;
-      }
-      try {
-        await saveSchoolContext({ silent: true });
-      } catch (contextError) {
-        console.error("Failed to save school context before starting:", contextError);
-        setStatus(contextError.message || "Save the school context before starting.", "error");
-        return;
-      }
-    }
-
     const response = await fetch("/api/start_interview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -881,20 +784,6 @@ elements.startButton?.addEventListener("click", async () => {
       // Hide regular code editor and problem panel
       elements.codeEditorSection.style.display = "none";
       elements.problemPanel.style.display = "none";
-    } else if (data.mode === "high_school") {
-      if (monacoEditor) {
-        try {
-          monacoEditor.dispose();
-        } catch (err) {
-          console.warn("Failed to dispose Monaco editor for high school mode:", err);
-        }
-        monacoEditor = null;
-      }
-      elements.codeEditorSection.style.display = "none";
-      elements.problemPanel.style.display = "none";
-      if (elements.oodWorkspace) {
-        elements.oodWorkspace.style.display = "none";
-      }
     } else {
       // Initialize Monaco Editor FIRST (before updatePhaseUI)
       await initializeMonacoEditor(language);
@@ -934,8 +823,6 @@ elements.startButton?.addEventListener("click", async () => {
       appendSystemMessage("Coding-only session started. Say hello to get your coding problem.");
     } else if (data.mode === "ood") {
       appendSystemMessage("OOD interview started. Say hello to receive your design question. Use the unified code editor for outlining your design, pseudocode, and final implementation.");
-    } else if (data.mode === "high_school") {
-      appendSystemMessage("High school admissions session started. Expect warm, conversational questions tailored to the school and student background.");
     } else {
       appendSystemMessage("Structured interview started. The interviewer will introduce themselves.");
     }
@@ -1152,8 +1039,7 @@ async function updatePhaseUI() {
       coding: "Phase 3: Coding Problem",
       questions: "Phase 4: Your Questions",
       ood_design: "OOD: Design Phase",
-      ood_implementation: "OOD: Implementation Phase",
-      high_school: "Boarding School Interview"
+      ood_implementation: "OOD: Implementation Phase"
     };
 
     elements.phaseIndicator.textContent = phaseNames[currentPhase] || currentPhase;
@@ -1191,11 +1077,6 @@ async function updatePhaseUI() {
       }
     }
 
-    if (currentMode === "high_school") {
-      elements.codeEditorSection.style.display = "none";
-      elements.problemPanel.style.display = "none";
-      elements.forceCodingBtn.style.display = "none";
-    }
   } catch (error) {
     console.error("Failed to update phase UI:", error);
   }
@@ -1261,7 +1142,7 @@ async function checkStuckDetection() {
   // Stuck if both silence AND no code changes for 30+ seconds
   if (silenceDuration > 30 && codeIdleDuration > 30) {
     console.log("User appears stuck - offering help");
-    // The backend will detect this and Gemini will offer help based on context
+    // The backend will detect this and DeepSeek will offer help based on context
     // We just ensure code is sent with the next interaction
   }
 }
@@ -1342,7 +1223,7 @@ async function handleUserUtterance(transcript) {
     if (activeEditor) {
       currentCode = activeEditor.getValue();
       codeChanged = (Date.now() - lastCodeChangeTime) < 5000; // Changed in last 5 seconds
-      console.log("=== CODE BEING SENT TO GEMINI ===");
+      console.log("=== CODE BEING SENT TO DEEPSEEK ===");
       console.log("Mode:", currentMode);
       console.log("Code length:", currentCode.length);
       console.log("Code preview:", currentCode.substring(0, 200));
@@ -1369,29 +1250,29 @@ async function handleUserUtterance(transcript) {
 
     if (!response.ok) throw new Error(data.error || "Failed to get reply");
     if (!data.replyAudio) {
-      throw new Error("Gemini did not return any audio.");
+      throw new Error("DeepSeek did not return any audio.");
     }
 
     console.log("Audio received, length:", data.replyAudio.length);
 
-    // FIRST: Extract and apply code if Gemini wrote code (do this before problem extraction)
-    const { text, code } = extractGeminiCode(data.reply);
+    // FIRST: Extract and apply code if DeepSeek wrote code (do this before problem extraction)
+    const { text, code } = extractModelCode(data.reply);
     console.log("Code extraction result:", { hasCode: !!code, textLength: text.length });
 
     // SECOND: Extract problem statement from the cleaned text (without code markers)
     extractProblemStatement(text);
 
     // THIRD: Display the text part (without code markers)
-    appendMessage("Gemini", text, "model");
+    appendMessage("DeepSeek", text, "model");
 
-    // FOURTH: If Gemini wrote code, update the editor
+    // FOURTH: If DeepSeek wrote code, update the editor
     const activeEditor = (currentMode === "ood") ? oodMonacoEditor : monacoEditor;
     if (code && activeEditor) {
-      console.log("Gemini wrote code to editor:", code.substring(0, 100) + "...");
+      console.log("DeepSeek wrote code to editor:", code.substring(0, 100) + "...");
       activeEditor.setValue(code);
-      // Immediately sync the updated code back to the backend so Gemini sees the latest version
+      // Immediately sync the updated code back to the backend so DeepSeek sees the latest version
       await sendCodeSnapshot();
-      appendSystemMessage("Gemini updated the code editor");
+      appendSystemMessage("DeepSeek updated the code editor");
     }
 
     // FIFTH: Play AI's audio response with echo cancellation
@@ -1477,8 +1358,8 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-function extractGeminiCode(replyText) {
-  // Check if Gemini included code using [CODE_START] and [CODE_END] markers
+function extractModelCode(replyText) {
+  // Check if DeepSeek included code using [CODE_START] and [CODE_END] markers
   const codeStartMarker = '[CODE_START]';
   const codeEndMarker = '[CODE_END]';
 

@@ -37,7 +37,7 @@
 
     <section class="card">
         <h2>1b. Optional: Target company &amp; role</h2>
-        <p class="hint" style="margin-top:0;">Gemini will tailor OOD questions to whatever you enter here.</p>
+        <p class="hint" style="margin-top:0;">DeepSeek will tailor OOD questions to whatever you enter here.</p>
         <form id="company-role-form">
             <label for="company-input" class="sr-only">Company</label>
             <input type="text" id="company-input" placeholder="Company (e.g., Stripe)">
@@ -48,27 +48,6 @@
             <button type="submit">Save Role Context</button>
         </form>
         <p id="company-role-status" class="status-message"></p>
-    </section>
-
-    <section class="card">
-        <h2>1c. Boarding school context</h2>
-        <p class="hint" style="margin-top:0;">Required for the High School Interview mode. Share the school name plus highlights so the interviewer can personalize questions.</p>
-        <form id="school-context-form">
-            <label for="school-name-input" class="sr-only">Boarding school name</label>
-            <input type="text" id="school-name-input" placeholder="School name (e.g., Phillips Exeter)">
-
-            <label for="school-strengths-input" class="sr-only">School strengths</label>
-            <textarea id="school-strengths-input" rows="2" placeholder="What are this school's strengths or signature programs?"></textarea>
-
-            <label for="school-culture-input" class="sr-only">Culture notes</label>
-            <textarea id="school-culture-input" rows="2" placeholder="Campus culture, values, traditions to highlight"></textarea>
-
-            <label for="student-background-input" class="sr-only">Student background</label>
-            <textarea id="student-background-input" rows="3" placeholder="Student background, interests, or stories you'd like the interviewer to pull from"></textarea>
-
-            <button type="submit">Save School Context</button>
-        </form>
-        <p id="school-context-status" class="status-message"></p>
     </section>
 
     <section class="card">
@@ -96,13 +75,6 @@
                     <div class="mode-card">
                         <div class="mode-title">OOD Interview</div>
                         <div class="mode-desc">Object-Oriented Design (40 min: 20 min design + 20 min implementation)</div>
-                    </div>
-                </label>
-                <label class="mode-option">
-                    <input type="radio" name="interview-mode" value="high_school">
-                    <div class="mode-card">
-                        <div class="mode-title">High School Interview</div>
-                        <div class="mode-desc">Boarding school admissions-style conversation tailored to the school and student</div>
                     </div>
                 </label>
             </div>

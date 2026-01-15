@@ -8,9 +8,9 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-secret-key")
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    GEMINI_PHASE_MODEL = os.getenv("GEMINI_PHASE_MODEL", "gemini-1.5-pro-latest")
+    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+    DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+    DEEPSEEK_PHASE_MODEL = os.getenv("DEEPSEEK_PHASE_MODEL", DEEPSEEK_MODEL)
 
 
 config = Config()

@@ -9,9 +9,6 @@ MAX_RESUME_CHARS = 20000
 MAX_CONVERSATION_MESSAGES = 40  # 20 turns
 MAX_COMPANY_FIELD_CHARS = 200
 MAX_COMPANY_DETAILS_CHARS = 1000
-MAX_SCHOOL_NAME_CHARS = 200
-MAX_SCHOOL_DETAILS_CHARS = 1200
-MAX_STUDENT_BACKGROUND_CHARS = 1500
 
 _state: Dict[str, Dict[str, Any]] = {}
 _lock = Lock()
@@ -21,7 +18,6 @@ PHASE_INTRO = "intro"
 PHASE_RESUME = "resume"
 PHASE_CODING = "coding"
 PHASE_QUESTIONS = "questions"
-PHASE_HIGH_SCHOOL = "high_school"
 
 # OOD Interview phases
 PHASE_OOD_DESIGN = "ood_design"
@@ -95,42 +91,6 @@ def get_company_context(session_id: str) -> Dict[str, str]:
         return dict(stored)
 
 
-def set_school_context(session_id: str, name: str = "", strengths: str = "", culture: str = "", student_background: str = "") -> None:
-    """Store target boarding school context to tailor high school interviews."""
-
-    def _sanitize(value: str, limit: int) -> str:
-        text = (value or "").strip()
-        if len(text) > limit:
-            text = text[:limit]
-        return text
-
-    payload = {
-        "name": _sanitize(name, MAX_SCHOOL_NAME_CHARS),
-        "strengths": _sanitize(strengths, MAX_SCHOOL_DETAILS_CHARS),
-        "culture": _sanitize(culture, MAX_SCHOOL_DETAILS_CHARS),
-        "student_background": _sanitize(student_background, MAX_STUDENT_BACKGROUND_CHARS),
-    }
-
-    with _lock:
-        context = _state.setdefault(session_id, {"resume": None, "conversation": []})
-        context["school_context"] = payload
-        interview = context.get("interview")
-        if interview is not None:
-            interview["school_context"] = payload
-
-
-def get_school_context(session_id: str) -> Dict[str, str]:
-    """Return stored boarding school context, if any."""
-    with _lock:
-        context = _state.get(session_id)
-        if not context:
-            return {"name": "", "strengths": "", "culture": "", "student_background": ""}
-        stored = context.get("school_context")
-    if not stored:
-        return {"name": "", "strengths": "", "culture": "", "student_background": ""}
-    return dict(stored)
-
-
 def get_conversation(session_id: str) -> List[Dict[str, Any]]:
     with _lock:
         context = _state.get(session_id)
@@ -171,8 +131,6 @@ def start_interview(session_id: str, language: str = "python", mode: str = "full
     # Determine starting phase based on mode
     if mode == "ood":
         starting_phase = PHASE_OOD_DESIGN
-    elif mode == "high_school":
-        starting_phase = PHASE_HIGH_SCHOOL
     elif mode == "coding_only":
         starting_phase = PHASE_CODING
     else:
@@ -197,10 +155,6 @@ def start_interview(session_id: str, language: str = "python", mode: str = "full
         company_context = context.get("company_context")
         if company_context:
             interview_state["company_context"] = dict(company_context)
-
-        school_context = context.get("school_context")
-        if school_context:
-            interview_state["school_context"] = dict(school_context)
 
         # Add OOD-specific state
         if mode == "ood":

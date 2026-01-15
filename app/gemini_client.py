@@ -13,21 +13,19 @@ from . import state
 
 
 class GeminiError(RuntimeError):
-    """Raised when the Gemini API returns an unexpected response."""
+    """Raised when the model API returns an unexpected response."""
 
 
 class GeminiClient:
-    API_URL_TEMPLATE = (
-        "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    )
+    API_URL = "https://api.deepseek.com/v1/chat/completions"
 
     def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
-        self.api_key = api_key or config.GEMINI_API_KEY
-        self.model = model or config.GEMINI_MODEL
-        self.phase_model = config.GEMINI_PHASE_MODEL or self.model
+        self.api_key = api_key or config.DEEPSEEK_API_KEY
+        self.model = model or config.DEEPSEEK_MODEL
+        self.phase_model = config.DEEPSEEK_PHASE_MODEL or self.model
         if not self.api_key:
             raise ValueError(
-                "Gemini API key is not configured. Set the GEMINI_API_KEY environment variable."
+                "DeepSeek API key is not configured. Set the DEEPSEEK_API_KEY environment variable."
             )
 
     def generate_interview_reply(
@@ -38,47 +36,30 @@ class GeminiClient:
         temperature: float = 0.7,
     ) -> str:
         """
-        Sends the conversation history and the latest user message to Gemini and returns the reply text.
+        Sends the conversation history and the latest user message to DeepSeek and returns the reply text.
 
         Args:
-            conversation: Existing conversation history formatted for the Gemini API.
+            conversation: Existing conversation history formatted for the app state.
             resume_text: Optional resume text to ground the interview context.
             user_message: Latest user utterance to append to the conversation.
             temperature: Sampling temperature for response creativity.
         """
-        payload = self._build_payload(conversation, resume_text, user_message, temperature)
-        response = requests.post(
-            self.API_URL_TEMPLATE.format(model=self.model),
-            params={"key": self.api_key},
-            json=payload,
-            timeout=30,
+        system_prompt, messages = self._build_payload(conversation, resume_text, user_message)
+        return self._post_chat(
+            messages=messages,
+            model=self.model,
+            temperature=temperature,
+            top_p=0.95,
+            max_tokens=800,
+            system_prompt=system_prompt,
         )
-        if response.status_code != 200:
-            logging.error(
-                "Gemini API error: status=%s body=%s",
-                response.status_code,
-                response.text,
-            )
-            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
-
-        data = response.json()
-        try:
-            parts = data["candidates"][0]["content"]["parts"]
-            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
-            if not combined_text:
-                raise KeyError("Empty response text")
-            return combined_text
-        except (KeyError, IndexError) as exc:
-            logging.error("Unexpected Gemini API payload: %s", data)
-            raise GeminiError("Gemini API returned an unexpected payload") from exc
 
     def _build_payload(
         self,
         conversation: List[Dict[str, Any]],
         resume_text: str | None,
         user_message: str,
-        temperature: float,
-    ) -> Dict[str, Any]:
+    ) -> tuple[str, List[Dict[str, str]]]:
         system_prompt = (
             "You are an experienced senior engineer conducting a LIVE VOICE mock technical interview. "
             "This is a natural, back-and-forth CONVERSATION, not a written exchange.\n\n"
@@ -114,37 +95,84 @@ class GeminiClient:
                 f"Resume:\n{resume_text}\n"
             )
 
-        # Clone conversation to avoid mutating caller data
-        conversation_payload = list(conversation)
-        conversation_payload.append(
-            {
-                "role": "user",
-                "parts": [
-                    {
-                        "text": user_message,
-                    }
-                ],
-            }
-        )
+        messages = self._build_messages(conversation, system_prompt, user_message)
+        return system_prompt, messages
 
-        payload: Dict[str, Any] = {
-            "systemInstruction": {
-                "role": "system",
-                "parts": [
-                    {
-                        "text": system_prompt,
-                    }
-                ],
-            },
-            "contents": conversation_payload,
-            "generationConfig": {
-                "temperature": temperature,
-                "topP": 0.95,
-                "topK": 40,
-                "maxOutputTokens": 800,  # Increased to allow code responses
-            },
+    def _build_messages(
+        self,
+        conversation: List[Dict[str, Any]],
+        system_prompt: str,
+        user_message: str,
+    ) -> List[Dict[str, str]]:
+        messages: List[Dict[str, str]] = [{"role": "system", "content": system_prompt}]
+        messages.extend(self._convert_conversation(conversation))
+        messages.append({"role": "user", "content": user_message})
+        return messages
+
+    def _convert_conversation(self, conversation: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        messages: List[Dict[str, str]] = []
+        for turn in conversation:
+            role = turn.get("role")
+            parts = turn.get("parts", [])
+            text_segments = []
+            for part in parts:
+                if isinstance(part, dict):
+                    text_segments.append(part.get("text", ""))
+            content = " ".join(text_segments).strip()
+            if not content:
+                continue
+            mapped_role = "assistant" if role == "model" else "user"
+            messages.append({"role": mapped_role, "content": content})
+        return messages
+
+    def _post_chat(
+        self,
+        messages: List[Dict[str, str]],
+        model: str,
+        temperature: float,
+        top_p: float,
+        max_tokens: int,
+        system_prompt: str,
+    ) -> str:
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+            "top_p": top_p,
+            "max_tokens": max_tokens,
         }
-        return payload
+        try:
+            response = requests.post(
+                self.API_URL,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+                timeout=30,
+            )
+        except RequestException as exc:
+            logging.error("DeepSeek API request failed: %s", exc)
+            raise GeminiError("DeepSeek API request failed") from exc
+
+        if response.status_code != 200:
+            logging.error(
+                "DeepSeek API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"DeepSeek API error {response.status_code}: {response.text}")
+
+        data = response.json()
+        try:
+            content = data["choices"][0]["message"]["content"]
+            if not content:
+                raise KeyError("Empty response text")
+            return content.strip()
+        except (KeyError, IndexError, TypeError) as exc:
+            logging.error("Unexpected DeepSeek API payload: %s", data)
+            logging.error("System prompt size for debugging: %s", len(system_prompt))
+            raise GeminiError("DeepSeek API returned an unexpected payload") from exc
 
     def generate_structured_interview_reply(
         self,
@@ -185,37 +213,19 @@ class GeminiClient:
         )
 
         # Debug logging
-        system_prompt = payload.get("systemInstruction", {}).get("parts", [{}])[0].get("text", "")
-        logging.info(f"[GEMINI DEBUG] Current code length: {len(current_code)}")
+        system_prompt, messages = payload
+        logging.info(f"[MODEL DEBUG] Current code length: {len(current_code)}")
         if current_code:
-            logging.info(f"[GEMINI DEBUG] Code is included in prompt: {bool('CURRENT CODE IN EDITOR' in system_prompt)}")
-        logging.info(f"[GEMINI DEBUG] System prompt length: {len(system_prompt)}")
-
-        response = requests.post(
-            self.API_URL_TEMPLATE.format(model=self.model),
-            params={"key": self.api_key},
-            json=payload,
-            timeout=30,
+            logging.info(f"[MODEL DEBUG] Code is included in prompt: {bool('CURRENT CODE IN EDITOR' in system_prompt)}")
+        logging.info(f"[MODEL DEBUG] System prompt length: {len(system_prompt)}")
+        return self._post_chat(
+            messages=messages,
+            model=self.model,
+            temperature=temperature,
+            top_p=0.95,
+            max_tokens=800,
+            system_prompt=system_prompt,
         )
-
-        if response.status_code != 200:
-            logging.error(
-                "Gemini API error: status=%s body=%s",
-                response.status_code,
-                response.text,
-            )
-            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
-
-        data = response.json()
-        try:
-            parts = data["candidates"][0]["content"]["parts"]
-            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
-            if not combined_text:
-                raise KeyError("Empty response text")
-            return combined_text
-        except (KeyError, IndexError) as exc:
-            logging.error("Unexpected Gemini API payload: %s", data)
-            raise GeminiError("Gemini API returned an unexpected payload") from exc
 
     def _build_structured_payload(
         self,
@@ -227,7 +237,7 @@ class GeminiClient:
         current_code: str,
         code_changed: bool,
         temperature: float,
-    ) -> Dict[str, Any]:
+    ) -> tuple[str, List[Dict[str, str]]]:
         """Build payload with phase-aware prompting for structured interview"""
 
         current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
@@ -236,7 +246,6 @@ class GeminiClient:
         mode = interview_state.get("mode", "full")
         company_context = interview_state.get("company_context")
         ood_question = interview_state.get("ood_question")
-        school_context = interview_state.get("school_context")
 
         normalized_code = self._normalize_editor_code(current_code)
 
@@ -261,7 +270,6 @@ class GeminiClient:
             mode,
             company_context,
             ood_question,
-            school_context,
         )
 
         # Build conversation payload
@@ -277,20 +285,9 @@ class GeminiClient:
             }
         )
 
-        payload: Dict[str, Any] = {
-            "systemInstruction": {
-                "role": "system",
-                "parts": [{"text": system_prompt}],
-            },
-            "contents": conversation_payload,
-            "generationConfig": {
-                "temperature": temperature,
-                "topP": 0.95,
-                "topK": 40,
-                "maxOutputTokens": 800,  # Increased to allow code responses
-            },
-        }
-        return payload
+        messages: List[Dict[str, str]] = [{"role": "system", "content": system_prompt}]
+        messages.extend(self._convert_conversation(conversation_payload))
+        return system_prompt, messages
 
     def decide_phase_transition(
         self,
@@ -318,31 +315,18 @@ class GeminiClient:
             code_idle_duration=code_idle_duration,
         )
 
+        system_prompt, messages = payload
         try:
-            response = requests.post(
-                self.API_URL_TEMPLATE.format(model=self.phase_model),
-                params={"key": self.api_key},
-                json=payload,
-                timeout=20,
+            decision_text = self._post_chat(
+                messages=messages,
+                model=self.phase_model,
+                temperature=0.1,
+                top_p=0.8,
+                max_tokens=200,
+                system_prompt=system_prompt,
             )
-        except RequestException as exc:  # type: ignore[name-defined]
-            logging.error("Phase decision request failed: %s", exc)
-            return None
-
-        if response.status_code != 200:
-            logging.warning(
-                "Phase decision model error: status=%s body=%s",
-                response.status_code,
-                response.text,
-            )
-            return None
-
-        data = response.json()
-        try:
-            parts = data["candidates"][0]["content"]["parts"]
-            decision_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
-        except (KeyError, IndexError) as exc:
-            logging.warning("Phase decision payload missing text: %s", data)
+        except GeminiError as exc:
+            logging.warning("Phase decision model error: %s", exc)
             return None
 
         if decision_text:
@@ -375,7 +359,7 @@ class GeminiClient:
         total_time: float,
         silence_duration: float,
         code_idle_duration: float,
-    ) -> Dict[str, Any]:
+    ) -> tuple[str, List[Dict[str, str]]]:
         current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
         mode = interview_state.get("mode", "full")
         time_in_phase = float(time_in_phase or 0.0)
@@ -425,29 +409,14 @@ class GeminiClient:
             "Only set mark_problem_presented true if the coding problem was clearly introduced."
         )
 
-        payload: Dict[str, Any] = {
-            "systemInstruction": {
-                "role": "system",
-                "parts": [{"text": system_prompt}],
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": instructions + "\n\nCONTEXT:\n" + json.dumps(context, ensure_ascii=False),
             },
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [
-                        {
-                            "text": instructions + "\n\nCONTEXT:\n" + json.dumps(context, ensure_ascii=False),
-                        }
-                    ],
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.1,
-                "topP": 0.8,
-                "topK": 32,
-                "maxOutputTokens": 200,
-            },
-        }
-        return payload
+        ]
+        return system_prompt, messages
 
     def _format_conversation_snippet(
         self,
@@ -503,17 +472,8 @@ class GeminiClient:
         mode: str = "full",
         company_context: Optional[Dict[str, str]] = None,
         ood_question: Optional[Dict[str, Any]] = None,
-        school_context: Optional[Dict[str, str]] = None,
     ) -> str:
         """Build phase-specific system prompt"""
-
-        if mode == "high_school":
-            return self._build_high_school_prompt(
-                resume_text=resume_text,
-                school_context=school_context,
-                time_in_phase=time_in_phase,
-                total_time=total_time,
-            )
 
         # Base prompt - applies to all phases
         if mode == "coding_only":
@@ -651,7 +611,7 @@ NOTE: The system detects these keywords to show the code editor. Without them, t
                 "cpp": "C++"
             }.get(language, language)
 
-            # Show code without markdown formatting (Gemini should not output markdown)
+            # Show code without markdown formatting (model should not output markdown)
             if current_code.strip():
                 code_display = f"\n=== CURRENT CODE IN EDITOR ===\n{current_code}\n=== END OF CODE ===\n"
             else:
@@ -992,7 +952,7 @@ Remember: This is a CHALLENGING interview. Be tough but fair."""
                 "cpp": "C++"
             }.get(language, language)
 
-            # Show code without markdown formatting (Gemini should not output markdown)
+            # Show code without markdown formatting (model should not output markdown)
             if current_code.strip():
                 code_display = f"\n=== CURRENT CODE IN EDITOR ===\n{current_code}\n=== END OF CODE ===\n"
             else:
@@ -1079,95 +1039,6 @@ Remember: Be HONEST about code quality. Don't praise poor code."""
 
         return base_prompt + structure + phase_instructions
 
-    def _build_high_school_prompt(
-        self,
-        resume_text: Optional[str],
-        school_context: Optional[Dict[str, str]],
-        time_in_phase: float,
-        total_time: float,
-    ) -> str:
-        """Prompt tailored for the private boarding high school interview mode."""
-
-        school_name = (school_context or {}).get("name", "").strip()
-        school_strengths = (school_context or {}).get("strengths", "").strip()
-        school_culture = (school_context or {}).get("culture", "").strip()
-        student_background = (school_context or {}).get("student_background", "").strip()
-
-        school_lines = ["BOARDING SCHOOL CONTEXT:"]
-        if school_name:
-            school_lines.append(f"- School: {school_name}")
-        if school_strengths:
-            school_lines.append(f"- Signature strengths or standout programs: {school_strengths}")
-        if school_culture:
-            school_lines.append(f"- Culture, traditions, values to lean on: {school_culture}")
-        if len(school_lines) == 1:
-            school_lines.append("- No extra school details saved yet. Ask the student what excites them about the school.")
-
-        student_lines = ["STUDENT BACKGROUND TO DRAW FROM:"]
-        if student_background:
-            student_lines.append(student_background)
-        elif resume_text:
-            student_lines.append("Use their resume highlights below to seed thoughtful follow-ups.")
-        else:
-            student_lines.append("Start by learning about their interests, family, and goals.")
-
-        resume_block = ""
-        if resume_text:
-            resume_block = f"\nRESUME / ACTIVITIES SUMMARY:\n{resume_text}\n"
-
-        question_themes = """BOARDING SCHOOL INTERVIEW THEMES TO COVER NATURALLY:
-- Motivation & fit: Why this school? Which programs, traditions, or community traits resonate with them?
-- Boarding readiness: Living away from home, managing dorm life, routines, personal wellbeing.
-- Academics & curiosity: Favorite classes, projects, how they push themselves intellectually (keep it reflective, not technical).
-- Activities & leadership: Sports, arts, service, clubs, passion projects, teamwork moments.
-- Character & community: Kindness, empathy, cultural humility, being a good roommate/dorm mate, conflict resolution.
-- Problem solving & handling situations: How they respond when plans change, help others, or navigate hard choices.
-- Social life & interests: Hobbies, what energizes them on weekends, how they build friendships.
-- Resilience & growth: Times they adapted, solved conflict, or bounced back from a setback.
-- Impact: How they'll contribute to campus culture and uphold the school's values.
-"""
-
-        pacing_notes = f"Current conversation time: {time_in_phase:.1f} minutes in phase, {total_time:.1f} total."
-
-        prompt = "You are Leo, a warm, professional admissions interviewer for a PRIVATE BOARDING HIGH SCHOOL.\n"
-        prompt += "Introduce yourself as Leo early in the conversation so the student knows who is speaking.\n"
-        prompt += "You are speaking out loud via TTS, so keep the dialogue natural, calm, and encouraging.\n"
-        prompt += "\nCONVERSATION STYLE:\n"
-        prompt += (
-            "- Default to concise replies (1-2 sentences). Only expand beyond that when you are answering a complex question, explaining feedback, or telling a necessary story.\n"
-            "- Use contractions and everyday phrasing. Absolutely no markdown, bullet lists, or filler words like 'um' or 'uh'.\n"
-            "- Ask ONE question at a time, then listen.\n"
-            "- Mirror the student's tone. If they seem nervous, slow down and reassure them.\n"
-            "- Reference what they just said plus the resume/school context in your follow-ups.\n"
-            "- Offer gentle affirmations (\"Thanks for sharing that\", \"That sounds exciting\") but stay professional.\n"
-            "- Use kind probes to go deeper: \"Tell me more about...\", \"What was challenging about...\"\n"
-            "- Keep everything age-appropriate: supportive yet still evaluative."
-        )
-
-        prompt += "\n" + "\n".join(school_lines) + "\n\n" + "\n".join(student_lines)
-        prompt += "\n\n" + question_themes
-        prompt += "\n" + pacing_notes
-        prompt += "\nUse the school-specific details to personalize every question so it feels like a real interview for that campus."
-        prompt += "\nRotate topics: if you've already asked two follow-ups on the same anecdote, zoom out and move to a new dimension (background, community, problem-solving, family, interests, social skills)."
-        prompt += "\nWhen the student asks you something or requests feedback, give a fuller answer, but still keep it easy to follow."
-        prompt += "\nAsk about dorm/community life, readiness to live away from home, and how they'd support peers."
-        prompt += "\nKeep the focus on character, reflection, and interpersonal skills—skip technical drills or deep implementation details for projects."
-        prompt += "\nIf they give short answers, follow up kindly. If they ramble, summarize and guide them to the point."
-        prompt += "\nOnce the conversation feels complete, invite their questions about the school."
-
-        prompt += "\n\nOUTPUT RULES:\n"
-        prompt += (
-            "- Spoken dialogue only. Never include markdown, emojis, or multiple questions at once.\n"
-            "- Never fabricate specific facts about the school beyond common boarding-school knowledge.\n"
-            "- Keep the tone kind, empathetic, and aligned with high school admissions standards."
-        )
-
-        if student_background or resume_text:
-            prompt += "\nWeave in resume achievements or background notes whenever it helps you craft a specific follow-up."
-
-        prompt += resume_block
-        return prompt
-
     def _normalize_editor_code(self, code: Optional[str]) -> str:
         """Normalize editor snapshot so placeholders don't appear as real code."""
         if not code:
@@ -1191,7 +1062,7 @@ Remember: Be HONEST about code quality. Don't praise poor code."""
         user_message: str,
         normalized_code: str,
     ) -> str:
-        """Embed editor context alongside the candidate's utterance for Gemini."""
+        """Embed editor context alongside the candidate's utterance for the model."""
         segments: List[str] = []
 
         snapshot = normalized_code.strip() or "[Editor is currently empty]"

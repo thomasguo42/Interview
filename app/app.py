@@ -6,15 +6,12 @@ from uuid import uuid4
 
 from flask import (
     Flask,
-    Response,
     jsonify,
     render_template,
     request,
     session,
 )
 
-import requests
-from requests import RequestException
 from .config import config
 from .gemini_client import GeminiClient, GeminiError
 from .resume_processor import allowed_file, extract_text
@@ -40,15 +37,12 @@ from .state import (
     set_design_phase_complete,
     set_company_context,
     get_company_context,
-    set_school_context,
-    get_school_context,
     PHASE_INTRO,
     PHASE_RESUME,
     PHASE_CODING,
     PHASE_QUESTIONS,
     PHASE_OOD_DESIGN,
     PHASE_OOD_IMPLEMENTATION,
-    PHASE_HIGH_SCHOOL,
     SUPPORTED_LANGUAGES,
 )
 from .ood_questions import get_hard_question, get_stock_match_engine_question
@@ -132,29 +126,6 @@ def create_app() -> Flask:
         set_company_context(session_id, company=company, role=role, details=details)
         return jsonify({"message": "Company & role context saved."})
 
-    @app.route("/api/school_context", methods=["GET", "POST"])
-    def school_context_endpoint():
-        session_id = session.get("session_id") or _ensure_session_id()
-
-        if request.method == "GET":
-            context = get_school_context(session_id)
-            return jsonify(context)
-
-        payload = request.get_json(silent=True) or {}
-        name = (payload.get("name") or "").strip()
-        strengths = (payload.get("strengths") or "").strip()
-        culture = (payload.get("culture") or "").strip()
-        student_background = (payload.get("student_background") or "").strip()
-
-        set_school_context(
-            session_id,
-            name=name,
-            strengths=strengths,
-            culture=culture,
-            student_background=student_background,
-        )
-        return jsonify({"message": "Boarding school context saved."})
-
     @app.route("/api/chat", methods=["POST"])
     def chat():
         payload = request.get_json(silent=True) or {}
@@ -177,7 +148,7 @@ def create_app() -> Flask:
         # Resume is optional for coding_only mode, required for full mode
         interview_mode = interview_state.get("mode") if interview_state else None
         if not resume_text:
-            resume_required = not interview_state or interview_mode in {"full", "high_school"}
+            resume_required = not interview_state or interview_mode in {"full"}
             if resume_required:
                 return jsonify({"error": "Upload a resume before starting the interview."}), 400
         current_code = payload.get("code", "")
@@ -192,8 +163,8 @@ def create_app() -> Flask:
             if stored_code:
                 current_code = stored_code
                 code_changed = False
-                # Preserve existing code snapshot so Gemini still sees editor content even if frontend omits it
-                print("[CHAT DEBUG] No code payload received; using last stored code snapshot.")
+        # Preserve existing code snapshot so the model still sees editor content even if frontend omits it
+        print("[CHAT DEBUG] No code payload received; using last stored code snapshot.")
 
         print(f"[CHAT DEBUG] User message: '{user_message}'")
         print(f"[CHAT DEBUG] Code received - length: {len(current_code)}, changed: {code_changed}")
@@ -229,13 +200,13 @@ def create_app() -> Flask:
         except (ValueError, GeminiError) as exc:
             return jsonify({"error": str(exc)}), 500
 
-        print(f"[CHAT DEBUG] Gemini reply length: {len(reply_text)}")
-        print(f"[CHAT DEBUG] Gemini reply preview: {reply_text[:200]}...")
+        print(f"[CHAT DEBUG] Model reply length: {len(reply_text)}")
+        print(f"[CHAT DEBUG] Model reply preview: {reply_text[:200]}...")
         print(f"[CHAT DEBUG] Contains CODE_START: {'[CODE_START]' in reply_text}")
         print(f"[CHAT DEBUG] Contains CODE_END: {'[CODE_END]' in reply_text}")
 
         phase_decision = None
-        if interview_state and interview_state.get("mode") != "high_school":
+        if interview_state:
             enriched_conversation = list(conversation)
             enriched_conversation.append({"role": "user", "parts": [{"text": user_message}]})
             enriched_conversation.append({"role": "model", "parts": [{"text": reply_text}]})
@@ -275,83 +246,11 @@ def create_app() -> Flask:
 
     @app.route("/api/live/session", methods=["POST"])
     def live_session():
-        if not config.GEMINI_API_KEY:
-            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
-
-        payload = request.get_json(silent=True) or {}
-        model = payload.get("model") or config.GEMINI_MODEL or "models/gemini-1.5-pro-latest"
-        language_code = payload.get("languageCode") or "en-US"
-        voice_name = payload.get("voiceName") or "Poppy"
-
-        session_payload: Dict[str, Any] = {
-            "model": model,
-            "languageCode": language_code,
-            "voiceConfig": {
-                "speechConfig": {
-                    "voiceName": voice_name,
-                }
-            },
-        }
-
-        try:
-            response = requests.post(
-                "https://generativelanguage.googleapis.com/v1beta/sessions",
-                headers={
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": config.GEMINI_API_KEY,
-                },
-                json=session_payload,
-                timeout=30,
-            )
-        except RequestException as exc:
-            return jsonify({"error": f"Failed to reach Gemini Live API: {exc}"}), 502
-
-        if response.status_code != 200:
-            try:
-                error_payload = response.json()
-                message = error_payload.get("error", error_payload)
-            except ValueError:
-                message = response.text
-            return jsonify({"error": f"Gemini Live API error: {message}"}), response.status_code
-
-        return jsonify(response.json())
+        return jsonify({"error": "Live audio sessions are not supported with DeepSeek."}), 501
 
     @app.route("/api/live/connect", methods=["POST"])
     def live_connect():
-        if not config.GEMINI_API_KEY:
-            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
-
-        payload = request.get_json(silent=True) or {}
-        session_name = (payload.get("session") or "").strip()
-        client_sdp = (payload.get("sdp") or "").strip()
-
-        if not session_name or not client_sdp:
-            return jsonify({"error": "Both session and sdp are required."}), 400
-
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/{session_name}:connect"
-
-        try:
-            response = requests.post(
-                endpoint,
-                headers={
-                    "Content-Type": "application/sdp",
-                    "x-goog-api-key": config.GEMINI_API_KEY,
-                },
-                data=client_sdp,
-                timeout=30,
-            )
-        except RequestException as exc:
-            return jsonify({"error": f"Failed to connect to Gemini Live session: {exc}"}), 502
-
-        if response.status_code != 200:
-            try:
-                error_payload = response.json()
-                message = error_payload.get("error", error_payload)
-            except ValueError:
-                message = response.text
-            return jsonify({"error": f"Gemini Live connect error: {message}"}), response.status_code
-
-        return Response(response.text, mimetype="application/sdp")
+        return jsonify({"error": "Live audio sessions are not supported with DeepSeek."}), 501
 
     @app.route("/api/intervene", methods=["POST"])
     def intervene():
@@ -424,8 +323,8 @@ def create_app() -> Flask:
         if language not in SUPPORTED_LANGUAGES:
             return jsonify({"error": f"Unsupported language. Choose from: {', '.join(SUPPORTED_LANGUAGES)}"}), 400
 
-        if mode not in ["full", "coding_only", "ood", "high_school"]:
-            return jsonify({"error": "Invalid mode. Choose 'full', 'coding_only', 'ood', or 'high_school'"}), 400
+        if mode not in ["full", "coding_only", "ood"]:
+            return jsonify({"error": "Invalid mode. Choose 'full', 'coding_only', or 'ood'"}), 400
 
         session_id = _ensure_session_id()
         if not session_id:
@@ -433,13 +332,9 @@ def create_app() -> Flask:
 
         resume_text = get_resume(session_id)
         company_context = get_company_context(session_id)
-        school_context = get_school_context(session_id)
         # Resume is optional for coding_only and ood modes
-        if not resume_text and mode in {"full", "high_school"}:
+        if not resume_text and mode in {"full"}:
             return jsonify({"error": "Upload a resume before starting this interview."}), 400
-
-        if mode == "high_school" and not (school_context.get("name")):
-            return jsonify({"error": "Enter and save a school name before starting the high school interview."}), 400
 
         # Initialize structured interview state
         interview_state = start_interview(session_id, language, mode)
@@ -458,7 +353,7 @@ def create_app() -> Flask:
 
         print(f"[START INTERVIEW] Created state - phase: {interview_state['current_phase']}, mode: {interview_state['mode']}")
 
-        mode_name = {"full": "Full", "coding_only": "Coding-only", "ood": "OOD", "high_school": "High School"}
+        mode_name = {"full": "Full", "coding_only": "Coding-only", "ood": "OOD"}
         response_data = {
             "message": f"{mode_name[mode]} interview started",
             "phase": interview_state["current_phase"],
@@ -519,7 +414,6 @@ def create_app() -> Flask:
             PHASE_QUESTIONS,
             PHASE_OOD_DESIGN,
             PHASE_OOD_IMPLEMENTATION,
-            PHASE_HIGH_SCHOOL,
         ]
         if new_phase not in valid_phases:
             return jsonify({"error": "Invalid phase"}), 400
