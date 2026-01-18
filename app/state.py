@@ -313,3 +313,39 @@ def set_design_phase_complete(session_id: str, complete: bool = True) -> None:
         context = _state.get(session_id)
         if context and "interview" in context:
             context["interview"]["design_phase_complete"] = complete
+
+
+def set_interview_ended(session_id: str, ended: bool = True) -> None:
+    """Mark interview as ended to trigger report generation."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            context["interview"]["ended"] = ended
+
+
+def is_interview_ended(session_id: str) -> bool:
+    """Check if interview has ended."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            return bool(context["interview"].get("ended", False))
+        return False
+
+
+def set_interview_report(session_id: str, report: Dict[str, Any]) -> None:
+    """Cache generated interview report."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            context["interview"]["report"] = dict(report)
+
+
+def get_interview_report(session_id: str) -> Optional[Dict[str, Any]]:
+    """Get cached interview report, if any."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            stored = context["interview"].get("report")
+            if stored:
+                return dict(stored)
+        return None

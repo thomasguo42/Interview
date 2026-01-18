@@ -15,13 +15,13 @@ source "${VENV_PATH}/bin/activate"
 pip install --upgrade pip > /dev/null
 pip install -r "./requirements.txt"
 
-if [[ -z "${DEEPSEEK_API_KEY:-}" ]]; then
-  echo "Set DEEPSEEK_API_KEY in your environment before running the server." >&2
+if [[ -z "${GEMINI_API_KEY:-}" ]]; then
+  echo "Set GEMINI_API_KEY in your environment before running the server." >&2
   exit 1
 fi
 
-export DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-chat}"
-export DEEPSEEK_PHASE_MODEL="${DEEPSEEK_PHASE_MODEL:-deepseek-chat}"
+export GEMINI_MODEL="${GEMINI_MODEL:-gemini-2.5-flash-lite}"
+export GEMINI_PHASE_MODEL="${GEMINI_PHASE_MODEL:-gemini-1.5-pro-latest}"
 
 if [[ -z "${FLASK_SECRET_KEY:-}" ]]; then
   FLASK_SECRET_KEY="$(python - <<'PY'

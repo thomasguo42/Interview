@@ -37,7 +37,7 @@
 
     <section class="card">
         <h2>1b. Optional: Target company &amp; role</h2>
-        <p class="hint" style="margin-top:0;">DeepSeek will tailor OOD questions to whatever you enter here.</p>
+        <p class="hint" style="margin-top:0;">Gemini will tailor OOD questions to whatever you enter here.</p>
         <form id="company-role-form">
             <label for="company-input" class="sr-only">Company</label>
             <input type="text" id="company-input" placeholder="Company (e.g., Stripe)">
@@ -92,6 +92,7 @@
         <div class="controls">
             <button id="start-btn" disabled>Start Interview</button>
             <button id="stop-btn" disabled>Stop Interview</button>
+            <button id="end-btn" disabled class="secondary">End Interview</button>
             <button id="reset-btn" disabled class="secondary">Reset Conversation</button>
         </div>
         <div id="live-caption" class="caption"></div>
@@ -124,6 +125,11 @@
     <section class="card">
         <h2>Conversation</h2>
         <div id="conversation-log" class="transcript" aria-live="polite"></div>
+    </section>
+
+    <section id="report-section" class="card report-section" style="display:none;">
+        <h2>Interview Feedback Report</h2>
+        <div id="report-body" class="report-body"></div>
     </section>
 </main>
 

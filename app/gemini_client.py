@@ -13,19 +13,21 @@ from . import state
 
 
 class GeminiError(RuntimeError):
-    """Raised when the model API returns an unexpected response."""
+    """Raised when the Gemini API returns an unexpected response."""
 
 
 class GeminiClient:
-    API_URL = "https://api.deepseek.com/v1/chat/completions"
+    API_URL_TEMPLATE = (
+        "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    )
 
     def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
-        self.api_key = api_key or config.DEEPSEEK_API_KEY
-        self.model = model or config.DEEPSEEK_MODEL
-        self.phase_model = config.DEEPSEEK_PHASE_MODEL or self.model
+        self.api_key = api_key or config.GEMINI_API_KEY
+        self.model = model or config.GEMINI_MODEL
+        self.phase_model = config.GEMINI_PHASE_MODEL or self.model
         if not self.api_key:
             raise ValueError(
-                "DeepSeek API key is not configured. Set the DEEPSEEK_API_KEY environment variable."
+                "Gemini API key is not configured. Set the GEMINI_API_KEY environment variable."
             )
 
     def generate_interview_reply(
@@ -36,30 +38,47 @@ class GeminiClient:
         temperature: float = 0.7,
     ) -> str:
         """
-        Sends the conversation history and the latest user message to DeepSeek and returns the reply text.
+        Sends the conversation history and the latest user message to Gemini and returns the reply text.
 
         Args:
-            conversation: Existing conversation history formatted for the app state.
+            conversation: Existing conversation history formatted for the Gemini API.
             resume_text: Optional resume text to ground the interview context.
             user_message: Latest user utterance to append to the conversation.
             temperature: Sampling temperature for response creativity.
         """
-        system_prompt, messages = self._build_payload(conversation, resume_text, user_message)
-        return self._post_chat(
-            messages=messages,
-            model=self.model,
-            temperature=temperature,
-            top_p=0.95,
-            max_tokens=800,
-            system_prompt=system_prompt,
+        payload = self._build_payload(conversation, resume_text, user_message, temperature)
+        response = requests.post(
+            self.API_URL_TEMPLATE.format(model=self.model),
+            params={"key": self.api_key},
+            json=payload,
+            timeout=30,
         )
+        if response.status_code != 200:
+            logging.error(
+                "Gemini API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+
+        data = response.json()
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+            if not combined_text:
+                raise KeyError("Empty response text")
+            return combined_text
+        except (KeyError, IndexError) as exc:
+            logging.error("Unexpected Gemini API payload: %s", data)
+            raise GeminiError("Gemini API returned an unexpected payload") from exc
 
     def _build_payload(
         self,
         conversation: List[Dict[str, Any]],
         resume_text: str | None,
         user_message: str,
-    ) -> tuple[str, List[Dict[str, str]]]:
+        temperature: float,
+    ) -> Dict[str, Any]:
         system_prompt = (
             "You are an experienced senior engineer conducting a LIVE VOICE mock technical interview. "
             "This is a natural, back-and-forth CONVERSATION, not a written exchange.\n\n"
@@ -95,84 +114,37 @@ class GeminiClient:
                 f"Resume:\n{resume_text}\n"
             )
 
-        messages = self._build_messages(conversation, system_prompt, user_message)
-        return system_prompt, messages
+        # Clone conversation to avoid mutating caller data
+        conversation_payload = list(conversation)
+        conversation_payload.append(
+            {
+                "role": "user",
+                "parts": [
+                    {
+                        "text": user_message,
+                    }
+                ],
+            }
+        )
 
-    def _build_messages(
-        self,
-        conversation: List[Dict[str, Any]],
-        system_prompt: str,
-        user_message: str,
-    ) -> List[Dict[str, str]]:
-        messages: List[Dict[str, str]] = [{"role": "system", "content": system_prompt}]
-        messages.extend(self._convert_conversation(conversation))
-        messages.append({"role": "user", "content": user_message})
-        return messages
-
-    def _convert_conversation(self, conversation: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-        messages: List[Dict[str, str]] = []
-        for turn in conversation:
-            role = turn.get("role")
-            parts = turn.get("parts", [])
-            text_segments = []
-            for part in parts:
-                if isinstance(part, dict):
-                    text_segments.append(part.get("text", ""))
-            content = " ".join(text_segments).strip()
-            if not content:
-                continue
-            mapped_role = "assistant" if role == "model" else "user"
-            messages.append({"role": mapped_role, "content": content})
-        return messages
-
-    def _post_chat(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        temperature: float,
-        top_p: float,
-        max_tokens: int,
-        system_prompt: str,
-    ) -> str:
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": temperature,
-            "top_p": top_p,
-            "max_tokens": max_tokens,
+        payload: Dict[str, Any] = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [
+                    {
+                        "text": system_prompt,
+                    }
+                ],
+            },
+            "contents": conversation_payload,
+            "generationConfig": {
+                "temperature": temperature,
+                "topP": 0.95,
+                "topK": 40,
+                "maxOutputTokens": 800,  # Increased to allow code responses
+            },
         }
-        try:
-            response = requests.post(
-                self.API_URL,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-                timeout=30,
-            )
-        except RequestException as exc:
-            logging.error("DeepSeek API request failed: %s", exc)
-            raise GeminiError("DeepSeek API request failed") from exc
-
-        if response.status_code != 200:
-            logging.error(
-                "DeepSeek API error: status=%s body=%s",
-                response.status_code,
-                response.text,
-            )
-            raise GeminiError(f"DeepSeek API error {response.status_code}: {response.text}")
-
-        data = response.json()
-        try:
-            content = data["choices"][0]["message"]["content"]
-            if not content:
-                raise KeyError("Empty response text")
-            return content.strip()
-        except (KeyError, IndexError, TypeError) as exc:
-            logging.error("Unexpected DeepSeek API payload: %s", data)
-            logging.error("System prompt size for debugging: %s", len(system_prompt))
-            raise GeminiError("DeepSeek API returned an unexpected payload") from exc
+        return payload
 
     def generate_structured_interview_reply(
         self,
@@ -213,19 +185,213 @@ class GeminiClient:
         )
 
         # Debug logging
-        system_prompt, messages = payload
-        logging.info(f"[MODEL DEBUG] Current code length: {len(current_code)}")
+        system_prompt = payload.get("systemInstruction", {}).get("parts", [{}])[0].get("text", "")
+        logging.info(f"[GEMINI DEBUG] Current code length: {len(current_code)}")
         if current_code:
-            logging.info(f"[MODEL DEBUG] Code is included in prompt: {bool('CURRENT CODE IN EDITOR' in system_prompt)}")
-        logging.info(f"[MODEL DEBUG] System prompt length: {len(system_prompt)}")
-        return self._post_chat(
-            messages=messages,
-            model=self.model,
-            temperature=temperature,
-            top_p=0.95,
-            max_tokens=800,
-            system_prompt=system_prompt,
+            logging.info(f"[GEMINI DEBUG] Code is included in prompt: {bool('CURRENT CODE IN EDITOR' in system_prompt)}")
+        logging.info(f"[GEMINI DEBUG] System prompt length: {len(system_prompt)}")
+
+        response = requests.post(
+            self.API_URL_TEMPLATE.format(model=self.model),
+            params={"key": self.api_key},
+            json=payload,
+            timeout=30,
         )
+
+        if response.status_code != 200:
+            logging.error(
+                "Gemini API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+
+        data = response.json()
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+            if not combined_text:
+                raise KeyError("Empty response text")
+            return combined_text
+        except (KeyError, IndexError) as exc:
+            logging.error("Unexpected Gemini API payload: %s", data)
+            raise GeminiError("Gemini API returned an unexpected payload") from exc
+
+    def generate_interview_report(
+        self,
+        mode: str,
+        language: str,
+        conversation: List[Dict[str, Any]],
+        current_code: str,
+        code_snapshots: List[Dict[str, Any]],
+        problem_presented: bool,
+    ) -> Dict[str, Any]:
+        """Generate a structured feedback report for the completed interview."""
+        system_prompt = (
+            "You are a senior engineering interviewer writing a concise evaluation report. "
+            "Assess the candidate like a real SDE interview. "
+            "Return STRICT JSON only, no extra commentary."
+        )
+
+        rubric_details = {
+            "problem_solving": "How well they structured the approach, validated assumptions, and decomposed the problem.",
+            "technical_depth": "Quality of algorithm/data structure reasoning and trade-off analysis.",
+            "coding_correctness": "Correctness of implementation vs. requirements.",
+            "edge_cases": "Coverage of tricky inputs and boundary conditions.",
+            "efficiency": "Time/space complexity choices and optimization awareness.",
+            "communication": "Clarity, structure, and collaboration throughout.",
+            "code_quality": "Readability, naming, organization, and maintainability.",
+        }
+
+        # For report generation, include significant conversation history but not everything
+        # to avoid overwhelming the context window. 40 turns should capture key moments
+        # while leaving room for detailed output.
+        max_conversation_turns = min(40, len(conversation) if conversation else 0)
+
+        context = {
+            "mode": mode,
+            "language": language,
+            "problem_presented": problem_presented,
+            "conversation_summary": self._format_conversation_snippet(
+                conversation,
+                max_turns=max_conversation_turns,
+            ),
+            "total_conversation_turns": len(conversation) if conversation else 0,
+            "current_code": current_code or "[empty]",
+            "code_snapshot_count": len(code_snapshots),
+        }
+
+        instructions = (
+            "Return JSON with EXACTLY this structure (no additional fields):\n"
+            "{\n"
+            '  "overall_score": number 1-5,\n'
+            '  "recommendation": "strong_hire" | "hire" | "lean_hire" | "lean_no_hire" | "no_hire",\n'
+            '  "summary": "Brief 2-sentence evaluation",\n'
+            '  "category_scores": {\n'
+            '     "problem_solving": 1-5,\n'
+            '     "technical_depth": 1-5,\n'
+            '     "coding_correctness": 1-5,\n'
+            '     "edge_cases": 1-5,\n'
+            '     "efficiency": 1-5,\n'
+            '     "communication": 1-5,\n'
+            '     "code_quality": 1-5\n'
+            "  },\n"
+            '  "strengths": ["concise point 1", "concise point 2", "concise point 3"],\n'
+            '  "improvements": ["concise point 1", "concise point 2", "concise point 3"],\n'
+            '  "notable_moments": ["brief moment 1", "brief moment 2", "brief moment 3"]\n'
+            "}\n\n"
+            "IMPORTANT:\n"
+            "- Output ONLY the JSON structure above with NO additional fields\n"
+            "- Do NOT add explanations for category scores (scores are self-explanatory)\n"
+            "- Keep each strength/improvement/moment to ONE sentence max\n"
+            "- Be specific but concise\n"
+            "- Output raw JSON only (no markdown, no code fences, no commentary)"
+        )
+
+        payload = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [{"text": system_prompt}],
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": instructions
+                            + "\n\nCONTEXT:\n"
+                            + json.dumps(context, ensure_ascii=False),
+                        }
+                    ],
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.2,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 2048,
+                "responseMimeType": "application/json",
+            },
+        }
+
+        response = requests.post(
+            self.API_URL_TEMPLATE.format(model=self.model),
+            params={"key": self.api_key},
+            json=payload,
+            timeout=30,
+        )
+        if response.status_code != 200:
+            logging.error(
+                "Gemini API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+
+        data = response.json()
+
+        # Check if response was truncated due to token limit
+        finish_reason = data.get("candidates", [{}])[0].get("finishReason", "")
+        if finish_reason == "MAX_TOKENS":
+            logging.warning(
+                "Report generation hit MAX_TOKENS limit. Retrying with higher limit. "
+                "Original response: %s",
+                data
+            )
+            # Retry with higher token limit
+            payload["generationConfig"]["maxOutputTokens"] = 3072
+            response = requests.post(
+                self.API_URL_TEMPLATE.format(model=self.model),
+                params={"key": self.api_key},
+                json=payload,
+                timeout=30,
+            )
+            if response.status_code != 200:
+                logging.error(
+                    "Gemini API error on retry: status=%s body=%s",
+                    response.status_code,
+                    response.text,
+                )
+                raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+            data = response.json()
+            finish_reason = data.get("candidates", [{}])[0].get("finishReason", "")
+            if finish_reason == "MAX_TOKENS":
+                logging.error(
+                    "Report generation still hitting MAX_TOKENS even with 3072 limit. "
+                    "Response: %s",
+                    data
+                )
+
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+            if not combined_text:
+                raise KeyError("Empty response text")
+            report = self._parse_json_from_text(combined_text)
+        except (KeyError, IndexError, json.JSONDecodeError) as exc:
+            logging.error("Unexpected Gemini report payload: %s", data)
+            if finish_reason == "MAX_TOKENS":
+                raise GeminiError(
+                    "Report generation exceeded token limit. The interview may be too long. "
+                    "Please try ending the interview earlier or contact support."
+                ) from exc
+            raise GeminiError("Gemini API returned an invalid report payload") from exc
+
+        report["rubric_details"] = rubric_details
+        return report
+
+    def _parse_json_from_text(self, text: str) -> Dict[str, Any]:
+        """Parse JSON from text, handling markdown code fences and extra whitespace."""
+        cleaned = text.strip()
+        # Remove markdown code fences if present
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```\w*\n?|```$", "", cleaned, flags=re.DOTALL).strip()
+        # Extract JSON object between first { and last }
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            cleaned = cleaned[start:end + 1]
+        return json.loads(cleaned)
 
     def _build_structured_payload(
         self,
@@ -237,7 +403,7 @@ class GeminiClient:
         current_code: str,
         code_changed: bool,
         temperature: float,
-    ) -> tuple[str, List[Dict[str, str]]]:
+    ) -> Dict[str, Any]:
         """Build payload with phase-aware prompting for structured interview"""
 
         current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
@@ -285,9 +451,20 @@ class GeminiClient:
             }
         )
 
-        messages: List[Dict[str, str]] = [{"role": "system", "content": system_prompt}]
-        messages.extend(self._convert_conversation(conversation_payload))
-        return system_prompt, messages
+        payload: Dict[str, Any] = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [{"text": system_prompt}],
+            },
+            "contents": conversation_payload,
+            "generationConfig": {
+                "temperature": temperature,
+                "topP": 0.95,
+                "topK": 40,
+                "maxOutputTokens": 800,  # Increased to allow code responses
+            },
+        }
+        return payload
 
     def decide_phase_transition(
         self,
@@ -315,18 +492,31 @@ class GeminiClient:
             code_idle_duration=code_idle_duration,
         )
 
-        system_prompt, messages = payload
         try:
-            decision_text = self._post_chat(
-                messages=messages,
-                model=self.phase_model,
-                temperature=0.1,
-                top_p=0.8,
-                max_tokens=200,
-                system_prompt=system_prompt,
+            response = requests.post(
+                self.API_URL_TEMPLATE.format(model=self.phase_model),
+                params={"key": self.api_key},
+                json=payload,
+                timeout=20,
             )
-        except GeminiError as exc:
-            logging.warning("Phase decision model error: %s", exc)
+        except RequestException as exc:  # type: ignore[name-defined]
+            logging.error("Phase decision request failed: %s", exc)
+            return None
+
+        if response.status_code != 200:
+            logging.warning(
+                "Phase decision model error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            return None
+
+        data = response.json()
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            decision_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+        except (KeyError, IndexError) as exc:
+            logging.warning("Phase decision payload missing text: %s", data)
             return None
 
         if decision_text:
@@ -359,7 +549,7 @@ class GeminiClient:
         total_time: float,
         silence_duration: float,
         code_idle_duration: float,
-    ) -> tuple[str, List[Dict[str, str]]]:
+    ) -> Dict[str, Any]:
         current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
         mode = interview_state.get("mode", "full")
         time_in_phase = float(time_in_phase or 0.0)
@@ -393,6 +583,8 @@ class GeminiClient:
             "the time spent in the current phase, and whether the candidate appears ready.\n"
             "Only recommend a transition when it feels natural and consistent with the discussion.\n"
             "If the current dialogue still fits the phase objectives, do not transition yet.\n"
+            "For full mode, enforce hard timing windows: do not transition to coding before 10 minutes total, "
+            "and transition to questions around 35 minutes total.\n"
             "Respond ONLY with strict JSON. Do not include any extra commentary."
         )
 
@@ -409,14 +601,29 @@ class GeminiClient:
             "Only set mark_problem_presented true if the coding problem was clearly introduced."
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": instructions + "\n\nCONTEXT:\n" + json.dumps(context, ensure_ascii=False),
+        payload: Dict[str, Any] = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [{"text": system_prompt}],
             },
-        ]
-        return system_prompt, messages
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": instructions + "\n\nCONTEXT:\n" + json.dumps(context, ensure_ascii=False),
+                        }
+                    ],
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.1,
+                "topP": 0.8,
+                "topK": 32,
+                "maxOutputTokens": 200,
+            },
+        }
+        return payload
 
     def _format_conversation_snippet(
         self,
@@ -426,7 +633,10 @@ class GeminiClient:
         if not conversation:
             return ""
 
-        recent_turns = conversation[-max_turns:]
+        if max_turns and max_turns > 0:
+            recent_turns = conversation[-max_turns:]
+        else:
+            recent_turns = conversation
         lines: List[str] = []
         for turn in recent_turns:
             role = turn.get("role")
@@ -482,13 +692,14 @@ This is a CODING-ONLY session (35-40 minutes) - no intro, no resume discussion, 
 
 CRITICAL CONVERSATION RULES:
 - Speak naturally like in a real conversation, NOT written text
-- Keep responses SHORT (1-3 sentences usually) - you're SPEAKING, not writing essays
+- Keep responses VERY SHORT (1-2 sentences max) - you're SPEAKING, not writing essays
 - Vary response length based on context and what the candidate just said
 - Use contractions (I'm, you're, that's), casual professional phrasing
 - Reference the conversation history - what was discussed earlier matters
 - ONE question or point at a time
 - Let silences happen when they're thinking or coding - don't fill every gap
 - Be supportive but maintain interview professionalism
+ - Avoid long explanations unless the candidate explicitly asks
 
 CRITICAL - TEXT-TO-SPEECH OUTPUT:
 - Your output will be converted to SPEECH by a TTS system
@@ -501,7 +712,7 @@ CRITICAL - TEXT-TO-SPEECH OUTPUT:
 """
         else:
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE technical interview.
-This is a 60-minute structured interview with natural, back-and-forth CONVERSATION.
+This is a 40-minute structured interview with natural, back-and-forth CONVERSATION.
 
 CRITICAL CONVERSATION RULES:
 - Speak naturally like in a real conversation, NOT written text
@@ -535,11 +746,10 @@ CURRENT STATE:
 
 """
         else:
-            structure = f"""INTERVIEW STRUCTURE (60 minutes total):
-Phase 1: Introduction (0-5min) - Greet, explain format
-Phase 2: Resume Discussion (5-15min) - Background deep-dive
-Phase 3: Coding Problem (15-50min) - Technical assessment
-Phase 4: Candidate Questions (50-60min) - Reverse interview
+            structure = f"""INTERVIEW STRUCTURE (40 minutes total):
+Phase 1: Intro + Resume (0-10min) - Quick rapport + background
+Phase 2: Coding Problem (10-35min) - Technical assessment
+Phase 3: Candidate Questions (35-40min) - Reverse interview
 
 CURRENT STATE:
 - Phase: {current_phase.upper()}
@@ -572,10 +782,12 @@ CURRENT STATE:
 - Explain the interview format in 2-3 sentences
 - Be warm and put them at ease
 - Ask if they have questions before starting
-- WHEN READY (after ~3-5 min): Naturally transition to resume discussion
+- This phase plus resume must stay within the first 10 minutes
+- If they ask to jump to coding before 5 minutes total, politely refuse and continue
+- WHEN READY (after ~3-5 min): Transition to resume discussion
   Example: "Great! Let's start with your background. Tell me about yourself."
 
-KEEP IT BRIEF - This is just the intro, not the main interview yet."""
+KEEP IT BRIEF - Intro should be short and efficient."""
 
         elif current_phase == state.PHASE_RESUME:
             resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
@@ -589,11 +801,14 @@ WHAT TO DO:
 - Reference what they mentioned earlier in THIS interview
 
 TIMING:
-- Target: ~10 minutes for this phase
+- Target: stay within the first 10 minutes total (intro + resume combined)
 - Current time in phase: {time_in_phase:.1f} minutes
+- Total interview time: {total_time:.1f} minutes
 
 CRITICAL - WHEN TO TRANSITION TO CODING:
-After about 10 minutes (or after 3-4 resume questions), you MUST transition to the coding phase.
+If total time is under 5 minutes and they ask to code, politely refuse and continue.
+Once total time is 5+ minutes, you may transition when it feels natural.
+At 10 minutes total time (or after 3-4 resume questions), you MUST transition to the coding phase.
 To trigger the transition, you MUST include one of these EXACT phrases in your response:
   - "Let's move to coding"
   - "Let's work on a coding problem"
@@ -636,18 +851,20 @@ LANGUAGE: {language_display}
 {code_display}{visibility_instructions}
 
 YOU ARE IN A CODING-ONLY SESSION. NO INTRO, NO RESUME DISCUSSION, NO SMALL TALK.
+KEEP RESPONSES TO 1-2 SHORT SENTENCES UNLESS THEY ASK FOR DETAIL.
 
 WHEN THE CANDIDATE GREETS YOU (says "Hi", "Hello", "Ready", etc.):
 YOUR FIRST RESPONSE SHOULD:
 1. Brief greeting (1 sentence): "Hi! Ready to solve a coding problem?"
-2. IMMEDIATELY present a LeetCode-style problem from your knowledge:
+2. IMMEDIATELY present a LeetCode-style problem from your knowledge inside [PROBLEM_START]...[PROBLEM_END] markers:
    - Difficulty: MEDIUM-HARD preferred, or EASY with MEDIUM-HARD follow-ups
    - Examples: Two Sum, Merge Intervals, LRU Cache, Design Twitter, Valid Parentheses, etc.
    - State the problem naturally and clearly
    - Give example inputs/outputs
    - Keep it concise - you're speaking, not writing
+3. Outside the markers, keep your spoken text brief (1-2 sentences) and do NOT read through the examples.
 
-3. Ask if they have clarifying questions
+4. Ask if they have clarifying questions
 
 AFTER they understand the problem:
 - GUIDE THEM TO DISCUSS APPROACH FIRST before coding
@@ -656,11 +873,12 @@ AFTER they understand the problem:
 - Discuss time/space complexity
 
 CODE WRITING CAPABILITY:
-- You CAN write code directly to the candidate's editor when necessary
-- ONLY write code in these situations:
-  1. The candidate explicitly asks you to write code or put something in the editor
-  2. Time is almost up and you need to show the correct solution
-  3. The candidate is very stuck and asks for the complete answer
+- You MUST avoid giving full solutions early. Be an interviewer, not a tutor.
+- Only provide hints and guiding questions unless time is nearly up.
+- You MAY write code directly to the candidate's editor ONLY when:
+  1. Time is almost up and they have not solved it, OR
+  2. They are truly stuck after multiple hints and explicitly ask for the solution.
+- If they ask you to write code early, refuse politely and offer a hint instead.
 - CRITICAL: Before writing code, ALWAYS look at what they already have
 - You can modify their existing code or provide a complete replacement
 - To write code to the editor, you MUST use this EXACT format:
@@ -695,13 +913,15 @@ LANGUAGE: {language_display}
 YOUR TASK NOW:
 1. Select a LeetCode-style coding problem from your knowledge
    - Difficulty: MEDIUM-HARD preferred, or EASY with MEDIUM-HARD follow-ups
+   - Choose a problem that reasonably takes ~25 minutes to solve with discussion
    - Pick something relevant to their resume/experience if possible
    - Examples: Two Sum, Merge Intervals, LRU Cache, Design Twitter, etc.
 
-2. Present the problem clearly and conversationally:
+2. Present the problem inside [PROBLEM_START]...[PROBLEM_END] markers:
    - State the problem naturally (don't just copy-paste)
    - Give example inputs/outputs
    - Ask if they have clarifying questions
+   - Do not read the examples out loud; keep spoken text brief outside the markers
 
 3. GUIDE THEM TO DISCUSS APPROACH FIRST:
    - Don't let them jump to coding immediately
@@ -710,11 +930,12 @@ YOUR TASK NOW:
    - Discuss time/space complexity
 
 CODE WRITING CAPABILITY:
-- You CAN write code directly to the candidate's editor when necessary
-- ONLY write code in these situations:
-  1. The candidate explicitly asks you to write code or put something in the editor
-  2. Time is almost up and you need to show the correct solution
-  3. The candidate is very stuck and asks for the complete answer
+- You MUST avoid giving full solutions early. Be an interviewer, not a tutor.
+- Only provide hints and guiding questions unless time is nearly up.
+- You MAY write code directly to the candidate's editor ONLY when:
+  1. Time is almost up and they have not solved it, OR
+  2. They are truly stuck after multiple hints and explicitly ask for the solution.
+- If they ask you to write code early, refuse politely and offer a hint instead.
 - CRITICAL: Before writing code, ALWAYS look at what they already have
 - You can modify their existing code or provide a complete replacement
 - To write code to the editor, you MUST use this EXACT format:
@@ -782,11 +1003,12 @@ CODE READING & WRITING CAPABILITY:
 - Example: "I see you've started with a hash map approach. Good choice!"
 - You MUST look at their code when they ask questions about it or say they're stuck
 
-- You CAN write code directly to the candidate's editor when necessary
-- ONLY write code in these situations:
-  1. The candidate explicitly asks you to write code or put something in the editor
-  2. Time is almost up and you need to show the correct solution
-  3. The candidate is very stuck and asks for the complete answer
+- You MUST avoid giving full solutions early. Be an interviewer, not a tutor.
+- Only provide hints and guiding questions unless time is nearly up.
+- You MAY write code directly to the candidate's editor ONLY when:
+  1. Time is almost up and they have not solved it, OR
+  2. They are truly stuck after multiple hints and explicitly ask for the solution.
+- If they ask you to write code early, refuse politely and offer a hint instead.
 - CRITICAL: Before writing code, ALWAYS look at what they already have
 - You can modify their existing code or provide a complete replacement
 - To write code to the editor, you MUST use this EXACT format:
@@ -817,9 +1039,9 @@ INTERVENTION RULES:
 
 TIME MANAGEMENT:
 - Current time in coding phase: {time_in_phase:.1f} minutes
-- Target: ~35 minutes for this phase
-- If approaching ~35 min: Guide toward wrapping up and testing edge cases
-- WHEN READY TO MOVE ON (~40-45 min total time): Transition to questions phase
+- Target: 25 minutes for this phase
+- If approaching ~25 min in phase or ~35 min total: Guide toward wrapping up
+- At ~35 min total time: Transition to questions phase
   Example: "Nice work. We have a few minutes left - what questions do you have for me?"
 """
 
@@ -833,9 +1055,9 @@ YOUR ROLE NOW:
 - This is their chance to learn about the "company"
 
 TIMING:
-- This is the final phase (~10 minutes)
+- This is the final phase (~5 minutes)
 - Current time in phase: {time_in_phase:.1f} minutes
-- When approaching 60 min total: Thank them and close warmly
+- When approaching 40 min total: Thank them and close warmly
   Example: "Thanks for your time today. We'll be in touch soon. Best of luck!"
 """
 
@@ -895,6 +1117,7 @@ DURING DESIGN DISCUSSION:
 - The candidate should be LEADING the design - YOU are evaluating, not guiding
 - Challenge their decisions. Ask "why?" frequently
 - Point out flaws, edge cases, and missed requirements
+- Keep responses concise (1-3 sentences) unless they ask for detail
 - Test their knowledge of:
   * SOLID principles
   * Design patterns (when applicable)
@@ -994,6 +1217,7 @@ IMPLEMENTATION EXPECTATIONS:
 - Handle core functionality (not every edge case)
 - {question_reminder}
 {extra_impl_emphasis}
+Keep responses concise (1-3 sentences) unless they ask for detail.
 
 WORKSPACE REMINDER:
 - There is still ONE editor. It contains their latest notes plus working code

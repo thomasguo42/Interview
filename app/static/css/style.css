@@ -139,6 +139,19 @@ button:disabled {
     gap: 1rem;
 }
 
+.report-section h3 {
+  margin-top: 0;
+}
+
+.report-body ul {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.report-body li {
+  margin-bottom: 0.25rem;
+}
+
 .message {
     border-radius: 14px;
     padding: 1rem 1.25rem;

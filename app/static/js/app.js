@@ -17,12 +17,15 @@ document.addEventListener('DOMContentLoaded', function() {
     startButton: document.getElementById("start-btn"),
     stopButton: document.getElementById("stop-btn"),
     resetButton: document.getElementById("reset-btn"),
+    endButton: document.getElementById("end-btn"),
     conversationLog: document.getElementById("conversation-log"),
     messageTemplate: document.getElementById("message-template"),
     liveCaption: document.getElementById("live-caption"),
     interviewTimer: document.getElementById("interview-timer"),
     phaseIndicator: document.getElementById("phase-indicator"),
     timeDisplay: document.getElementById("time-display"),
+    reportSection: document.getElementById("report-section"),
+    reportBody: document.getElementById("report-body"),
     problemPanel: document.getElementById("problem-panel"),
     problemStatement: document.getElementById("problem-statement"),
     codeEditorSection: document.getElementById("code-editor-section"),
@@ -201,7 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
   let pendingFinalTranscript = "";
   let pendingFinalTimer = null;
 
-  const FINAL_TRANSCRIPT_DELAY_MS = 500;
+  const FINAL_TRANSCRIPT_DELAY_MS = 1200;
+  const MIN_SILENCE_BEFORE_SEND_MS = 900;
+  let lastSpeechInputAt = 0;
 
   const CODE_SUPPORTED_MODES = new Set(["full", "coding_only", "ood"]);
 
@@ -566,9 +571,11 @@ document.addEventListener('DOMContentLoaded', function() {
         lastInterim = "";
         consecutiveInterimCount = 0; // Reset on final result
         lastSpeechTime = Date.now();
+        lastSpeechInputAt = Date.now();
         queueFinalTranscript(transcript);
       } else {
         console.log("Interim transcript:", transcript);
+        lastSpeechInputAt = Date.now();
 
         // NO BARGE-IN: Just accumulate interim transcript, never interrupt AI
         interimTranscript += `${transcript} `;
@@ -854,6 +861,27 @@ elements.stopButton?.addEventListener("click", () => {
   setStatus("Interview paused. Press start to resume.", "info");
 });
 
+elements.endButton?.addEventListener("click", async () => {
+  if (!interviewActive) return;
+  try {
+    const response = await fetch("/api/end_interview", {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to end interview");
+    renderInterviewReport(data.report);
+    interviewActive = false;
+    interviewPaused = false;
+    micEnabled = false;
+    updateControlStates();
+    setStatus("Interview ended. Report ready below.", "success");
+  } catch (error) {
+    console.error("End interview error:", error);
+    setStatus(error.message || "Failed to end interview.", "error");
+  }
+});
+
 elements.resetButton?.addEventListener("click", async () => {
   try {
     const response = await fetch("/api/reset", {
@@ -875,6 +903,10 @@ elements.resetButton?.addEventListener("click", async () => {
     elements.codeEditorSection.style.display = "none";
     elements.forceCodingBtn.style.display = "none";
     elements.problemStatement.innerHTML = "Problem will appear here during the coding phase...";
+    if (elements.reportSection && elements.reportBody) {
+      elements.reportBody.innerHTML = "";
+      elements.reportSection.style.display = "none";
+    }
 
     // Reset OOD workspace
     if (elements.oodWorkspace) {
@@ -1018,9 +1050,14 @@ function updateTimerDisplay() {
   const totalElapsed = Math.floor((Date.now() - interviewStartTime) / 1000);
   const totalMinutes = Math.floor(totalElapsed / 60);
   const totalSeconds = totalElapsed % 60;
+  const totalTarget = {
+    full: 40,
+    coding_only: 40,
+    ood: 40
+  }[currentMode] || 40;
 
   elements.timeDisplay.textContent =
-    `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')} / 60:00`;
+    `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')} / ${totalTarget}:00`;
 }
 
 async function updatePhaseUI() {
@@ -1142,7 +1179,7 @@ async function checkStuckDetection() {
   // Stuck if both silence AND no code changes for 30+ seconds
   if (silenceDuration > 30 && codeIdleDuration > 30) {
     console.log("User appears stuck - offering help");
-    // The backend will detect this and DeepSeek will offer help based on context
+    // The backend will detect this and Gemini will offer help based on context
     // We just ensure code is sent with the next interaction
   }
 }
@@ -1164,6 +1201,19 @@ function queueFinalTranscript(text) {
   }
 
   pendingFinalTimer = setTimeout(() => {
+    const now = Date.now();
+    const silenceMs = now - lastSpeechInputAt;
+    if (silenceMs < MIN_SILENCE_BEFORE_SEND_MS) {
+      pendingFinalTimer = setTimeout(() => {
+        const toSend = pendingFinalTranscript.trim();
+        pendingFinalTranscript = "";
+        pendingFinalTimer = null;
+        if (toSend) {
+          processFinalTranscript(toSend);
+        }
+      }, MIN_SILENCE_BEFORE_SEND_MS - silenceMs);
+      return;
+    }
     const toSend = pendingFinalTranscript.trim();
     pendingFinalTranscript = "";
     pendingFinalTimer = null;
@@ -1184,7 +1234,9 @@ function processFinalTranscript(transcript) {
   }
 
   if (awaitingResponse) {
-    interruptInFlight("Interrupting previous reply…");
+    console.log("[NO BARGE-IN] Ignoring user input while awaiting response");
+    setStatus("Hold on, finishing the current reply.", "info");
+    return;
   }
   handleUserUtterance(transcript);
 }
@@ -1223,7 +1275,7 @@ async function handleUserUtterance(transcript) {
     if (activeEditor) {
       currentCode = activeEditor.getValue();
       codeChanged = (Date.now() - lastCodeChangeTime) < 5000; // Changed in last 5 seconds
-      console.log("=== CODE BEING SENT TO DEEPSEEK ===");
+      console.log("=== CODE BEING SENT TO GEMINI ===");
       console.log("Mode:", currentMode);
       console.log("Code length:", currentCode.length);
       console.log("Code preview:", currentCode.substring(0, 200));
@@ -1250,34 +1302,51 @@ async function handleUserUtterance(transcript) {
 
     if (!response.ok) throw new Error(data.error || "Failed to get reply");
     if (!data.replyAudio) {
-      throw new Error("DeepSeek did not return any audio.");
+      throw new Error("Gemini did not return any audio.");
+    }
+    if (data.phase) {
+      currentPhase = data.phase;
+      await updatePhaseUI();
     }
 
     console.log("Audio received, length:", data.replyAudio.length);
 
-    // FIRST: Extract and apply code if DeepSeek wrote code (do this before problem extraction)
-    const { text, code } = extractModelCode(data.reply);
+    // FIRST: Extract and apply code if Gemini wrote code (do this before problem extraction)
+    const { text, code } = extractGeminiCode(data.reply);
+    const problemPayload = extractProblemBlock(text);
+    const spokenText = problemPayload.text;
+    if (problemPayload.problem) {
+      setProblemStatement(problemPayload.problem);
+    } else {
+      extractProblemStatement(spokenText);
+    }
     console.log("Code extraction result:", { hasCode: !!code, textLength: text.length });
 
-    // SECOND: Extract problem statement from the cleaned text (without code markers)
-    extractProblemStatement(text);
+    // THIRD: Display the text part (without code markers or markdown symbols)
+    appendMessage("Gemini", stripMarkdownMarkers(spokenText), "model");
 
-    // THIRD: Display the text part (without code markers)
-    appendMessage("DeepSeek", text, "model");
-
-    // FOURTH: If DeepSeek wrote code, update the editor
+    // FOURTH: If Gemini wrote code, update the editor
     const activeEditor = (currentMode === "ood") ? oodMonacoEditor : monacoEditor;
     if (code && activeEditor) {
-      console.log("DeepSeek wrote code to editor:", code.substring(0, 100) + "...");
+      console.log("Gemini wrote code to editor:", code.substring(0, 100) + "...");
       activeEditor.setValue(code);
-      // Immediately sync the updated code back to the backend so DeepSeek sees the latest version
+      // Immediately sync the updated code back to the backend so Gemini sees the latest version
       await sendCodeSnapshot();
-      appendSystemMessage("DeepSeek updated the code editor");
+      appendSystemMessage("Gemini updated the code editor");
     }
 
     // FIFTH: Play AI's audio response with echo cancellation
     // Pass the text to enable echo detection
-    await playReply(data.replyAudio, text);
+    await playReply(data.replyAudio, spokenText);
+    if (data.interviewEnded) {
+      await fetchInterviewReport();
+      interviewActive = false;
+      interviewPaused = false;
+      micEnabled = false;
+      stopTimers();
+      stopLevelMonitoring();
+      updateControlStates();
+    }
     setStatus("Your turn. Continue the conversation.", "success");
   } catch (error) {
     if (error.name === "AbortError") {
@@ -1352,14 +1421,41 @@ function extractProblemStatement(replyText) {
   }
 }
 
+function extractProblemBlock(replyText) {
+  if (!replyText) return { text: "", problem: "" };
+  const startMarker = "[PROBLEM_START]";
+  const endMarker = "[PROBLEM_END]";
+  const startIndex = replyText.indexOf(startMarker);
+  const endIndex = replyText.indexOf(endMarker);
+  if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) {
+    return { text: replyText, problem: "" };
+  }
+  const problem = replyText.substring(startIndex + startMarker.length, endIndex).trim();
+  const before = replyText.substring(0, startIndex).trim();
+  const after = replyText.substring(endIndex + endMarker.length).trim();
+  const text = `${before} ${after}`.trim();
+  return { text, problem };
+}
+
+function setProblemStatement(problemText) {
+  if (currentPhase !== 'coding') return;
+  elements.problemStatement.innerHTML = `<div class="problem-section">
+    <h3>Problem</h3>
+    <pre>${escapeHtml(problemText)}</pre>
+  </div>`;
+  elements.problemPanel.style.display = "block";
+  problemStatementSet = true;
+  problemUpdatesCount = 0;
+}
+
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
-function extractModelCode(replyText) {
-  // Check if DeepSeek included code using [CODE_START] and [CODE_END] markers
+function extractGeminiCode(replyText) {
+  // Check if Gemini included code using [CODE_START] and [CODE_END] markers
   const codeStartMarker = '[CODE_START]';
   const codeEndMarker = '[CODE_END]';
 
@@ -1399,6 +1495,21 @@ function extractModelCode(replyText) {
   return { text: replyText, code: null };
 }
 
+function stripMarkdownMarkers(text) {
+  if (!text) return "";
+  let cleaned = text;
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, "");
+  cleaned = cleaned.replace(/`([^`]+)`/g, "$1");
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, "$1");
+  cleaned = cleaned.replace(/__(.*?)__/g, "$1");
+  cleaned = cleaned.replace(/\*(.*?)\*/g, "$1");
+  cleaned = cleaned.replace(/_(.*?)_/g, "$1");
+  cleaned = cleaned.replace(/^#{1,6}\s+/gm, "");
+  cleaned = cleaned.replace(/\[CODE_START\][\s\S]*?\[CODE_END\]/g, "");
+  cleaned = cleaned.replace(/\[CODE_START\][\s\S]*$/g, "");
+  return cleaned.trim();
+}
+
 // ============================================================================
 // AUDIO PLAYBACK
 // ============================================================================
@@ -1415,6 +1526,65 @@ function appendMessage(speaker, text, role) {
 
 function appendSystemMessage(text) {
   appendMessage("System", text, "system");
+}
+
+async function fetchInterviewReport() {
+  if (!elements.reportSection || !elements.reportBody) return;
+  if (!interviewActive) return;
+  try {
+    const response = await fetch("/api/interview_report", {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to fetch report");
+    renderInterviewReport(data.report);
+  } catch (error) {
+    console.error("Report error:", error);
+  }
+}
+
+function renderInterviewReport(report) {
+  if (!report || !elements.reportSection || !elements.reportBody) return;
+  const lines = [];
+  lines.push(`<h3>Overall Score: ${escapeHtml(String(report.overall_score || ""))} / 5</h3>`);
+  if (report.recommendation) {
+    lines.push(`<p><strong>Recommendation:</strong> ${escapeHtml(report.recommendation)}</p>`);
+  }
+  if (report.summary) {
+    lines.push(`<p>${escapeHtml(report.summary)}</p>`);
+  }
+  if (report.rubric_details) {
+    lines.push("<h4>Rubric</h4><ul>");
+    for (const [key, value] of Object.entries(report.rubric_details)) {
+      lines.push(`<li>${escapeHtml(key)}: ${escapeHtml(String(value))}</li>`);
+    }
+    lines.push("</ul>");
+  }
+  if (report.category_scores) {
+    lines.push("<h4>Category Scores</h4><ul>");
+    for (const [key, value] of Object.entries(report.category_scores)) {
+      lines.push(`<li>${escapeHtml(key)}: ${escapeHtml(String(value))}</li>`);
+    }
+    lines.push("</ul>");
+  }
+  if (Array.isArray(report.strengths) && report.strengths.length) {
+    lines.push("<h4>Strengths</h4><ul>");
+    report.strengths.forEach(item => lines.push(`<li>${escapeHtml(item)}</li>`));
+    lines.push("</ul>");
+  }
+  if (Array.isArray(report.improvements) && report.improvements.length) {
+    lines.push("<h4>Improvements</h4><ul>");
+    report.improvements.forEach(item => lines.push(`<li>${escapeHtml(item)}</li>`));
+    lines.push("</ul>");
+  }
+  if (Array.isArray(report.notable_moments) && report.notable_moments.length) {
+    lines.push("<h4>Notable Moments</h4><ul>");
+    report.notable_moments.forEach(item => lines.push(`<li>${escapeHtml(item)}</li>`));
+    lines.push("</ul>");
+  }
+  elements.reportBody.innerHTML = lines.join("");
+  elements.reportSection.style.display = "block";
 }
 
 async function playReply(replyAudio, replyText = "") {
@@ -1594,6 +1764,9 @@ function updateControlStates() {
   const shouldDisableStart = micEnabled || (interviewActive && !interviewPaused);
   elements.startButton.disabled = !!shouldDisableStart;
   elements.stopButton.disabled = !micEnabled;
+  if (elements.endButton) {
+    elements.endButton.disabled = !interviewActive;
+  }
 }
 
 function enableInterviewControls() {
@@ -1602,6 +1775,9 @@ function enableInterviewControls() {
     elements.startButton.disabled = false;
   }
   elements.stopButton.disabled = !micEnabled;
+  if (elements.endButton) {
+    elements.endButton.disabled = !interviewActive;
+  }
 }
 
 function disableInterviewControls() {
@@ -1609,6 +1785,9 @@ function disableInterviewControls() {
   elements.startButton.disabled = true;
   elements.stopButton.disabled = true;
   elements.resetButton.disabled = true;
+  if (elements.endButton) {
+    elements.endButton.disabled = true;
+  }
 }
 
 // ============================================================================

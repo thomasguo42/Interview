@@ -6,11 +6,15 @@ from uuid import uuid4
 
 from flask import (
     Flask,
+    Response,
     jsonify,
     render_template,
     request,
     session,
 )
+
+import requests
+from requests import RequestException
 
 from .config import config
 from .gemini_client import GeminiClient, GeminiError
@@ -37,6 +41,10 @@ from .state import (
     set_design_phase_complete,
     set_company_context,
     get_company_context,
+    set_interview_ended,
+    is_interview_ended,
+    set_interview_report,
+    get_interview_report,
     PHASE_INTRO,
     PHASE_RESUME,
     PHASE_CODING,
@@ -163,7 +171,7 @@ def create_app() -> Flask:
             if stored_code:
                 current_code = stored_code
                 code_changed = False
-        # Preserve existing code snapshot so the model still sees editor content even if frontend omits it
+        # Preserve existing code snapshot so Gemini still sees editor content even if frontend omits it
         print("[CHAT DEBUG] No code payload received; using last stored code snapshot.")
 
         print(f"[CHAT DEBUG] User message: '{user_message}'")
@@ -200,8 +208,8 @@ def create_app() -> Flask:
         except (ValueError, GeminiError) as exc:
             return jsonify({"error": str(exc)}), 500
 
-        print(f"[CHAT DEBUG] Model reply length: {len(reply_text)}")
-        print(f"[CHAT DEBUG] Model reply preview: {reply_text[:200]}...")
+        print(f"[CHAT DEBUG] Gemini reply length: {len(reply_text)}")
+        print(f"[CHAT DEBUG] Gemini reply preview: {reply_text[:200]}...")
         print(f"[CHAT DEBUG] Contains CODE_START: {'[CODE_START]' in reply_text}")
         print(f"[CHAT DEBUG] Contains CODE_END: {'[CODE_END]' in reply_text}")
 
@@ -242,15 +250,105 @@ def create_app() -> Flask:
 
         append_turn(session_id, user_message, reply_text)
 
-        return jsonify({"reply": reply_text, "replyAudio": reply_audio})
+        interview_ended = False
+        if interview_state:
+            total_time = calculate_total_time(session_id)
+            mode = interview_state.get("mode", "full")
+            current_phase = interview_state.get("current_phase")
+            if total_time >= 40.0 and mode in {"full", "coding_only", "ood"}:
+                set_interview_ended(session_id, True)
+                interview_ended = True
+            elif _detect_interview_close(reply_text):
+                set_interview_ended(session_id, True)
+                interview_ended = True
+
+        response_phase = interview_state.get("current_phase") if interview_state else None
+        return jsonify({
+            "reply": reply_text,
+            "replyAudio": reply_audio,
+            "phase": response_phase,
+            "interviewEnded": interview_ended,
+        })
 
     @app.route("/api/live/session", methods=["POST"])
     def live_session():
-        return jsonify({"error": "Live audio sessions are not supported with DeepSeek."}), 501
+        if not config.GEMINI_API_KEY:
+            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
+
+        payload = request.get_json(silent=True) or {}
+        model = payload.get("model") or config.GEMINI_MODEL or "models/gemini-1.5-pro-latest"
+        language_code = payload.get("languageCode") or "en-US"
+        voice_name = payload.get("voiceName") or "Poppy"
+
+        session_payload: Dict[str, Any] = {
+            "model": model,
+            "languageCode": language_code,
+            "voiceConfig": {
+                "speechConfig": {
+                    "voiceName": voice_name,
+                }
+            },
+        }
+
+        try:
+            response = requests.post(
+                "https://generativelanguage.googleapis.com/v1beta/sessions",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": config.GEMINI_API_KEY,
+                },
+                json=session_payload,
+                timeout=30,
+            )
+        except RequestException as exc:
+            return jsonify({"error": f"Failed to reach Gemini Live API: {exc}"}), 502
+
+        if response.status_code != 200:
+            try:
+                error_payload = response.json()
+                message = error_payload.get("error", error_payload)
+            except ValueError:
+                message = response.text
+            return jsonify({"error": f"Gemini Live API error: {message}"}), response.status_code
+
+        return jsonify(response.json())
 
     @app.route("/api/live/connect", methods=["POST"])
     def live_connect():
-        return jsonify({"error": "Live audio sessions are not supported with DeepSeek."}), 501
+        if not config.GEMINI_API_KEY:
+            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
+
+        payload = request.get_json(silent=True) or {}
+        session_name = (payload.get("session") or "").strip()
+        client_sdp = (payload.get("sdp") or "").strip()
+
+        if not session_name or not client_sdp:
+            return jsonify({"error": "Both session and sdp are required."}), 400
+
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/{session_name}:connect"
+
+        try:
+            response = requests.post(
+                endpoint,
+                headers={
+                    "Content-Type": "application/sdp",
+                    "x-goog-api-key": config.GEMINI_API_KEY,
+                },
+                data=client_sdp,
+                timeout=30,
+            )
+        except RequestException as exc:
+            return jsonify({"error": f"Failed to connect to Gemini Live session: {exc}"}), 502
+
+        if response.status_code != 200:
+            try:
+                error_payload = response.json()
+                message = error_payload.get("error", error_payload)
+            except ValueError:
+                message = response.text
+            return jsonify({"error": f"Gemini Live connect error: {message}"}), response.status_code
+
+        return Response(response.text, mimetype="application/sdp")
 
     @app.route("/api/intervene", methods=["POST"])
     def intervene():
@@ -382,7 +480,83 @@ def create_app() -> Flask:
             "timeInPhase": calculate_time_in_phase(session_id),
             "totalTime": calculate_total_time(session_id),
             "problemPresented": interview_state.get("problem_presented", False),
+            "interviewEnded": bool(interview_state.get("ended", False)),
         })
+
+    @app.route("/api/interview_report", methods=["POST"])
+    def interview_report():
+        session_id = session.get("session_id")
+        if not session_id:
+            return jsonify({"error": "No active session"}), 400
+
+        interview_state = get_interview_state(session_id)
+        if not interview_state:
+            return jsonify({"error": "No active interview"}), 400
+
+        cached = get_interview_report(session_id)
+        if cached:
+            return jsonify({"report": cached, "cached": True})
+
+        conversation = get_conversation(session_id)
+        current_code = get_current_code(session_id)
+        mode = interview_state.get("mode", "full")
+        language = interview_state.get("language", "python")
+        code_snapshots = interview_state.get("code_snapshots", [])
+        problem_presented = interview_state.get("problem_presented", False)
+
+        try:
+            client = GeminiClient()
+            report = client.generate_interview_report(
+                mode=mode,
+                language=language,
+                conversation=conversation,
+                current_code=current_code,
+                code_snapshots=code_snapshots,
+                problem_presented=problem_presented,
+            )
+        except (ValueError, GeminiError) as exc:
+            return jsonify({"error": str(exc)}), 500
+
+        set_interview_report(session_id, report)
+        return jsonify({"report": report, "cached": False})
+
+    @app.route("/api/end_interview", methods=["POST"])
+    def end_interview():
+        session_id = session.get("session_id")
+        if not session_id:
+            return jsonify({"error": "No active session"}), 400
+
+        interview_state = get_interview_state(session_id)
+        if not interview_state:
+            return jsonify({"error": "No active interview"}), 400
+
+        set_interview_ended(session_id, True)
+        report = get_interview_report(session_id)
+        if report:
+            return jsonify({"report": report, "cached": True})
+
+        conversation = get_conversation(session_id)
+        current_code = get_current_code(session_id)
+        mode = interview_state.get("mode", "full")
+        language = interview_state.get("language", "python")
+        code_snapshots = interview_state.get("code_snapshots", [])
+        problem_presented = interview_state.get("problem_presented", False)
+
+        try:
+            client = GeminiClient()
+            report = client.generate_interview_report(
+                mode=mode,
+                language=language,
+                conversation=conversation,
+                current_code=current_code,
+                code_snapshots=code_snapshots,
+                problem_presented=problem_presented,
+            )
+        except (ValueError, GeminiError) as exc:
+            return jsonify({"error": str(exc)}), 500
+
+        set_interview_report(session_id, report)
+        return jsonify({"report": report, "cached": False})
 
     @app.route("/api/update_code", methods=["POST"])
     def update_code_endpoint():
@@ -426,6 +600,13 @@ def create_app() -> Flask:
         if not interview_state:
             return jsonify({"error": "No active interview"}), 400
 
+        if interview_state.get("mode") == "full":
+            total_time = calculate_total_time(session_id)
+            if new_phase == PHASE_CODING and total_time < 5.0:
+                return jsonify({"error": "Cannot enter coding before 5 minutes total time."}), 400
+            if new_phase == PHASE_QUESTIONS and total_time < 35.0:
+                return jsonify({"error": "Cannot enter questions before 35 minutes total time."}), 400
+
         update_interview_phase(session_id, new_phase)
         return jsonify({"message": f"Transitioned to {new_phase} phase"})
 
@@ -433,8 +614,42 @@ def create_app() -> Flask:
         """Remove code markers from text before TTS"""
         # Find and remove [CODE_START]...[CODE_END] blocks
         import re
-        pattern = r'\[CODE_START\].*?\[CODE_END\]'
-        cleaned = re.sub(pattern, '', text, flags=re.DOTALL)
+        cleaned = re.sub(r'\[CODE_START\].*?\[CODE_END\]', '', text, flags=re.DOTALL)
+        cleaned = re.sub(r'\[CODE_START\].*$', '', cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r'\[PROBLEM_START\].*?\[PROBLEM_END\]', '', cleaned, flags=re.DOTALL)
+        cleaned = cleaned.strip()
+        return _strip_markdown_symbols(cleaned)
+
+    def _detect_interview_close(reply_text: str) -> bool:
+        if not reply_text:
+            return False
+        reply_lower = reply_text.lower()
+        closing_phrases = [
+            "thanks for your time",
+            "we'll be in touch",
+            "best of luck",
+            "that concludes",
+            "this concludes",
+            "we are out of time",
+            "we're out of time",
+            "wrap up here",
+            "goodbye",
+            "have a great day",
+        ]
+        return any(phrase in reply_lower for phrase in closing_phrases)
+
+    def _strip_markdown_symbols(text: str) -> str:
+        """Remove common markdown symbols so TTS doesn't speak them."""
+        import re
+        if not text:
+            return ""
+        cleaned = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+        cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)
+        cleaned = re.sub(r"__(.*?)__", r"\1", cleaned)
+        cleaned = re.sub(r"\*(.*?)\*", r"\1", cleaned)
+        cleaned = re.sub(r"_(.*?)_", r"\1", cleaned)
+        cleaned = re.sub(r"^#{1,6}\s+", "", cleaned, flags=re.MULTILINE)
         return cleaned.strip()
 
     def _apply_phase_decision(
@@ -451,6 +666,20 @@ def create_app() -> Flask:
         current_phase = interview_state.get("current_phase")
         if not current_phase:
             return
+        interview_mode = interview_state.get("mode", "full")
+        total_time = calculate_total_time(session_id)
+
+        if interview_mode == "full":
+            if total_time >= 35.0 and current_phase != PHASE_QUESTIONS:
+                print(f"[PHASE HARD STOP] Forcing questions at {total_time:.1f} min total")
+                update_interview_phase(session_id, PHASE_QUESTIONS)
+                interview_state["current_phase"] = PHASE_QUESTIONS
+                return
+            if total_time >= 10.0 and current_phase in {PHASE_INTRO, PHASE_RESUME}:
+                print(f"[PHASE HARD STOP] Forcing coding at {total_time:.1f} min total")
+                update_interview_phase(session_id, PHASE_CODING)
+                interview_state["current_phase"] = PHASE_CODING
+                return
 
         should_transition = False
         if decision is not None:
@@ -464,6 +693,13 @@ def create_app() -> Flask:
             next_phase = decision.get("next_phase")
             reason = decision.get("reason", "")
             if next_phase and next_phase != current_phase:
+                if interview_mode == "full":
+                    if total_time < 5.0 and next_phase in {PHASE_CODING, PHASE_QUESTIONS}:
+                        print(f"[PHASE GUARD] Blocked early transition to {next_phase} at {total_time:.1f} min")
+                        return
+                    if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
+                        print(f"[PHASE GUARD] Blocked questions before 35 min at {total_time:.1f} min")
+                        return
                 print(f"[PHASE DECISION] {current_phase} → {next_phase} (reason: {reason})")
                 update_interview_phase(session_id, next_phase)
                 interview_state["current_phase"] = next_phase
@@ -472,19 +708,33 @@ def create_app() -> Flask:
         keyword_transition = _detect_content_transition(current_phase, user_message, model_reply)
         if keyword_transition:
             next_phase, reason = keyword_transition
+            if interview_mode == "full":
+                if total_time < 5.0 and next_phase in {PHASE_CODING, PHASE_QUESTIONS}:
+                    print(f"[PHASE GUARD] Blocked early transition to {next_phase} at {total_time:.1f} min")
+                    return
+                if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
+                    print(f"[PHASE GUARD] Blocked questions before 35 min at {total_time:.1f} min")
+                    return
             print(f"[PHASE CONTENT] {current_phase} → {next_phase} (reason: {reason})")
             update_interview_phase(session_id, next_phase)
             interview_state["current_phase"] = next_phase
             return
 
         # Fallback: guard against getting stuck in a phase for far too long
-        fallback_thresholds = {
-            PHASE_INTRO: 7.0,
-            PHASE_RESUME: 18.0,
-            PHASE_CODING: 45.0,
-            PHASE_OOD_DESIGN: 20.0,  # 20 minutes for design phase
-            PHASE_OOD_IMPLEMENTATION: 20.0,  # 20 minutes for implementation phase
-        }
+        if interview_mode == "full":
+            fallback_thresholds = {
+                PHASE_INTRO: 5.0,
+                PHASE_RESUME: 5.0,
+                PHASE_CODING: 25.0,
+            }
+        else:
+            fallback_thresholds = {
+                PHASE_INTRO: 7.0,
+                PHASE_RESUME: 18.0,
+                PHASE_CODING: 45.0,
+                PHASE_OOD_DESIGN: 20.0,  # 20 minutes for design phase
+                PHASE_OOD_IMPLEMENTATION: 20.0,  # 20 minutes for implementation phase
+            }
         time_in_phase = calculate_time_in_phase(session_id)
         if current_phase in fallback_thresholds and time_in_phase > fallback_thresholds[current_phase]:
             next_phase_map = {
@@ -495,6 +745,12 @@ def create_app() -> Flask:
             }
             next_phase = next_phase_map.get(current_phase)
             if next_phase:
+                if interview_mode == "full":
+                    total_time = calculate_total_time(session_id)
+                    if total_time < 5.0 and next_phase == PHASE_CODING:
+                        return
+                    if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
+                        return
                 print(f"[PHASE FALLBACK] {current_phase} → {next_phase} (time_in_phase={time_in_phase:.1f} min)")
                 update_interview_phase(session_id, next_phase)
                 interview_state["current_phase"] = next_phase
