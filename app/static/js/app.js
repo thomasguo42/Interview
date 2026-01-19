@@ -82,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
       // Start monitoring input levels
       startLevelMonitoring();
 
+      // Initialize Whisper recording capability
+      setupWhisperRecording();
+
     } catch (error) {
       console.error("[AUDIO] Failed to set up audio monitoring:", error);
     }
@@ -178,6 +181,215 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // ============================================================================
+  // WHISPER AUDIO RECORDING - Accurate transcription
+  // ============================================================================
+
+  /**
+   * Initialize MediaRecorder for capturing audio to send to Whisper
+   */
+  function setupWhisperRecording() {
+    if (!microphoneStream) {
+      console.error("[WHISPER] No microphone stream available");
+      return false;
+    }
+
+    try {
+      // Check for supported MIME types
+      const mimeTypes = [
+        'audio/webm',
+        'audio/webm;codecs=opus',
+        'audio/ogg;codecs=opus',
+        'audio/wav'
+      ];
+
+      let selectedMimeType = null;
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
+      }
+
+      if (!selectedMimeType) {
+        console.error("[WHISPER] No supported audio MIME types found");
+        return false;
+      }
+
+      mediaRecorder = new MediaRecorder(microphoneStream, {
+        mimeType: selectedMimeType
+      });
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        console.log("[WHISPER] Recording stopped, sending to Whisper...");
+        sendAudioToWhisper();
+      };
+
+      console.log(`[WHISPER] MediaRecorder initialized with ${selectedMimeType}`);
+      return true;
+
+    } catch (error) {
+      console.error("[WHISPER] Failed to setup MediaRecorder:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Start recording audio for Whisper transcription
+   */
+  function startWhisperRecording() {
+    if (!mediaRecorder) {
+      if (!setupWhisperRecording()) {
+        return;
+      }
+    }
+
+    if (mediaRecorder.state === "recording") {
+      return; // Already recording
+    }
+
+    audioChunks = [];
+    recordingStartTime = Date.now();
+    isRecordingForWhisper = true;
+
+    try {
+      mediaRecorder.start();
+      console.log("[WHISPER] Started recording audio");
+    } catch (error) {
+      console.error("[WHISPER] Failed to start recording:", error);
+      isRecordingForWhisper = false;
+    }
+  }
+
+  /**
+   * Stop recording audio and prepare to send to Whisper
+   */
+  function stopWhisperRecording() {
+    if (!mediaRecorder || mediaRecorder.state !== "recording") {
+      return;
+    }
+
+    try {
+      mediaRecorder.stop();
+      isRecordingForWhisper = false;
+      console.log("[WHISPER] Stopped recording audio");
+    } catch (error) {
+      console.error("[WHISPER] Failed to stop recording:", error);
+    }
+  }
+
+  /**
+   * Send captured audio to Whisper API for transcription
+   */
+  async function sendAudioToWhisper() {
+    if (audioChunks.length === 0) {
+      console.warn("[WHISPER] No audio chunks to send");
+      return;
+    }
+
+    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+    const duration = Date.now() - recordingStartTime;
+
+    // Minimum audio duration check (avoid sending super short clips)
+    if (duration < 300) {
+      console.log(`[WHISPER] Audio too short (${duration}ms), skipping`);
+      audioChunks = [];
+      return;
+    }
+
+    console.log(`[WHISPER] Sending ${audioBlob.size} bytes (${duration}ms) to Whisper`);
+
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+    formData.append('format', mediaRecorder.mimeType.split('/')[1].split(';')[0]);
+
+    // Generate unique ID for this transcription request
+    const transcriptionId = Date.now();
+    pendingWhisperTranscriptions.set(transcriptionId, true);
+
+    try {
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Whisper API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.text) {
+        const rtf = result.transcription_time / result.duration;
+        const speedup = (1 / rtf).toFixed(1);
+
+        console.log(`[WHISPER] Transcription received: "${result.text}"`);
+        console.log(`[WHISPER] Raw: "${result.raw_text}"`);
+        console.log(`[WHISPER] Performance: ${result.transcription_time.toFixed(3)}s for ${result.duration.toFixed(1)}s audio`);
+        console.log(`[WHISPER] Device: ${result.device} | Speed: ${speedup}x real-time`);
+
+        if (result.device === 'cuda') {
+          console.log(`[WHISPER] 🚀 GPU acceleration active`);
+        }
+
+        // Replace the last browser transcription with Whisper's accurate version
+        replaceLastTranscriptionWithWhisper(result.text, result.raw_text);
+      } else {
+        console.error("[WHISPER] Transcription failed:", result.error);
+      }
+
+    } catch (error) {
+      console.error("[WHISPER] Error sending audio to Whisper:", error);
+    } finally {
+      pendingWhisperTranscriptions.delete(transcriptionId);
+      audioChunks = [];
+    }
+  }
+
+  /**
+   * Replace the last browser transcription with accurate Whisper result
+   */
+  function replaceLastTranscriptionWithWhisper(whisperText, rawText) {
+    // Find the last user message in the conversation log
+    const messages = elements.conversationLog.querySelectorAll('.message.user');
+    if (messages.length === 0) {
+      console.warn("[WHISPER] No user message to replace");
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    const textElement = lastMessage.querySelector('.message-text');
+
+    if (!textElement) {
+      console.warn("[WHISPER] No text element found in last message");
+      return;
+    }
+
+    const browserText = textElement.textContent;
+
+    // Only replace if texts are significantly different
+    if (browserText.toLowerCase().trim() === whisperText.toLowerCase().trim()) {
+      console.log("[WHISPER] Browser and Whisper transcriptions match, no replacement needed");
+      return;
+    }
+
+    // Update the message text
+    textElement.textContent = whisperText;
+
+    // Add a subtle indicator that this was corrected by Whisper
+    if (!lastMessage.classList.contains('whisper-corrected')) {
+      lastMessage.classList.add('whisper-corrected');
+      textElement.title = `Browser: "${browserText}"\nWhisper: "${whisperText}"`;
+      console.log(`[WHISPER] Replaced transcription: "${browserText}" → "${whisperText}"`);
+    }
+  }
+
   // Now declare all state variables
   let micEnabled = false;
   let isListening = false;
@@ -203,6 +415,13 @@ document.addEventListener('DOMContentLoaded', function() {
   let recognitionPausedForEcho = false;
   let pendingFinalTranscript = "";
   let pendingFinalTimer = null;
+
+  // Whisper audio recording for accurate transcription
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recordingStartTime = null;
+  let isRecordingForWhisper = false;
+  let pendingWhisperTranscriptions = new Map(); // Track in-flight transcription requests
 
   const FINAL_TRANSCRIPT_DELAY_MS = 1200;
   const MIN_SILENCE_BEFORE_SEND_MS = 900;
@@ -550,6 +769,7 @@ document.addEventListener('DOMContentLoaded', function() {
   recognition.onresult = (event) => {
     console.log("Speech recognition result:", event);
     let interimTranscript = "";
+    let hasInterimResults = false;
 
     for (let i = event.resultIndex; i < event.results.length; i += 1) {
       const result = event.results[i];
@@ -572,10 +792,20 @@ document.addEventListener('DOMContentLoaded', function() {
         consecutiveInterimCount = 0; // Reset on final result
         lastSpeechTime = Date.now();
         lastSpeechInputAt = Date.now();
+
+        // Stop Whisper recording when we get final result
+        stopWhisperRecording();
+
         queueFinalTranscript(transcript);
       } else {
         console.log("Interim transcript:", transcript);
         lastSpeechInputAt = Date.now();
+        hasInterimResults = true;
+
+        // Start Whisper recording on first interim result (user started speaking)
+        if (!isRecordingForWhisper && interviewActive) {
+          startWhisperRecording();
+        }
 
         // NO BARGE-IN: Just accumulate interim transcript, never interrupt AI
         interimTranscript += `${transcript} `;

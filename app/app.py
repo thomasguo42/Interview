@@ -19,6 +19,7 @@ from requests import RequestException
 from .config import config
 from .gemini_client import GeminiClient, GeminiError
 from .resume_processor import allowed_file, extract_text
+from .whisper_service import get_whisper_transcriber
 from .state import (
     append_turn,
     clear_conversation,
@@ -34,6 +35,8 @@ from .state import (
     get_current_code,
     update_last_speech,
     set_problem_presented,
+    set_coding_question,
+    set_code_evaluation,
     calculate_time_in_phase,
     calculate_total_time,
     set_ood_question,
@@ -54,6 +57,9 @@ from .state import (
     SUPPORTED_LANGUAGES,
 )
 from .ood_questions import get_hard_question, get_stock_match_engine_question
+from .question_bank import get_random_coding_question
+from .question_tests import ensure_tests_for_question, get_cached_tests, format_signatures_for_prompt
+from .test_runner import run_code_tests
 from .tts import KokoroUnavailable, kokoro
 
 
@@ -184,6 +190,18 @@ def create_app() -> Flask:
             update_last_speech(session_id)
             if code_supported and current_code:
                 update_code(session_id, current_code)
+                if code_changed and interview_state.get("current_phase") == PHASE_CODING:
+                    coding_question = interview_state.get("coding_question") or {}
+                    question_title = coding_question.get("title", "")
+                    if question_title:
+                        test_spec = get_cached_tests(question_title)
+                        if test_spec:
+                            evaluation = run_code_tests(
+                                interview_state.get("language", ""),
+                                current_code,
+                                test_spec,
+                            )
+                            set_code_evaluation(session_id, evaluation)
 
         conversation: List[Dict[str, Any]] = get_conversation(session_id)
         try:
@@ -448,6 +466,19 @@ def create_app() -> Flask:
                 )
             else:
                 print("[OOD INTERVIEW] Stock matching engine question selected")
+        else:
+            coding_question = get_random_coding_question()
+            print(f"[START INTERVIEW] Selected question: {coding_question.get('title', 'UNKNOWN')}")
+            if coding_question:
+                question_title = coding_question.get("title", "")
+                print(f"[START INTERVIEW] Generating/fetching test cases for: {question_title}")
+                test_spec = ensure_tests_for_question(question_title)
+                if not test_spec:
+                    print(f"[START INTERVIEW ERROR] Failed to generate test cases for: {question_title}")
+                    return jsonify({"error": "Failed to generate test cases for the selected question."}), 500
+                print(f"[START INTERVIEW] Test cases ready - {len(test_spec.get('tests', []))} tests")
+                coding_question["signatures"] = format_signatures_for_prompt(test_spec)
+                set_coding_question(session_id, coding_question)
 
         print(f"[START INTERVIEW] Created state - phase: {interview_state['current_phase']}, mode: {interview_state['mode']}")
 
@@ -574,6 +605,71 @@ def create_app() -> Flask:
 
         update_code(session_id, code)
         return jsonify({"message": "Code updated"})
+
+    @app.route("/api/transcribe", methods=["POST"])
+    def transcribe_audio():
+        """
+        Transcribe audio using Whisper for accurate speech-to-text.
+        Accepts audio blob from frontend (WebM, WAV, etc.)
+        """
+        import time
+        import logging
+
+        start_time = time.time()
+
+        try:
+            # Get audio data from request
+            if 'audio' not in request.files:
+                return jsonify({"error": "No audio file provided"}), 400
+
+            audio_file = request.files['audio']
+            audio_format = request.form.get('format', 'webm')
+
+            # Read audio bytes
+            audio_bytes = audio_file.read()
+
+            if not audio_bytes:
+                return jsonify({"error": "Empty audio file"}), 400
+
+            audio_size_kb = len(audio_bytes) / 1024
+            logging.info(f"[WHISPER] Received {audio_size_kb:.1f} KB audio file ({audio_format})")
+
+            # Get Whisper transcriber instance
+            transcriber = get_whisper_transcriber(model_size="base")
+
+            # Transcribe audio
+            transcribe_start = time.time()
+            result = transcriber.transcribe_bytes(
+                audio_bytes,
+                audio_format=audio_format,
+                language="en"
+            )
+            transcribe_time = time.time() - transcribe_start
+
+            total_time = time.time() - start_time
+
+            logging.info(
+                f"[WHISPER] Transcription complete in {transcribe_time:.3f}s "
+                f"(total: {total_time:.3f}s) - Device: {transcriber.device} - "
+                f"Text: \"{result['text'][:50]}...\""
+            )
+
+            return jsonify({
+                "text": result["text"],
+                "raw_text": result["raw_text"],
+                "language": result["language"],
+                "duration": result["duration"],
+                "transcription_time": transcribe_time,
+                "device": transcriber.device,
+                "success": True
+            })
+
+        except Exception as e:
+            logging.error(f"[WHISPER] Transcription error: {e}", exc_info=True)
+            return jsonify({
+                "error": str(e),
+                "success": False
+            }), 500
 
     @app.route("/api/transition_phase", methods=["POST"])
     def transition_phase():

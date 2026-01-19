@@ -25,6 +25,7 @@ class GeminiClient:
         self.api_key = api_key or config.GEMINI_API_KEY
         self.model = model or config.GEMINI_MODEL
         self.phase_model = config.GEMINI_PHASE_MODEL or self.model
+        self.test_model = config.GEMINI_TEST_MODEL or self.model
         if not self.api_key:
             raise ValueError(
                 "Gemini API key is not configured. Set the GEMINI_API_KEY environment variable."
@@ -393,6 +394,248 @@ class GeminiClient:
             cleaned = cleaned[start:end + 1]
         return json.loads(cleaned)
 
+    def generate_question_tests(self, question_title: str) -> Dict[str, Any]:
+        """Generate cached test cases and function signatures for a question title."""
+        print(f"[GEMINI] Generating tests for: {question_title}")
+        print(f"[GEMINI] Using model: {self.test_model}")
+        print(f"[GEMINI] API key configured: {'Yes' if self.api_key else 'No'}")
+        if not question_title:
+            raise ValueError("Question title is required for test generation.")
+
+        system_prompt = (
+            "You generate coding interview test cases for LeetCode-style problems.\n"
+            "Return ONLY valid JSON, no markdown, no extra text.\n"
+            "Return a single-line MINIFIED JSON with no extra whitespace or newlines.\n"
+            "Use the following schema:\n"
+            "{\n"
+            '  "question_title": string,\n'
+            '  "function_signatures": {\n'
+            '    "python": {"function_name": string, "parameters": [{"name": string, "type": string}], "return_type": string},\n'
+            '    "java": {"class_name": "Solution", "method_name": string, "parameters": [{"name": string, "type": string}], "return_type": string, "static": true},\n'
+            '    "cpp": {"function_name": string, "parameters": [{"name": string, "type": string}], "return_type": string},\n'
+            '    "c": {"function_name": string, "parameters": [{"name": string, "type": string, "size_param": string}], "return_type": string, "return_size_param": string}\n'
+            "  },\n"
+            '  "comparison": "exact" | "unordered",\n'
+            '  "tests": [{"input": {param: value}, "output": value}]\n'
+            "}\n\n"
+            "Rules:\n"
+            "- Generate exactly 10 tests.\n"
+            "- Inputs must map to parameter names.\n"
+            "- Types must be one of: int, bool, string, int[], string[], int[][], string[][].\n"
+            "- Use LeetCode-standard naming: python snake_case, java/cpp camelCase.\n"
+            "- For C, use the same type strings as above and include size_param for each array parameter and return_size_param for array returns.\n"
+            "- Ensure outputs are deterministic.\n"
+            "- Keep test inputs and outputs SMALL to limit JSON size:\n"
+            "  * arrays length <= 6, strings length <= 8, matrices <= 4x4, small integers\n"
+            "  * if outputs grow quickly (e.g., Pascal's triangle), use very small inputs\n"
+            "- If you cannot fit the JSON, further shrink inputs and outputs.\n"
+        )
+
+        user_prompt = f"Question title: {question_title}"
+
+        def _request_tests_sdk(max_output_tokens: int, compact: bool) -> Optional[Dict[str, Any]]:
+            try:
+                import google.generativeai as genai
+            except ImportError:
+                print(f"[GEMINI SDK] google.generativeai not available")
+                return None
+
+            compact_prompt = ""
+            if compact:
+                compact_prompt = (
+                    "\nOutput must be fully valid JSON. If space is tight, "
+                    "use the smallest possible inputs and outputs.\n"
+                )
+
+            try:
+                genai.configure(api_key=self.api_key)
+
+                # Configure safety settings to be more lenient for technical content
+                safety_settings = {
+                    "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+                    "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+                    "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+                    "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+                }
+
+                model = genai.GenerativeModel(
+                    self.test_model,
+                    system_instruction=system_prompt,
+                    safety_settings=safety_settings
+                )
+                generation_config = {
+                    "temperature": 0.2,
+                    "top_p": 0.9,
+                    "top_k": 40,
+                    "max_output_tokens": max_output_tokens,
+                    "response_mime_type": "application/json",
+                }
+                print(f"[GEMINI SDK] Making request to {self.test_model}")
+                response = model.generate_content(user_prompt + compact_prompt, generation_config=generation_config)
+                print(f"[GEMINI SDK] Response received")
+            except Exception as exc:
+                print(f"[GEMINI SDK ERROR] {type(exc).__name__}: {exc}")
+                logging.error("Gemini SDK test generation error: %s", exc)
+                return None
+
+            # Check if response was blocked
+            try:
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if hasattr(candidate, 'safety_ratings'):
+                        print(f"[GEMINI SDK] Safety ratings: {candidate.safety_ratings}")
+                    if hasattr(candidate, 'finish_reason'):
+                        finish_reason = candidate.finish_reason
+                        finish_reason_name = {
+                            0: "UNSPECIFIED",
+                            1: "STOP",
+                            2: "MAX_TOKENS",
+                            3: "SAFETY",
+                            4: "RECITATION",
+                            5: "OTHER"
+                        }.get(finish_reason, f"UNKNOWN({finish_reason})")
+                        print(f"[GEMINI SDK] Finish reason: {finish_reason_name}")
+
+                        # If hit max tokens, don't try to parse, let retry with more tokens
+                        if finish_reason == 2:  # MAX_TOKENS
+                            print(f"[GEMINI SDK] Hit max tokens, will retry with more")
+                            return None
+
+                combined_text = (getattr(response, "text", "") or "").strip()
+            except ValueError as e:
+                # response.text accessor failed, likely blocked response
+                print(f"[GEMINI SDK] Failed to access response.text: {e}")
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    print(f"[GEMINI SDK] Candidate safety_ratings: {getattr(candidate, 'safety_ratings', 'N/A')}")
+                    finish_reason = getattr(candidate, 'finish_reason', 'N/A')
+                    print(f"[GEMINI SDK] Candidate finish_reason: {finish_reason}")
+                return None
+
+            if not combined_text:
+                print(f"[GEMINI SDK] No text in response")
+                return None
+            try:
+                parsed = self._parse_json_from_text(combined_text)
+                print(f"[GEMINI SDK] Successfully parsed JSON")
+                return parsed
+            except json.JSONDecodeError as e:
+                print(f"[GEMINI SDK] JSON decode error: {e}")
+                return None
+
+        def _request_tests(max_output_tokens: int, compact: bool) -> Dict[str, Any]:
+            compact_prompt = ""
+            if compact:
+                compact_prompt = (
+                    "\nOutput must be fully valid JSON. If space is tight, "
+                    "use the smallest possible inputs and outputs.\n"
+                )
+            payload = {
+                "systemInstruction": {"role": "system", "parts": [{"text": system_prompt}]},
+                "contents": [{"role": "user", "parts": [{"text": user_prompt + compact_prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "topP": 0.9,
+                    "topK": 40,
+                    "maxOutputTokens": max_output_tokens,
+                    "responseMimeType": "application/json",
+                    # Removed thinkingConfig - gemini-2.5-pro requires thinking mode enabled
+                },
+                "safetySettings": [
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                ],
+            }
+
+            print(f"[GEMINI REST] Making request to {self.test_model}")
+            response = requests.post(
+                self.API_URL_TEMPLATE.format(model=self.test_model),
+                params={"key": self.api_key},
+                json=payload,
+                timeout=60,
+            )
+            print(f"[GEMINI REST] Response status: {response.status_code}")
+            if response.status_code != 200:
+                error_msg = response.text[:500]  # Truncate for readability
+                print(f"[GEMINI REST ERROR] Status {response.status_code}: {error_msg}")
+                logging.error(
+                    "Gemini test generation error: status=%s body=%s",
+                    response.status_code,
+                    response.text,
+                )
+                raise GeminiError(f"Gemini test generation error {response.status_code}: {response.text}")
+
+            data = response.json()
+            try:
+                candidate = data["candidates"][0]
+                parts = candidate.get("content", {}).get("parts", [])
+                combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+                finish_reason = candidate.get("finishReason", "")
+                print(f"[GEMINI REST] Finish reason: {finish_reason}")
+            except (KeyError, IndexError) as exc:
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON") from exc
+
+            if not combined_text:
+                print(f"[GEMINI REST] No text in response")
+                if finish_reason == "MAX_TOKENS":
+                    print(f"[GEMINI REST] Hit max tokens, will retry with more")
+                    raise GeminiError("Gemini hit token limit during test generation.")
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON")
+
+            # Check if hit max tokens even with text (partial response)
+            if finish_reason == "MAX_TOKENS":
+                print(f"[GEMINI REST] Hit max tokens (partial response), will retry with more")
+                raise GeminiError("Gemini hit token limit during test generation.")
+
+            try:
+                parsed = self._parse_json_from_text(combined_text)
+                print(f"[GEMINI REST] Successfully parsed JSON")
+                return parsed
+            except json.JSONDecodeError as exc:
+                print(f"[GEMINI REST] JSON decode error: {exc}")
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON") from exc
+
+        parsed = None
+        attempt_params = [
+            (2400, False),
+            (4096, False),
+            (4096, True),
+        ]
+
+        for idx, (max_tokens, compact) in enumerate(attempt_params, 1):
+            print(f"[GEMINI] Attempt {idx}/3: max_tokens={max_tokens}, compact={compact}")
+            sdk_parsed = _request_tests_sdk(max_tokens, compact)
+            if sdk_parsed:
+                print(f"[GEMINI] SDK request succeeded on attempt {idx}")
+                parsed = sdk_parsed
+                break
+            print(f"[GEMINI] SDK request failed, trying REST API")
+            try:
+                parsed = _request_tests(max_tokens, compact)
+                print(f"[GEMINI] REST API request succeeded on attempt {idx}")
+                break
+            except GeminiError as exc:
+                print(f"[GEMINI] REST API attempt {idx} failed: {exc}")
+                if "token limit" not in str(exc).lower() and "invalid test case json" not in str(exc).lower():
+                    print(f"[GEMINI] Non-retryable error, raising exception")
+                    raise
+                parsed = None
+
+        if parsed is None:
+            print(f"[GEMINI ERROR] All attempts failed")
+            raise GeminiError("Gemini returned invalid test case JSON")
+
+        tests = parsed.get("tests", [])
+        if not isinstance(tests, list) or len(tests) != 10:
+            raise GeminiError("Gemini test generation did not return exactly 10 tests.")
+
+        return parsed
+
     def _build_structured_payload(
         self,
         session_id: str,
@@ -412,6 +655,8 @@ class GeminiClient:
         mode = interview_state.get("mode", "full")
         company_context = interview_state.get("company_context")
         ood_question = interview_state.get("ood_question")
+        coding_question = interview_state.get("coding_question")
+        code_evaluation = state.get_code_evaluation(session_id)
 
         normalized_code = self._normalize_editor_code(current_code)
 
@@ -436,6 +681,8 @@ class GeminiClient:
             mode,
             company_context,
             ood_question,
+            coding_question,
+            code_evaluation,
         )
 
         # Build conversation payload
@@ -682,6 +929,8 @@ class GeminiClient:
         mode: str = "full",
         company_context: Optional[Dict[str, str]] = None,
         ood_question: Optional[Dict[str, Any]] = None,
+        coding_question: Optional[Dict[str, Any]] = None,
+        code_evaluation: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build phase-specific system prompt"""
 
@@ -690,47 +939,64 @@ class GeminiClient:
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE coding interview.
 This is a CODING-ONLY session (35-40 minutes) - no intro, no resume discussion, just pure technical problem-solving.
 
-CRITICAL CONVERSATION RULES:
-- Speak naturally like in a real conversation, NOT written text
-- Keep responses VERY SHORT (1-2 sentences max) - you're SPEAKING, not writing essays
-- Vary response length based on context and what the candidate just said
-- Use contractions (I'm, you're, that's), casual professional phrasing
-- Reference the conversation history - what was discussed earlier matters
-- ONE question or point at a time
-- Let silences happen when they're thinking or coding - don't fill every gap
-- Be supportive but maintain interview professionalism
- - Avoid long explanations unless the candidate explicitly asks
+🎯 SPEECH OUTPUT - THIS IS CRITICAL:
+Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
+- Think like you're having a phone conversation, not writing an email
+- Write ONLY what should be spoken - no formatting, no markdown, no visual cues
+- NEVER use: *, #, _, **, `, or any formatting symbols
+- NEVER use filler words: "um", "uh", "hmm", "well", "so"
+- Say technical terms plainly: "use a for loop" NOT "use a *for loop*"
 
-CRITICAL - TEXT-TO-SPEECH OUTPUT:
-- Your output will be converted to SPEECH by a TTS system
-- NEVER use markdown symbols: NO asterisks (*), NO hashtags (#), NO underscores (_)
-- NEVER use formatting: NO **bold**, NO *italics*, NO `code blocks`
-- NEVER use filler words like "um", "uh", "hmm", "well", "so"
-- Speak clearly and directly - write EXACTLY what should be spoken out loud
-- For code or technical terms, just say them plainly (e.g., "use a for loop" not "use a *for loop*")
+💬 BE EXTREMELY CONCISE:
+- DEFAULT LENGTH: 1-2 sentences (10-20 words total)
+- Most responses should be under 15 words
+- Only go longer (3-4 sentences) when:
+  * Explaining a complex concept they specifically asked about
+  * Presenting a coding problem (use [PROBLEM_START]...[PROBLEM_END] markers)
+  * Giving feedback on completed solution
+- If you find yourself writing more than 4 sentences, STOP and cut it down
+- Every word costs time - be ruthless about brevity
+
+🗣️ NATURAL CONVERSATION:
+- Use contractions: "I'm", "you're", "that's", "let's"
+- ONE thought per response - don't chain multiple ideas
+- Let them speak - don't fill every silence
+- Sound like a real person, not a textbook
+- Vary your phrasing - avoid repetitive patterns
+- Never do long step-by-step simulations or traces out loud
+- If you must reference a case, summarize in 1-2 sentences
 
 """
         else:
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE technical interview.
 This is a 40-minute structured interview with natural, back-and-forth CONVERSATION.
 
-CRITICAL CONVERSATION RULES:
-- Speak naturally like in a real conversation, NOT written text
-- Keep responses SHORT (1-3 sentences usually) - you're SPEAKING, not writing essays
-- Vary response length based on context and what the candidate just said
-- Use contractions (I'm, you're, that's), casual professional phrasing
-- Reference the conversation history - what was discussed earlier matters
-- ONE question or point at a time
-- Let silences happen when they're thinking or coding - don't fill every gap
-- Be supportive but maintain interview professionalism
+🎯 SPEECH OUTPUT - THIS IS CRITICAL:
+Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
+- Think like you're having a phone conversation, not writing an email
+- Write ONLY what should be spoken - no formatting, no markdown, no visual cues
+- NEVER use: *, #, _, **, `, or any formatting symbols
+- NEVER use filler words: "um", "uh", "hmm", "well", "so"
+- Say technical terms plainly: "use a for loop" NOT "use a *for loop*"
 
-CRITICAL - TEXT-TO-SPEECH OUTPUT:
-- Your output will be converted to SPEECH by a TTS system
-- NEVER use markdown symbols: NO asterisks (*), NO hashtags (#), NO underscores (_)
-- NEVER use formatting: NO **bold**, NO *italics*, NO `code blocks`
-- NEVER use filler words like "um", "uh", "hmm", "well", "so"
-- Speak clearly and directly - write EXACTLY what should be spoken out loud
-- For code or technical terms, just say them plainly (e.g., "use a for loop" not "use a *for loop*")
+💬 BE EXTREMELY CONCISE:
+- DEFAULT LENGTH: 1-2 sentences (10-25 words total)
+- Most responses should be under 20 words
+- Only go longer (3-5 sentences) when:
+  * Explaining a complex concept they specifically asked about
+  * Presenting a coding problem (use [PROBLEM_START]...[PROBLEM_END] markers)
+  * Giving detailed feedback on their work
+- If you find yourself writing more than 5 sentences, STOP and cut it down
+- Every word costs time - be ruthless about brevity
+
+🗣️ NATURAL CONVERSATION:
+- Use contractions: "I'm", "you're", "that's", "let's"
+- ONE thought or question per response
+- Let them speak - don't fill every silence
+- Sound like a real person, not a textbook
+- Vary your phrasing - avoid repetitive patterns
+- Never do long step-by-step simulations or traces out loud
+- If you must reference a case, summarize in 1-2 sentences
 
 """
 
@@ -777,46 +1043,43 @@ CURRENT STATE:
 
         # Phase-specific instructions
         if current_phase == state.PHASE_INTRO:
-            phase_instructions = """INTRODUCTION PHASE - CURRENT OBJECTIVE:
-- If just starting: Introduce yourself briefly as a senior engineer (make up a name/company)
-- Explain the interview format in 2-3 sentences
-- Be warm and put them at ease
-- Ask if they have questions before starting
-- This phase plus resume must stay within the first 10 minutes
-- If they ask to jump to coding before 5 minutes total, politely refuse and continue
-- WHEN READY (after ~3-5 min): Transition to resume discussion
-  Example: "Great! Let's start with your background. Tell me about yourself."
+            phase_instructions = """INTRODUCTION PHASE:
+Your first response (if just starting):
+- ONE sentence intro: "Hi, I'm [Name], senior engineer at [Company]."
+- ONE sentence about format: "This'll be a 40-minute interview - intro, coding, then your questions."
+- ONE sentence warmup: "Sound good?" or "Ready to start?"
+Total: 3 sentences max (under 30 words)
 
-KEEP IT BRIEF - Intro should be short and efficient."""
+After they respond:
+- Move to resume discussion: "Great. Tell me about yourself."
+- Keep everything conversational and brief
+- No need to explain every detail upfront
+
+TRANSITION at 3-5 minutes total: "Let's talk about your background."
+"""
 
         elif current_phase == state.PHASE_RESUME:
             resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
-            phase_instructions = f"""RESUME DISCUSSION PHASE - CURRENT OBJECTIVE:{resume_context}
+            phase_instructions = f"""RESUME DISCUSSION PHASE:{resume_context}
 
-WHAT TO DO:
-- Ask about their experience, recent projects, technologies they've used
-- Dig deeper into interesting areas with follow-up questions
-- Assess technical depth through probing questions
-- Keep it conversational, like getting to know a colleague
-- Reference what they mentioned earlier in THIS interview
+RESPONSE STYLE:
+- Ask ONE question at a time (10-15 words)
+- Follow-ups should be brief: "Tell me more about that" or "What challenges did you face?"
+- Listen more, talk less
 
-TIMING:
-- Target: stay within the first 10 minutes total (intro + resume combined)
-- Current time in phase: {time_in_phase:.1f} minutes
-- Total interview time: {total_time:.1f} minutes
+QUESTIONS TO ASK (pick 3-4 total):
+- Recent projects and impact
+- Technical challenges they solved
+- Technologies they're comfortable with
+- What they're excited about
 
-CRITICAL - WHEN TO TRANSITION TO CODING:
-If total time is under 5 minutes and they ask to code, politely refuse and continue.
-Once total time is 5+ minutes, you may transition when it feels natural.
-At 10 minutes total time (or after 3-4 resume questions), you MUST transition to the coding phase.
-To trigger the transition, you MUST include one of these EXACT phrases in your response:
-  - "Let's move to coding"
-  - "Let's work on a coding problem"
-  - "Time for a coding challenge"
+TIMING: Time in phase {time_in_phase:.1f}min | Total {total_time:.1f}min
+- Target: Finish by 10 min total
+- At 10 min OR after 3-4 questions: TRANSITION
 
-Example transition: "Thanks for sharing that. Let's move to coding now. I'll present a problem and I want you to talk through your approach first before coding. Ready?"
-
-NOTE: The system detects these keywords to show the code editor. Without them, the editor won't appear!"""
+TRANSITION: Include this EXACT phrase: "Let's move to coding"
+Example: "Sounds great. Let's move to coding now. Ready?"
+"""
 
         elif current_phase == state.PHASE_CODING:
             language_display = {
@@ -842,85 +1105,87 @@ NOTE: The system detects these keywords to show the code editor. Without them, t
 
 """
 
+            evaluation_block = ""
+            if code_evaluation:
+                status = str(code_evaluation.get("status", "")).strip()
+                summary = str(code_evaluation.get("summary", "")).strip()
+                if status:
+                    evaluation_block = (
+                        "INTERNAL CODE EVALUATION (DO NOT MENTION TESTS OR COUNTS):\n"
+                        f"- Status: {status}\n"
+                    )
+                    if summary:
+                        evaluation_block += f"- Summary: {summary}\n"
+                    evaluation_block += "Use this only to guide your feedback.\n\n"
+
+            selected_question_block = ""
+            if coding_question and coding_question.get("title"):
+                title = str(coding_question.get("title", "")).strip()
+                difficulty = str(coding_question.get("difficulty", "")).strip()
+                acceptance = str(coding_question.get("acceptance", "")).strip()
+                signature = ""
+                signatures = coding_question.get("signatures") if isinstance(coding_question, dict) else None
+                if isinstance(signatures, dict):
+                    signature = str(signatures.get(language, "")).strip()
+                details = [f"- Title: {title}"]
+                if difficulty:
+                    details.append(f"- Difficulty: {difficulty}")
+                if acceptance:
+                    details.append(f"- Acceptance: {acceptance}")
+                if signature:
+                    details.append(f"- Required function signature ({language_display}): {signature}")
+                selected_question_block = "USE THIS QUESTION FROM THE BANK:\n" + "\n".join(details) + "\nDo NOT choose another question.\n\n"
+
             if not problem_presented:
                 # Different instructions for coding_only mode
                 if mode == "coding_only":
-                    phase_instructions = f"""CODING-ONLY MODE - START IMMEDIATELY WITH PROBLEM:
+                    phase_instructions = f"""CODING-ONLY MODE - PRESENT PROBLEM IMMEDIATELY:
 
 LANGUAGE: {language_display}
-{code_display}{visibility_instructions}
+{code_display}{visibility_instructions}{evaluation_block}
+{selected_question_block}
 
-YOU ARE IN A CODING-ONLY SESSION. NO INTRO, NO RESUME DISCUSSION, NO SMALL TALK.
-KEEP RESPONSES TO 1-2 SHORT SENTENCES UNLESS THEY ASK FOR DETAIL.
+WHEN CANDIDATE GREETS YOU:
+1. Brief greeting: "Hi! Ready for a coding problem?"
+2. Present problem in [PROBLEM_START]...[PROBLEM_END] markers
+   - Use the selected question above (if provided)
+   - Difficulty: MEDIUM preferred when the bank does not specify
+   - Include the required function signature verbatim
+   - Ensure the problem statement and examples use ONLY the types from the required signature
+   - Include examples in the markers
+3. Outside markers, keep spoken text under 15 words: "Take a minute to think about your approach."
+4. Ask: "Any questions on the problem?"
 
-WHEN THE CANDIDATE GREETS YOU (says "Hi", "Hello", "Ready", etc.):
-YOUR FIRST RESPONSE SHOULD:
-1. Brief greeting (1 sentence): "Hi! Ready to solve a coding problem?"
-2. IMMEDIATELY present a LeetCode-style problem from your knowledge inside [PROBLEM_START]...[PROBLEM_END] markers:
-   - Difficulty: MEDIUM-HARD preferred, or EASY with MEDIUM-HARD follow-ups
-   - Examples: Two Sum, Merge Intervals, LRU Cache, Design Twitter, Valid Parentheses, etc.
-   - State the problem naturally and clearly
-   - Give example inputs/outputs
-   - Keep it concise - you're speaking, not writing
-3. Outside the markers, keep your spoken text brief (1-2 sentences) and do NOT read through the examples.
+AFTER THEY UNDERSTAND:
+- Guide approach discussion BEFORE coding
+- Short prompts: "What's your approach?" "What about edge cases?" "Time complexity?"
 
-4. Ask if they have clarifying questions
+WRITING CODE TO EDITOR:
+Only write code if: (1) Time almost up, OR (2) They're stuck and explicitly ask
+Format: "Let me show you. [CODE_START]...code...[CODE_END] This uses a HashMap."
+Otherwise: Give hints, not solutions
 
-AFTER they understand the problem:
-- GUIDE THEM TO DISCUSS APPROACH FIRST before coding
-- Make them explain their approach
-- Ask about edge cases
-- Discuss time/space complexity
-
-CODE WRITING CAPABILITY:
-- You MUST avoid giving full solutions early. Be an interviewer, not a tutor.
-- Only provide hints and guiding questions unless time is nearly up.
-- You MAY write code directly to the candidate's editor ONLY when:
-  1. Time is almost up and they have not solved it, OR
-  2. They are truly stuck after multiple hints and explicitly ask for the solution.
-- If they ask you to write code early, refuse politely and offer a hint instead.
-- CRITICAL: Before writing code, ALWAYS look at what they already have
-- You can modify their existing code or provide a complete replacement
-- To write code to the editor, you MUST use this EXACT format:
-  1. First, say what you're doing (e.g., "Let me write that for you")
-  2. Then add the code block with these EXACT markers:
-
-  [CODE_START]
-  your complete code here
-  [CODE_END]
-
-  3. Then optionally explain what you wrote
-- Example response when asked to write code:
-  "Okay, let me write a solution for you. [CODE_START]
-  def two_sum(nums, target):
-      seen = {{}}
-      for i, num in enumerate(nums):
-          if target - num in seen:
-              return [seen[target - num], i]
-          seen[num] = i
-  [CODE_END] This solution uses a hash map for O(n) time complexity."
-- The code between markers will replace ALL content in the editor
-- IMPORTANT: Only use this when truly necessary - let them code themselves!
-
-REMEMBER: Be concise. This is a voice conversation, not a written document.
-NOTE: The candidate speaks first (they start the conversation), you respond with the problem."""
+DEFAULT: 1-2 sentence responses. Let them work."""
                 else:
                     phase_instructions = f"""CODING PHASE - PROBLEM PRESENTATION STAGE:
 
 LANGUAGE: {language_display}
-{code_display}{visibility_instructions}
+{code_display}{visibility_instructions}{evaluation_block}
+{selected_question_block}
 
 YOUR TASK NOW:
-1. Select a LeetCode-style coding problem from your knowledge
+1. Use the selected question above if provided
+   - If none is provided, select a LeetCode-style problem from your knowledge
    - Difficulty: MEDIUM-HARD preferred, or EASY with MEDIUM-HARD follow-ups
    - Choose a problem that reasonably takes ~25 minutes to solve with discussion
    - Pick something relevant to their resume/experience if possible
-   - Examples: Two Sum, Merge Intervals, LRU Cache, Design Twitter, etc.
 
 2. Present the problem inside [PROBLEM_START]...[PROBLEM_END] markers:
    - State the problem naturally (don't just copy-paste)
    - Give example inputs/outputs
    - Ask if they have clarifying questions
+   - Include the required function signature verbatim
+   - Ensure the problem statement and examples use ONLY the types from the required signature
    - Do not read the examples out loud; keep spoken text brief outside the markers
 
 3. GUIDE THEM TO DISCUSS APPROACH FIRST:
@@ -962,103 +1227,56 @@ CODE WRITING CAPABILITY:
 REMEMBER: After presenting, I will mark problem as presented."""
 
             else:
-                phase_instructions = f"""CODING PHASE - ACTIVE PROBLEM SOLVING:
+                phase_instructions = f"""CODING PHASE - ACTIVE SOLVING:
 
 LANGUAGE: {language_display}
-{code_display}{visibility_instructions}
+{code_display}{visibility_instructions}{evaluation_block}
 
-CODING STAGE GUIDANCE:
-The candidate is now working on the problem. Your role depends on what's happening:
+RESPONSE GUIDE (choose based on situation):
 
-**IF CANDIDATE JUST SPOKE:**
-- Respond to what they said
-- Answer questions they ask
-- Provide hints if they explicitly ask for help
-- Give feedback on their approach if they're explaining
+IF they just spoke:
+- Answer their question (1-2 sentences)
+- Provide hints if stuck (don't give solutions)
+- Example: "What if you use a HashMap?" or "Consider the edge case when the array is empty."
 
-**IF THEY'RE ACTIVELY CODING (code changing recently):**
-- Let them work! Brief check-ins only every 2-3 minutes
-- Example: "How's it going?" or "Making progress?"
+IF they're actively coding (code changed recently):
+- Stay quiet! Let them work
+- Check-in every 2-3 min: "How's it going?"
 
-**IF THEY'RE STUCK (silence >30s AND no code changes >30s):**
-Current stuck indicators: {silence_duration:.0f}s silence, {code_idle_duration:.0f}s code idle
-- Offer help: "Walk me through what you're thinking" or "What's blocking you?"
-- Never give direct solutions - only hints or guiding questions
+IF they're stuck (silence >{silence_duration:.0f}s, no code >{code_idle_duration:.0f}s):
+- Offer help: "What are you thinking?" or "What's blocking you?"
+- Guide with questions, not answers
 
-**IF THEY'RE ON WRONG PATH:**
-- Gently redirect with questions: "What about the case when...?"
-- Don't tell them the answer - guide them to realize it
+IF reviewing their code:
+- Look at the actual code above
+- Be specific: "I see you're using a nested loop. Can we optimize that?"
+- Discuss: edge cases, complexity, bugs
 
-**CODE ANALYSIS:**
-- ALWAYS look at their current code in the "CURRENT CODE IN EDITOR" section above
-- Assess correctness based on logic, approach, edge cases
-- Identify bugs or issues you see by looking at their actual code
-- When they say they're done: Review their actual code together, discuss edge cases, optimizations
-- Reference specific lines or patterns you see in their code
+WRITING CODE:
+Only if: time almost up OR they're stuck and ask for solution
+Format: "Let me show you. [CODE_START]...code...[CODE_END] This is O(n) time."
 
-CODE READING & WRITING CAPABILITY:
-- You can SEE the current code in the editor (shown above in "CURRENT CODE IN EDITOR")
-- ALWAYS read and understand their existing code before responding to ANY question or comment
-- You can reference specific parts of their code in your responses
-- Example: "I see you've started with a hash map approach. Good choice!"
-- You MUST look at their code when they ask questions about it or say they're stuck
-
-- You MUST avoid giving full solutions early. Be an interviewer, not a tutor.
-- Only provide hints and guiding questions unless time is nearly up.
-- You MAY write code directly to the candidate's editor ONLY when:
-  1. Time is almost up and they have not solved it, OR
-  2. They are truly stuck after multiple hints and explicitly ask for the solution.
-- If they ask you to write code early, refuse politely and offer a hint instead.
-- CRITICAL: Before writing code, ALWAYS look at what they already have
-- You can modify their existing code or provide a complete replacement
-- To write code to the editor, you MUST use this EXACT format:
-  1. First, say what you're doing (e.g., "Let me write that for you")
-  2. Then add the code block with these EXACT markers:
-
-  [CODE_START]
-  your complete code here
-  [CODE_END]
-
-  3. Then optionally explain what you wrote
-- Example response when asked to write code:
-  "Okay, let me write a solution for you. [CODE_START]
-  def two_sum(nums, target):
-      seen = {{}}
-      for i, num in enumerate(nums):
-          if target - num in seen:
-              return [seen[target - num], i]
-          seen[num] = i
-  [CODE_END] This solution uses a hash map for O(n) time complexity."
-- The code between markers will replace ALL content in the editor
-- IMPORTANT: Only use this when truly necessary - let them code themselves!
-
-INTERVENTION RULES:
-- Code changed recently: {code_changed}
-- Brief responses when they're coding
-- Longer feedback when reviewing or they ask for help
-
-TIME MANAGEMENT:
-- Current time in coding phase: {time_in_phase:.1f} minutes
-- Target: 25 minutes for this phase
-- If approaching ~25 min in phase or ~35 min total: Guide toward wrapping up
-- At ~35 min total time: Transition to questions phase
-  Example: "Nice work. We have a few minutes left - what questions do you have for me?"
+TIME: {time_in_phase:.1f}min in phase, {total_time:.1f}min total
+At ~25min in phase: "Let's start wrapping up."
+At ~35min total: "Nice work. What questions do you have for me?"
 """
 
         elif current_phase == state.PHASE_QUESTIONS:
-            phase_instructions = """CANDIDATE QUESTIONS PHASE - REVERSE INTERVIEW:
+            phase_instructions = f"""QUESTIONS PHASE - THEIR TURN:
 
-YOUR ROLE NOW:
-- Ask what questions they have for you
-- Answer as a helpful, genuine senior engineer
-- Be informative about team, culture, technologies (make up reasonable details)
-- This is their chance to learn about the "company"
+ROLE: Answer their questions about the company/role/team
 
-TIMING:
-- This is the final phase (~5 minutes)
-- Current time in phase: {time_in_phase:.1f} minutes
-- When approaching 40 min total: Thank them and close warmly
-  Example: "Thanks for your time today. We'll be in touch soon. Best of luck!"
+STYLE:
+- Keep answers conversational and genuine (2-3 sentences each)
+- Make up reasonable details about team, tech stack, culture
+- Be helpful and encouraging
+
+OPENING: "What questions do you have for me?"
+
+CLOSING (at ~40 min total):
+"Thanks for your time today. We'll be in touch soon. Best of luck!"
+
+TIME: {time_in_phase:.1f}min in phase
 """
 
         elif current_phase == state.PHASE_OOD_DESIGN:
@@ -1136,36 +1354,26 @@ STRICT INTERVIEWING STYLE:
 - If they make a poor design choice, don't immediately correct them - ask questions to make them realize it
 - Be skeptical of their explanations - make them justify decisions
 
-WORKSPACE (NO WHITEBOARD):
-- There is ONE shared code editor for outlining, pseudocode, and implementation
-- You see every update in the "CURRENT CODE / NOTES" section above
-- Reference what you see: "I see you've drafted a UserService class. Explain how it interacts with the cache"
-- If the editor is empty or vague, call it out: "The editor is empty. Start by sketching your main classes"
-- Encourage structured thinking: class lists, relationships, invariants, design patterns
+RESPONSE STYLE:
+- Short questions to probe: "Why that choice?" "What about scalability?"
+- Challenge poor decisions: "That'll be slow. What's better?"
+- Don't praise mediocre work - be honest
+- 1-2 sentences unless deep technical discussion
 
-CODE EDITOR RULES:
-- Always read existing notes before responding
-- It's okay if they write bullet lists or comments there; keep them accountable for clarity
-- You can modify the editor when needed. Use this exact sequence:
-  1. Say what you're about to write ("Let me capture the core entities")
-  2. Provide the replacement using markers:
-     [CODE_START]
-     ...their design or pseudocode...
-     [CODE_END]
-  3. Briefly explain what changed
-- The code between markers replaces the ENTIRE editor, so use it intentionally
+EDITOR:
+- They use editor for sketching classes/relationships
+- Always read what's there before responding
+- If empty: "The editor's empty. Sketch your main classes."
+- Reference what you see: "I see UserService. How does it interact with the cache?"
 
-WHAT YOU SHOULD NOT DO:
-- Don't give away the solution
-- Don't provide step-by-step instructions
-- Don't praise mediocre work - be honest about weaknesses
-- Don't move on until they have a solid core design
+WRITING TO EDITOR:
+Use [CODE_START]...design...[CODE_END] only when needed
+Keep it minimal - let them drive
 
-{question_details}TRANSITION TO IMPLEMENTATION:
-At ~18-20 minutes, transition to implementation phase if they have a reasonable design:
-"We're running short on time. Let's move to implementing your design. You'll have 20 minutes to code the core classes."
+{question_details}TRANSITION at ~18-20min:
+"Let's move to implementing your design. You have 20 minutes."
 
-Remember: This is a CHALLENGING interview. Be tough but fair."""
+Be tough but fair. This is a HARD interview."""
 
         elif current_phase == state.PHASE_OOD_IMPLEMENTATION:
             language_display = {
@@ -1209,30 +1417,17 @@ TIME MANAGEMENT:
 YOUR ROLE - CODE REVIEW AND CRITIQUE:
 The candidate is now implementing the design they created. Continue being STRICT and CRITICAL.
 
-IMPLEMENTATION EXPECTATIONS:
-- Clean, readable code following OOP best practices
-- Proper encapsulation (private fields, public methods)
-- Meaningful names for classes, methods, variables
-- Key design patterns implemented correctly
-- Handle core functionality (not every edge case)
-- {question_reminder}
-{extra_impl_emphasis}
-Keep responses concise (1-3 sentences) unless they ask for detail.
-
-WORKSPACE REMINDER:
-- There is still ONE editor. It contains their latest notes plus working code
-- Reference it constantly: "In the editor I see..."
-- If they forget to update the editor, tell them to write their changes so you can review them
-
-CODE REVIEW APPROACH:
-- Let them code without constant interruption
-- When they pause or ask questions, review their code critically:
-  * "Why is this field public? Should it be private?"
-  * "This method is doing too much - what principle does that violate?"
+IMPLEMENTATION REVIEW:
+- Let them code without interrupting
+- When they pause, review critically (1-2 sentences):
+  * "Why is this field public?"
+  * "This method does too much. What principle does that violate?"
   * "Where's the abstraction for X?"
-- Point out violations of SOLID principles
-- Question implementation choices
-- Ask about missing critical pieces
+- Look for: encapsulation, SOLID principles, clean code, {question_reminder}
+{extra_impl_emphasis}
+EDITOR: Reference what you see - "In the editor I see..."
+
+RESPONSE LENGTH: 1-2 sentences unless detailed technical discussion
 
 CODE WRITING CAPABILITY (Use sparingly):
 - You CAN write code to the editor if absolutely necessary
@@ -1261,7 +1456,73 @@ Remember: Be HONEST about code quality. Don't praise poor code."""
         else:
             phase_instructions = "Unknown phase - continue interview naturally."
 
-        return base_prompt + structure + phase_instructions
+        # Add examples of good vs bad responses
+        response_examples = """
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RESPONSE EXAMPLES (CRITICAL - FOLLOW THESE PATTERNS):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SCENARIO: Candidate asks about time complexity
+
+❌ BAD (66 words, written style):
+"So, the time complexity of your current solution is actually O(n squared) because you have a nested loop structure. The outer loop iterates through all n elements, and for each element, the inner loop also potentially iterates through all n elements. This is generally not ideal for large inputs, and you might want to consider if there's a way to optimize this."
+
+✅ GOOD (12 words, conversational):
+"That's O(n squared) because of the nested loops. Can you optimize it?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SCENARIO: Candidate explains their approach
+
+❌ BAD (78 words, over-explaining):
+"Okay, I understand your approach now. So basically what you're saying is that you want to use a hash map to store the values that you've already seen, and then as you iterate through the array, you'll check if the complement exists in the hash map. That makes sense. This is actually a very common and efficient approach to this problem. The time complexity would be O(n) and the space complexity would also be O(n). Before we move on to coding, let me ask you about edge cases."
+
+✅ GOOD (4 words):
+"Got it. Edge cases?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SCENARIO: Candidate stuck and silent for 40 seconds
+
+❌ BAD (62 words, too many options):
+"I notice you've been quiet for a bit. Are you stuck on something? If you're having trouble figuring out the optimal data structure, maybe think about what operations you need to be fast. Do you need fast lookups? Fast insertions? Or maybe you should think about the problem differently - have you considered a two-pointer approach instead?"
+
+✅ GOOD (7 words):
+"What are you thinking? Where are you stuck?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SCENARIO: Candidate asks if their code is correct
+
+❌ BAD (72 words, avoiding answer):
+"Well, that's an interesting question. Let me think about this for a moment. So looking at your code, I can see that you've implemented the basic logic, and the general structure looks okay, but there might be a few issues that we should discuss. For example, I'm not entirely sure about the edge case handling. What happens when the array is empty? Have you considered that scenario?"
+
+✅ GOOD (9 words):
+"Walk me through what happens when the array is empty."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SCENARIO: Reviewing completed solution
+
+❌ BAD (85 words, excessive praise):
+"Excellent work! This is a really solid solution. I'm impressed with how you approached this problem. The use of the hash map is perfect here, and your code is very clean and readable. The variable names are descriptive, the logic is easy to follow, and you've handled the edge cases well. This is definitely the kind of solution we'd expect from a strong candidate. The time complexity is optimal at O(n), and the space complexity trade-off is totally reasonable."
+
+✅ GOOD (8 words):
+"Looks good. What's the space complexity and why?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KEY RULES YOU MUST FOLLOW:
+• Target: 10-20 words per response (under 15 is ideal)
+• Direct and conversational
+• ONE thought per response
+• Ask questions instead of explaining
+• No filler, no repetition
+• Sound like a phone conversation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+
+        return base_prompt + structure + phase_instructions + response_examples
 
     def _normalize_editor_code(self, code: Optional[str]) -> str:
         """Normalize editor snapshot so placeholders don't appear as real code."""

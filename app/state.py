@@ -150,6 +150,8 @@ def start_interview(session_id: str, language: str = "python", mode: str = "full
             "intervention_count": 0,
             "problem_presented": False,
             "code_snapshots": [],
+            "coding_question": None,
+            "code_evaluation": None,
         }
 
         company_context = context.get("company_context")
@@ -233,6 +235,44 @@ def set_problem_presented(session_id: str, presented: bool = True) -> None:
         context = _state.get(session_id)
         if context and "interview" in context:
             context["interview"]["problem_presented"] = presented
+
+
+def set_coding_question(session_id: str, question: Dict[str, str]) -> None:
+    """Set the coding question metadata for the interview."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            context["interview"]["coding_question"] = dict(question)
+
+
+def get_coding_question(session_id: str) -> Dict[str, str]:
+    """Get the stored coding question metadata."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            stored = context["interview"].get("coding_question")
+            if stored:
+                return dict(stored)
+        return {}
+
+
+def set_code_evaluation(session_id: str, evaluation: Dict[str, Any]) -> None:
+    """Store the most recent code evaluation results."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            context["interview"]["code_evaluation"] = dict(evaluation)
+
+
+def get_code_evaluation(session_id: str) -> Dict[str, Any]:
+    """Get the last stored code evaluation results."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            stored = context["interview"].get("code_evaluation")
+            if stored:
+                return dict(stored)
+        return {}
 
 
 def calculate_time_in_phase(session_id: str) -> float:

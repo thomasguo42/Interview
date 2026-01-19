@@ -11,6 +11,7 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
     GEMINI_PHASE_MODEL = os.getenv("GEMINI_PHASE_MODEL", "gemini-1.5-pro-latest")
+    GEMINI_TEST_MODEL = os.getenv("GEMINI_TEST_MODEL", "gemini-2.5-pro")
 
 
 config = Config()
