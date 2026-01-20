@@ -1,0 +1,100 @@
+{
+  "question_title": "Valid Word Abbreviation",
+  "tests": [
+    {
+      "input": {
+        "word": "internationalization",
+        "abbr": "i12iz4n"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "word": "apple",
+        "abbr": "a2e"
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "word": "substitution",
+        "abbr": "s10n"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "word": "substitution",
+        "abbr": "sub4u4"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "word": "word",
+        "abbr": "4"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "word": "word",
+        "abbr": "03d"
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "word": "hi",
+        "abbr": "1i"
+      },
+      "output": true
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "validWordAbbreviation",
+      "parameters": [
+        {
+          "name": "word",
+          "type": "string"
+        },
+        {
+          "name": "abbr",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "validWordAbbreviation",
+      "parameters": [
+        {
+          "name": "word",
+          "type": "string"
+        },
+        {
+          "name": "abbr",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "validWordAbbreviation",
+      "parameters": [
+        {
+          "name": "word",
+          "type": "string"
+        },
+        {
+          "name": "abbr",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "question_title": "Valid Parentheses",
+  "tests": [
+    {
+      "input": {
+        "s": "()"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "s": "()[]{}"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "s": "(]"
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "s": "([)]"
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "s": "{[]}"
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "s": ""
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "s": ")("
+      },
+      "output": false
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "isValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "isValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "isValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool"
+    }
+  }
+}

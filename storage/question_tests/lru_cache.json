@@ -1,0 +1,459 @@
+{
+  "question_title": "LRU Cache",
+  "tests": [
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "put",
+          "get",
+          "put",
+          "get",
+          "put",
+          "get",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            2
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            1
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        null,
+        1,
+        null,
+        -1,
+        null,
+        -1,
+        3,
+        4
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "get",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        1,
+        null,
+        -1,
+        2
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "put",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        null,
+        null,
+        -1,
+        2
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "get",
+          "put",
+          "get",
+          "put",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            2
+          ],
+          [
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "output": [
+        null,
+        -1,
+        null,
+        1,
+        null,
+        null,
+        2,
+        3
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "put",
+          "get",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            2
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            1
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        null,
+        1,
+        null,
+        -1,
+        3
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        null,
+        -1,
+        2
+      ]
+    },
+    {
+      "input": {
+        "operations": [
+          "LRUCache",
+          "put",
+          "get",
+          "put",
+          "get",
+          "put",
+          "get",
+          "get"
+        ],
+        "arguments": [
+          [
+            3
+          ],
+          [
+            1,
+            10
+          ],
+          [
+            1
+          ],
+          [
+            2,
+            20
+          ],
+          [
+            2
+          ],
+          [
+            3,
+            30
+          ],
+          [
+            3
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "output": [
+        null,
+        null,
+        10,
+        null,
+        20,
+        null,
+        30,
+        10
+      ]
+    }
+  ],
+  "kind": "class",
+  "class_signatures": {
+    "python": {
+      "class_name": "LRUCache",
+      "constructor": {
+        "parameters": [
+          {
+            "name": "capacity",
+            "type": "int"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "name": "get",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            }
+          ],
+          "return_type": "int"
+        },
+        {
+          "name": "put",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "return_type": "void"
+        }
+      ]
+    },
+    "java": {
+      "class_name": "LRUCache",
+      "constructor": {
+        "parameters": [
+          {
+            "name": "capacity",
+            "type": "int"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "name": "get",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            }
+          ],
+          "return_type": "int"
+        },
+        {
+          "name": "put",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "return_type": "void"
+        }
+      ]
+    },
+    "cpp": {
+      "class_name": "LRUCache",
+      "constructor": {
+        "parameters": [
+          {
+            "name": "capacity",
+            "type": "int"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "name": "get",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            }
+          ],
+          "return_type": "int"
+        },
+        {
+          "name": "put",
+          "parameters": [
+            {
+              "name": "key",
+              "type": "int"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "return_type": "void"
+        }
+      ]
+    }
+  }
+}

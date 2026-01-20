@@ -1,0 +1,81 @@
+{
+  "question_title": "Reordered Power of 2",
+  "tests": [
+    {
+      "input": {
+        "n": 1
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "n": 10
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "n": 16
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "n": 24
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "n": 46
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "n": 128
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "n": 821
+      },
+      "output": true
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "reorderedPowerOf2",
+      "parameters": [
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "reorderedPowerOf2",
+      "parameters": [
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "reorderedPowerOf2",
+      "parameters": [
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool"
+    }
+  }
+}

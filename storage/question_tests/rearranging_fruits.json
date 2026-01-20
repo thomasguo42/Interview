@@ -1,0 +1,166 @@
+{
+  "question_title": "Rearranging Fruits",
+  "tests": [
+    {
+      "input": {
+        "basket1": [
+          4,
+          2,
+          2,
+          2
+        ],
+        "basket2": [
+          1,
+          4,
+          1,
+          2
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "basket1": [
+          2,
+          3,
+          4,
+          1
+        ],
+        "basket2": [
+          3,
+          2,
+          5,
+          1
+        ]
+      },
+      "output": -1
+    },
+    {
+      "input": {
+        "basket1": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "basket2": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "basket1": [
+          1,
+          2
+        ],
+        "basket2": [
+          2,
+          1
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "basket1": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "basket2": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "basket1": [
+          1,
+          4,
+          4,
+          4
+        ],
+        "basket2": [
+          2,
+          2,
+          2,
+          4
+        ]
+      },
+      "output": -1
+    },
+    {
+      "input": {
+        "basket1": [
+          5,
+          5,
+          5,
+          1
+        ],
+        "basket2": [
+          5,
+          1,
+          1,
+          1
+        ]
+      },
+      "output": 1
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "minCost",
+      "parameters": [
+        {
+          "name": "basket1",
+          "type": "int[]"
+        },
+        {
+          "name": "basket2",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "minCost",
+      "parameters": [
+        {
+          "name": "basket1",
+          "type": "int[]"
+        },
+        {
+          "name": "basket2",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "long",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "minCost",
+      "parameters": [
+        {
+          "name": "basket1",
+          "type": "vector<int>"
+        },
+        {
+          "name": "basket2",
+          "type": "vector<int>"
+        }
+      ],
+      "return_type": "long long"
+    }
+  }
+}

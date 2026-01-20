@@ -1,0 +1,81 @@
+{
+  "question_title": "Palindrome Number",
+  "tests": [
+    {
+      "input": {
+        "x": 121
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "x": -121
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "x": 10
+      },
+      "output": false
+    },
+    {
+      "input": {
+        "x": 0
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "x": 12321
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "x": 1001
+      },
+      "output": true
+    },
+    {
+      "input": {
+        "x": 2147447412
+      },
+      "output": true
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "isPalindrome",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "isPalindrome",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "isPalindrome",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "int"
+        }
+      ],
+      "return_type": "bool"
+    }
+  }
+}

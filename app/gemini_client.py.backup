@@ -10,6 +10,7 @@ from requests import RequestException
 
 from .config import config
 from . import state
+from .gemini_test_generator_new import generate_question_tests_new
 
 
 class GeminiError(RuntimeError):
@@ -24,7 +25,8 @@ class GeminiClient:
     def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
         self.api_key = api_key or config.GEMINI_API_KEY
         self.model = model or config.GEMINI_MODEL
-        self.phase_model = self.model
+        self.phase_model = config.GEMINI_PHASE_MODEL or self.model
+        self.test_model = config.GEMINI_TEST_MODEL or self.model
         if not self.api_key:
             raise ValueError(
                 "Gemini API key is not configured. Set the GEMINI_API_KEY environment variable."
@@ -393,6 +395,248 @@ class GeminiClient:
             cleaned = cleaned[start:end + 1]
         return json.loads(cleaned)
 
+    def generate_question_tests(self, question_title: str) -> Dict[str, Any]:
+        """Generate test cases by having Gemini create solution code and inputs, then executing to get outputs."""
+        print(f"[GEMINI] Generating tests for: {question_title}")
+        print(f"[GEMINI] Using model: gemini-3-flash-preview")
+        print(f"[GEMINI] API key configured: {'Yes' if self.api_key else 'No'}")
+        if not question_title:
+            raise ValueError("Question title is required for test generation.")
+
+        system_prompt = (
+            "You generate coding interview test cases for LeetCode-style problems.\n"
+            "Return ONLY valid JSON, no markdown, no extra text.\n"
+            "Return a single-line MINIFIED JSON with no extra whitespace or newlines.\n"
+            "Use the following schema:\n"
+            "{\n"
+            '  "question_title": string,\n'
+            '  "function_signatures": {\n'
+            '    "python": {"function_name": string, "parameters": [{"name": string, "type": string}], "return_type": string},\n'
+            '    "java": {"class_name": "Solution", "method_name": string, "parameters": [{"name": string, "type": string}], "return_type": string, "static": true},\n'
+            '    "cpp": {"function_name": string, "parameters": [{"name": string, "type": string}], "return_type": string},\n'
+            '    "c": {"function_name": string, "parameters": [{"name": string, "type": string, "size_param": string}], "return_type": string, "return_size_param": string}\n'
+            "  },\n"
+            '  "comparison": "exact" | "unordered",\n'
+            '  "tests": [{"input": {param: value}, "output": value}]\n'
+            "}\n\n"
+            "Rules:\n"
+            "- Generate exactly 10 tests.\n"
+            "- Inputs must map to parameter names.\n"
+            "- Types must be one of: int, bool, string, int[], string[], int[][], string[][].\n"
+            "- Use LeetCode-standard naming: python snake_case, java/cpp camelCase.\n"
+            "- For C, use the same type strings as above and include size_param for each array parameter and return_size_param for array returns.\n"
+            "- Ensure outputs are deterministic.\n"
+            "- Keep test inputs and outputs SMALL to limit JSON size:\n"
+            "  * arrays length <= 6, strings length <= 8, matrices <= 4x4, small integers\n"
+            "  * if outputs grow quickly (e.g., Pascal's triangle), use very small inputs\n"
+            "- If you cannot fit the JSON, further shrink inputs and outputs.\n"
+        )
+
+        user_prompt = f"Question title: {question_title}"
+
+        def _request_tests_sdk(max_output_tokens: int, compact: bool) -> Optional[Dict[str, Any]]:
+            try:
+                import google.generativeai as genai
+            except ImportError:
+                print(f"[GEMINI SDK] google.generativeai not available")
+                return None
+
+            compact_prompt = ""
+            if compact:
+                compact_prompt = (
+                    "\nOutput must be fully valid JSON. If space is tight, "
+                    "use the smallest possible inputs and outputs.\n"
+                )
+
+            try:
+                genai.configure(api_key=self.api_key)
+
+                # Configure safety settings to be more lenient for technical content
+                safety_settings = {
+                    "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+                    "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+                    "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+                    "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+                }
+
+                model = genai.GenerativeModel(
+                    self.test_model,
+                    system_instruction=system_prompt,
+                    safety_settings=safety_settings
+                )
+                generation_config = {
+                    "temperature": 0.2,
+                    "top_p": 0.9,
+                    "top_k": 40,
+                    "max_output_tokens": max_output_tokens,
+                    "response_mime_type": "application/json",
+                }
+                print(f"[GEMINI SDK] Making request to {self.test_model}")
+                response = model.generate_content(user_prompt + compact_prompt, generation_config=generation_config)
+                print(f"[GEMINI SDK] Response received")
+            except Exception as exc:
+                print(f"[GEMINI SDK ERROR] {type(exc).__name__}: {exc}")
+                logging.error("Gemini SDK test generation error: %s", exc)
+                return None
+
+            # Check if response was blocked
+            try:
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if hasattr(candidate, 'safety_ratings'):
+                        print(f"[GEMINI SDK] Safety ratings: {candidate.safety_ratings}")
+                    if hasattr(candidate, 'finish_reason'):
+                        finish_reason = candidate.finish_reason
+                        finish_reason_name = {
+                            0: "UNSPECIFIED",
+                            1: "STOP",
+                            2: "MAX_TOKENS",
+                            3: "SAFETY",
+                            4: "RECITATION",
+                            5: "OTHER"
+                        }.get(finish_reason, f"UNKNOWN({finish_reason})")
+                        print(f"[GEMINI SDK] Finish reason: {finish_reason_name}")
+
+                        # If hit max tokens, don't try to parse, let retry with more tokens
+                        if finish_reason == 2:  # MAX_TOKENS
+                            print(f"[GEMINI SDK] Hit max tokens, will retry with more")
+                            return None
+
+                combined_text = (getattr(response, "text", "") or "").strip()
+            except ValueError as e:
+                # response.text accessor failed, likely blocked response
+                print(f"[GEMINI SDK] Failed to access response.text: {e}")
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    print(f"[GEMINI SDK] Candidate safety_ratings: {getattr(candidate, 'safety_ratings', 'N/A')}")
+                    finish_reason = getattr(candidate, 'finish_reason', 'N/A')
+                    print(f"[GEMINI SDK] Candidate finish_reason: {finish_reason}")
+                return None
+
+            if not combined_text:
+                print(f"[GEMINI SDK] No text in response")
+                return None
+            try:
+                parsed = self._parse_json_from_text(combined_text)
+                print(f"[GEMINI SDK] Successfully parsed JSON")
+                return parsed
+            except json.JSONDecodeError as e:
+                print(f"[GEMINI SDK] JSON decode error: {e}")
+                return None
+
+        def _request_tests(max_output_tokens: int, compact: bool) -> Dict[str, Any]:
+            compact_prompt = ""
+            if compact:
+                compact_prompt = (
+                    "\nOutput must be fully valid JSON. If space is tight, "
+                    "use the smallest possible inputs and outputs.\n"
+                )
+            payload = {
+                "systemInstruction": {"role": "system", "parts": [{"text": system_prompt}]},
+                "contents": [{"role": "user", "parts": [{"text": user_prompt + compact_prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "topP": 0.9,
+                    "topK": 40,
+                    "maxOutputTokens": max_output_tokens,
+                    "responseMimeType": "application/json",
+                    # Removed thinkingConfig - gemini-2.5-pro requires thinking mode enabled
+                },
+                "safetySettings": [
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                ],
+            }
+
+            print(f"[GEMINI REST] Making request to {self.test_model}")
+            response = requests.post(
+                self.API_URL_TEMPLATE.format(model=self.test_model),
+                params={"key": self.api_key},
+                json=payload,
+                timeout=60,
+            )
+            print(f"[GEMINI REST] Response status: {response.status_code}")
+            if response.status_code != 200:
+                error_msg = response.text[:500]  # Truncate for readability
+                print(f"[GEMINI REST ERROR] Status {response.status_code}: {error_msg}")
+                logging.error(
+                    "Gemini test generation error: status=%s body=%s",
+                    response.status_code,
+                    response.text,
+                )
+                raise GeminiError(f"Gemini test generation error {response.status_code}: {response.text}")
+
+            data = response.json()
+            try:
+                candidate = data["candidates"][0]
+                parts = candidate.get("content", {}).get("parts", [])
+                combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+                finish_reason = candidate.get("finishReason", "")
+                print(f"[GEMINI REST] Finish reason: {finish_reason}")
+            except (KeyError, IndexError) as exc:
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON") from exc
+
+            if not combined_text:
+                print(f"[GEMINI REST] No text in response")
+                if finish_reason == "MAX_TOKENS":
+                    print(f"[GEMINI REST] Hit max tokens, will retry with more")
+                    raise GeminiError("Gemini hit token limit during test generation.")
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON")
+
+            # Check if hit max tokens even with text (partial response)
+            if finish_reason == "MAX_TOKENS":
+                print(f"[GEMINI REST] Hit max tokens (partial response), will retry with more")
+                raise GeminiError("Gemini hit token limit during test generation.")
+
+            try:
+                parsed = self._parse_json_from_text(combined_text)
+                print(f"[GEMINI REST] Successfully parsed JSON")
+                return parsed
+            except json.JSONDecodeError as exc:
+                print(f"[GEMINI REST] JSON decode error: {exc}")
+                logging.error("Unexpected test generation payload: %s", data)
+                raise GeminiError("Gemini returned invalid test case JSON") from exc
+
+        parsed = None
+        attempt_params = [
+            (2400, False),
+            (4096, False),
+            (4096, True),
+        ]
+
+        for idx, (max_tokens, compact) in enumerate(attempt_params, 1):
+            print(f"[GEMINI] Attempt {idx}/3: max_tokens={max_tokens}, compact={compact}")
+            sdk_parsed = _request_tests_sdk(max_tokens, compact)
+            if sdk_parsed:
+                print(f"[GEMINI] SDK request succeeded on attempt {idx}")
+                parsed = sdk_parsed
+                break
+            print(f"[GEMINI] SDK request failed, trying REST API")
+            try:
+                parsed = _request_tests(max_tokens, compact)
+                print(f"[GEMINI] REST API request succeeded on attempt {idx}")
+                break
+            except GeminiError as exc:
+                print(f"[GEMINI] REST API attempt {idx} failed: {exc}")
+                if "token limit" not in str(exc).lower() and "invalid test case json" not in str(exc).lower():
+                    print(f"[GEMINI] Non-retryable error, raising exception")
+                    raise
+                parsed = None
+
+        if parsed is None:
+            print(f"[GEMINI ERROR] All attempts failed")
+            raise GeminiError("Gemini returned invalid test case JSON")
+
+        tests = parsed.get("tests", [])
+        if not isinstance(tests, list) or len(tests) != 10:
+            raise GeminiError("Gemini test generation did not return exactly 10 tests.")
+
+        return parsed
+
     def _build_structured_payload(
         self,
         session_id: str,
@@ -542,106 +786,6 @@ class GeminiClient:
             return None
 
         return decision
-
-    def should_run_tests(
-        self,
-        session_id: str,
-        interview_state: Dict[str, Any],
-        conversation: List[Dict[str, Any]],
-        user_message: str,
-        current_code: str,
-    ) -> bool:
-        """Decide if the candidate appears finished and tests should run."""
-        current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
-        if current_phase != state.PHASE_CODING:
-            return False
-
-        snippet = self._format_conversation_snippet(conversation)
-        payload = self._build_test_gate_payload(
-            user_message=user_message,
-            current_code=current_code,
-            conversation_snippet=snippet,
-        )
-        try:
-            response = requests.post(
-                self.API_URL_TEMPLATE.format(model=self.model),
-                params={"key": self.api_key},
-                json=payload,
-                timeout=20,
-            )
-        except RequestException as exc:  # type: ignore[name-defined]
-            logging.error("Test gate request failed: %s", exc)
-            return False
-
-        if response.status_code != 200:
-            logging.warning(
-                "Test gate model error: status=%s body=%s",
-                response.status_code,
-                response.text,
-            )
-            return False
-
-        data = response.json()
-        try:
-            parts = data["candidates"][0]["content"]["parts"]
-            decision_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
-        except (KeyError, IndexError):
-            logging.warning("Test gate payload missing text: %s", data)
-            return False
-
-        decision = self._parse_phase_decision(decision_text)
-        if not decision:
-            logging.warning("Unable to parse test gate JSON: %s", decision_text)
-            return False
-
-        flag = decision.get("should_run_tests", False)
-        logging.info("[TEST GATE MODEL] raw=%s parsed=%s", decision_text, flag)
-        if isinstance(flag, str):
-            return flag.lower() == "true"
-        return bool(flag)
-
-    def _build_test_gate_payload(
-        self,
-        user_message: str,
-        current_code: str,
-        conversation_snippet: str,
-    ) -> Dict[str, Any]:
-        system_prompt = (
-            "You are the coding interview test gate.\n"
-            "Decide if the candidate appears finished and the solution should be tested now.\n"
-            "Be lenient: return true if they imply they are done, "
-            "ask to run/verify tests, or the solution looks complete.\n"
-            "Return strict JSON only, no extra text."
-        )
-        context = {
-            "recent_candidate_message": user_message,
-            "conversation_excerpt": conversation_snippet,
-            "current_code": current_code,
-        }
-        instructions = (
-            "Return JSON with the following keys:\n"
-            '{ "should_run_tests": true | false, "reason": "concise explanation" }\n'
-            "If they are still implementing or discussing approach, return false."
-        )
-        payload: Dict[str, Any] = {
-            "systemInstruction": {
-                "role": "system",
-                "parts": [{"text": system_prompt}],
-            },
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": instructions + "\n\nCONTEXT:\n" + json.dumps(context, ensure_ascii=False)}],
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.1,
-                "topP": 0.8,
-                "topK": 32,
-                "maxOutputTokens": 120,
-            },
-        }
-        return payload
 
     def _build_phase_decision_payload(
         self,
@@ -973,15 +1117,6 @@ Example: "Sounds great. Let's move to coding now. Ready?"
                     )
                     if summary:
                         evaluation_block += f"- Summary: {summary}\n"
-                    if status == "pass":
-                        evaluation_block += (
-                            "Guidance: Treat the solution as correct. Do not question correctness. "
-                            "Ask only about optimizations, complexity, or clarifications.\n"
-                        )
-                    elif status in {"fail", "error"}:
-                        evaluation_block += (
-                            "Guidance: The solution likely has issues. You may question correctness and ask for fixes.\n"
-                        )
                     evaluation_block += "Use this only to guide your feedback.\n\n"
 
             selected_question_block = ""

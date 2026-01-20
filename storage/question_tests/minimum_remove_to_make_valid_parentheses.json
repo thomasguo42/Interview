@@ -1,0 +1,81 @@
+{
+  "question_title": "Minimum Remove to Make Valid Parentheses",
+  "tests": [
+    {
+      "input": {
+        "s": "lee(t(c)o)de)"
+      },
+      "output": "lee(t(c)o)de"
+    },
+    {
+      "input": {
+        "s": "a)b(c)d"
+      },
+      "output": "ab(c)d"
+    },
+    {
+      "input": {
+        "s": "))("
+      },
+      "output": ""
+    },
+    {
+      "input": {
+        "s": "(a(b(c)d)"
+      },
+      "output": "a(b(c)d)"
+    },
+    {
+      "input": {
+        "s": "abc"
+      },
+      "output": "abc"
+    },
+    {
+      "input": {
+        "s": "(a(b)c)d)"
+      },
+      "output": "(a(b)c)d"
+    },
+    {
+      "input": {
+        "s": "(()"
+      },
+      "output": "()"
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "minRemoveToMakeValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "minRemoveToMakeValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "minRemoveToMakeValid",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string"
+    }
+  }
+}

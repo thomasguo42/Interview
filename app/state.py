@@ -24,7 +24,7 @@ PHASE_OOD_DESIGN = "ood_design"
 PHASE_OOD_IMPLEMENTATION = "ood_implementation"
 
 # Supported programming languages
-SUPPORTED_LANGUAGES = ["python", "java", "c", "cpp"]
+SUPPORTED_LANGUAGES = ["python", "java", "cpp"]
 
 
 def store_resume(session_id: str, resume_text: str) -> None:
@@ -123,7 +123,12 @@ def clear_conversation(session_id: str) -> None:
 # STRUCTURED INTERVIEW SESSION MANAGEMENT
 # ============================================================================
 
-def start_interview(session_id: str, language: str = "python", mode: str = "full") -> Dict[str, Any]:
+def start_interview(
+    session_id: str,
+    language: str = "python",
+    mode: str = "full",
+    model: str | None = None,
+) -> Dict[str, Any]:
     """Initialize a structured interview session"""
     if language not in SUPPORTED_LANGUAGES:
         language = "python"
@@ -144,6 +149,7 @@ def start_interview(session_id: str, language: str = "python", mode: str = "full
             "phase_started_at": datetime.now(),
             "language": language,
             "mode": mode,  # Store the mode
+            "model": model,
             "current_code": "",
             "last_speech_at": datetime.now(),
             "last_code_change_at": datetime.now(),

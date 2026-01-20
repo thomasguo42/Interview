@@ -1,0 +1,155 @@
+{
+  "question_title": "Two Sum",
+  "tests": [
+    {
+      "input": {
+        "nums": [
+          2,
+          7,
+          11,
+          15
+        ],
+        "target": 9
+      },
+      "output": [
+        0,
+        1
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          3,
+          2,
+          4
+        ],
+        "target": 6
+      },
+      "output": [
+        1,
+        2
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          3,
+          3
+        ],
+        "target": 6
+      },
+      "output": [
+        0,
+        1
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          -1,
+          -2,
+          -3,
+          -4,
+          -5
+        ],
+        "target": -8
+      },
+      "output": [
+        2,
+        4
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          0,
+          4,
+          3,
+          0
+        ],
+        "target": 0
+      },
+      "output": [
+        0,
+        3
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          1,
+          5,
+          1,
+          5
+        ],
+        "target": 10
+      },
+      "output": [
+        1,
+        3
+      ]
+    },
+    {
+      "input": {
+        "nums": [
+          8,
+          7,
+          2,
+          5
+        ],
+        "target": 9
+      },
+      "output": [
+        1,
+        2
+      ]
+    }
+  ],
+  "comparison": "unordered",
+  "function_signatures": {
+    "python": {
+      "function_name": "twoSum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "int[]"
+        },
+        {
+          "name": "target",
+          "type": "int"
+        }
+      ],
+      "return_type": "int[]"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "twoSum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "int[]"
+        },
+        {
+          "name": "target",
+          "type": "int"
+        }
+      ],
+      "return_type": "int[]",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "twoSum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "vector<int>"
+        },
+        {
+          "name": "target",
+          "type": "int"
+        }
+      ],
+      "return_type": "vector<int>"
+    }
+  }
+}

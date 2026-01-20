@@ -1,0 +1,133 @@
+{
+  "question_title": "Subarray Sum Equals K",
+  "tests": [
+    {
+      "input": {
+        "nums": [
+          1,
+          1,
+          1
+        ],
+        "k": 2
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "nums": [
+          1,
+          2,
+          3
+        ],
+        "k": 3
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "nums": [
+          1,
+          -1,
+          0
+        ],
+        "k": 0
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "nums": [
+          3,
+          4,
+          7,
+          2,
+          -3,
+          1,
+          4,
+          2
+        ],
+        "k": 7
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "nums": [
+          1
+        ],
+        "k": 0
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "nums": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "k": 0
+      },
+      "output": 15
+    },
+    {
+      "input": {
+        "nums": [
+          -1,
+          -1,
+          1
+        ],
+        "k": 0
+      },
+      "output": 1
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "subarraySum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "int[]"
+        },
+        {
+          "name": "k",
+          "type": "int"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "subarraySum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "int[]"
+        },
+        {
+          "name": "k",
+          "type": "int"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "subarraySum",
+      "parameters": [
+        {
+          "name": "nums",
+          "type": "vector<int>"
+        },
+        {
+          "name": "k",
+          "type": "int"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

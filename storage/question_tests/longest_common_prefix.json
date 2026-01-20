@@ -1,0 +1,106 @@
+{
+  "question_title": "Longest Common Prefix",
+  "tests": [
+    {
+      "input": {
+        "strs": [
+          "flower",
+          "flow",
+          "flight"
+        ]
+      },
+      "output": "fl"
+    },
+    {
+      "input": {
+        "strs": [
+          "dog",
+          "racecar",
+          "car"
+        ]
+      },
+      "output": ""
+    },
+    {
+      "input": {
+        "strs": [
+          "interspecies",
+          "interstellar",
+          "interstate"
+        ]
+      },
+      "output": "inters"
+    },
+    {
+      "input": {
+        "strs": [
+          "throne",
+          "throne"
+        ]
+      },
+      "output": "throne"
+    },
+    {
+      "input": {
+        "strs": [
+          "",
+          "b"
+        ]
+      },
+      "output": ""
+    },
+    {
+      "input": {
+        "strs": [
+          "single"
+        ]
+      },
+      "output": "single"
+    },
+    {
+      "input": {
+        "strs": [
+          "re",
+          "reap",
+          "rear",
+          "reason"
+        ]
+      },
+      "output": "re"
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "longestCommonPrefix",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "string[]"
+        }
+      ],
+      "return_type": "string"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "longestCommonPrefix",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "string[]"
+        }
+      ],
+      "return_type": "string",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "longestCommonPrefix",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "vector<string>"
+        }
+      ],
+      "return_type": "string"
+    }
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "question_title": "Number of Ways to Wear Different Hats to Each Other",
+  "tests": [
+    {
+      "input": {
+        "hats": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5
+          ]
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            1,
+            2,
+            3
+          ],
+          [
+            1,
+            2,
+            3
+          ],
+          [
+            1,
+            2,
+            3
+          ]
+        ]
+      },
+      "output": 6
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            5
+          ]
+        ]
+      },
+      "output": 5
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            1,
+            2,
+            3,
+            4
+          ]
+        ]
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            7
+          ],
+          [
+            7,
+            8
+          ],
+          [
+            8,
+            9
+          ]
+        ]
+      },
+      "output": 5
+    },
+    {
+      "input": {
+        "hats": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "output": 0
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "numberWays",
+      "parameters": [
+        {
+          "name": "hats",
+          "type": "int[][]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "numberWays",
+      "parameters": [
+        {
+          "name": "hats",
+          "type": "int[][]"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "numberWays",
+      "parameters": [
+        {
+          "name": "hats",
+          "type": "vector<vector<int>>"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

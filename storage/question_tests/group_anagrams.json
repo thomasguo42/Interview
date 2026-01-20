@@ -1,0 +1,178 @@
+{
+  "question_title": "Group Anagrams",
+  "tests": [
+    {
+      "input": {
+        "strs": [
+          "eat",
+          "tea",
+          "tan",
+          "ate",
+          "nat",
+          "bat"
+        ]
+      },
+      "output": [
+        [
+          "eat",
+          "tea",
+          "ate"
+        ],
+        [
+          "tan",
+          "nat"
+        ],
+        [
+          "bat"
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          ""
+        ]
+      },
+      "output": [
+        [
+          ""
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          "a"
+        ]
+      },
+      "output": [
+        [
+          "a"
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          "abc",
+          "bca",
+          "cab",
+          "xyz",
+          "zyx",
+          "yxz"
+        ]
+      },
+      "output": [
+        [
+          "abc",
+          "bca",
+          "cab"
+        ],
+        [
+          "xyz",
+          "zyx",
+          "yxz"
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          "ab",
+          "ba",
+          "abc",
+          "cba",
+          "bac"
+        ]
+      },
+      "output": [
+        [
+          "ab",
+          "ba"
+        ],
+        [
+          "abc",
+          "cba",
+          "bac"
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          "listen",
+          "silent",
+          "enlist",
+          "inlets",
+          "google"
+        ]
+      },
+      "output": [
+        [
+          "listen",
+          "silent",
+          "enlist",
+          "inlets"
+        ],
+        [
+          "google"
+        ]
+      ]
+    },
+    {
+      "input": {
+        "strs": [
+          "ab",
+          "cd",
+          "ef"
+        ]
+      },
+      "output": [
+        [
+          "ab"
+        ],
+        [
+          "cd"
+        ],
+        [
+          "ef"
+        ]
+      ]
+    }
+  ],
+  "comparison": "unordered",
+  "function_signatures": {
+    "python": {
+      "function_name": "groupAnagrams",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "string[]"
+        }
+      ],
+      "return_type": "string[][]"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "groupAnagrams",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "string[]"
+        }
+      ],
+      "return_type": "string[][]",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "groupAnagrams",
+      "parameters": [
+        {
+          "name": "strs",
+          "type": "vector<string>"
+        }
+      ],
+      "return_type": "vector<vector<string>>"
+    }
+  }
+}

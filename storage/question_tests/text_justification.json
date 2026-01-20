@@ -1,0 +1,167 @@
+{
+  "question_title": "Text Justification",
+  "tests": [
+    {
+      "input": {
+        "words": [
+          "This",
+          "is",
+          "an",
+          "example",
+          "of",
+          "text",
+          "justification."
+        ],
+        "maxWidth": 16
+      },
+      "output": [
+        "This    is    an",
+        "example  of text",
+        "justification.  "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "What",
+          "must",
+          "be",
+          "acknowledgment",
+          "shall",
+          "be"
+        ],
+        "maxWidth": 16
+      },
+      "output": [
+        "What   must   be",
+        "acknowledgment  ",
+        "shall be        "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "Science",
+          "is",
+          "what",
+          "we",
+          "understand",
+          "well",
+          "enough",
+          "to",
+          "explain",
+          "to",
+          "a",
+          "computer."
+        ],
+        "maxWidth": 20
+      },
+      "output": [
+        "Science  is  what we",
+        "understand      well",
+        "enough to explain to",
+        "a computer.         "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "Single"
+        ],
+        "maxWidth": 10
+      },
+      "output": [
+        "Single    "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "Two",
+          "words"
+        ],
+        "maxWidth": 10
+      },
+      "output": [
+        "Two words "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e"
+        ],
+        "maxWidth": 3
+      },
+      "output": [
+        "a b",
+        "c d",
+        "e  "
+      ]
+    },
+    {
+      "input": {
+        "words": [
+          "Edge",
+          "case",
+          "check"
+        ],
+        "maxWidth": 9
+      },
+      "output": [
+        "Edge case",
+        "check    "
+      ]
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "fullJustify",
+      "parameters": [
+        {
+          "name": "words",
+          "type": "string[]"
+        },
+        {
+          "name": "maxWidth",
+          "type": "int"
+        }
+      ],
+      "return_type": "string[]"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "fullJustify",
+      "parameters": [
+        {
+          "name": "words",
+          "type": "string[]"
+        },
+        {
+          "name": "maxWidth",
+          "type": "int"
+        }
+      ],
+      "return_type": "string[]",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "fullJustify",
+      "parameters": [
+        {
+          "name": "words",
+          "type": "vector<string>"
+        },
+        {
+          "name": "maxWidth",
+          "type": "int"
+        }
+      ],
+      "return_type": "vector<string>"
+    }
+  }
+}

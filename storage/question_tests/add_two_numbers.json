@@ -1,0 +1,179 @@
+{
+  "question_title": "Add Two Numbers",
+  "tests": [
+    {
+      "input": {
+        "l1": [
+          2,
+          4,
+          3
+        ],
+        "l2": [
+          5,
+          6,
+          4
+        ]
+      },
+      "output": [
+        7,
+        0,
+        8
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          0
+        ],
+        "l2": [
+          0
+        ]
+      },
+      "output": [
+        0
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "l2": [
+          9,
+          9,
+          9,
+          9
+        ]
+      },
+      "output": [
+        8,
+        9,
+        9,
+        9,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          1,
+          8
+        ],
+        "l2": [
+          0
+        ]
+      },
+      "output": [
+        1,
+        8
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          5
+        ],
+        "l2": [
+          5
+        ]
+      },
+      "output": [
+        0,
+        1
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          1,
+          2,
+          3
+        ],
+        "l2": [
+          9,
+          9,
+          9
+        ]
+      },
+      "output": [
+        0,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "input": {
+        "l1": [
+          9
+        ],
+        "l2": [
+          1,
+          9,
+          9
+        ]
+      },
+      "output": [
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "addTwoNumbers",
+      "parameters": [
+        {
+          "name": "l1",
+          "type": "ListNode"
+        },
+        {
+          "name": "l2",
+          "type": "ListNode"
+        }
+      ],
+      "return_type": "ListNode"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "addTwoNumbers",
+      "parameters": [
+        {
+          "name": "l1",
+          "type": "ListNode"
+        },
+        {
+          "name": "l2",
+          "type": "ListNode"
+        }
+      ],
+      "return_type": "ListNode",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "addTwoNumbers",
+      "parameters": [
+        {
+          "name": "l1",
+          "type": "ListNode*"
+        },
+        {
+          "name": "l2",
+          "type": "ListNode*"
+        }
+      ],
+      "return_type": "ListNode*"
+    }
+  }
+}

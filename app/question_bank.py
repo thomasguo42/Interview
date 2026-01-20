@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 
 
 _DEFAULT_BANK_PATH = Path(__file__).resolve().parent.parent / "question_bank.txt"
+_MAX_QUESTIONS = 30
 _TITLE_PATTERN = re.compile(r"^\d+\.\s+(.+)$")
 _DIFFICULTY_PATTERN = re.compile(r"\b(easy|med|medium|hard)\b", re.IGNORECASE)
 
@@ -56,7 +57,7 @@ def load_question_bank(path: Optional[Path] = None) -> List[Dict[str, str]]:
         )
         index += 1
 
-    return questions
+    return questions[:_MAX_QUESTIONS]
 
 
 def get_random_coding_question(path: Optional[Path] = None) -> Dict[str, str]:

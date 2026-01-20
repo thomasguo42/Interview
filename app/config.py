@@ -10,8 +10,12 @@ class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-secret-key")
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-    GEMINI_PHASE_MODEL = os.getenv("GEMINI_PHASE_MODEL", "gemini-1.5-pro-latest")
-    GEMINI_TEST_MODEL = os.getenv("GEMINI_TEST_MODEL", "gemini-2.5-pro")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    SUPPORTED_MODELS = {
+        "gemini-2.5-flash-lite": "gemini",
+        "gpt-4o-mini": "openai",
+    }
 
 
 config = Config()

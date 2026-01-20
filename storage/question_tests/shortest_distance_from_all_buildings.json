@@ -1,0 +1,218 @@
+{
+  "question_title": "Shortest Distance from All Buildings",
+  "tests": [
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            0,
+            2,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "output": 7
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            2,
+            0
+          ],
+          [
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "output": 5
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      "output": 16
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            1,
+            2,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "output": 6
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "shortestDistance",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "int[][]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "shortestDistance",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "int[][]"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "shortestDistance",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "vector<vector<int>>"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

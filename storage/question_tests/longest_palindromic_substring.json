@@ -1,0 +1,81 @@
+{
+  "question_title": "Longest Palindromic Substring",
+  "tests": [
+    {
+      "input": {
+        "s": "babad"
+      },
+      "output": "bab"
+    },
+    {
+      "input": {
+        "s": "cbbd"
+      },
+      "output": "bb"
+    },
+    {
+      "input": {
+        "s": "a"
+      },
+      "output": "a"
+    },
+    {
+      "input": {
+        "s": "bb"
+      },
+      "output": "bb"
+    },
+    {
+      "input": {
+        "s": "forgeeksskeegfor"
+      },
+      "output": "geeksskeeg"
+    },
+    {
+      "input": {
+        "s": "abaxyzzyxf"
+      },
+      "output": "xyzzyx"
+    },
+    {
+      "input": {
+        "s": "noonabc"
+      },
+      "output": "noon"
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "longestPalindrome",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "longestPalindrome",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "longestPalindrome",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "string"
+    }
+  }
+}

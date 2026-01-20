@@ -1,0 +1,3643 @@
+{
+  "version": 1,
+  "problems": [
+    {
+      "id": 1,
+      "title": "Two Sum",
+      "cases": [
+        {
+          "input": {
+            "nums": [
+              2,
+              7,
+              11,
+              15
+            ],
+            "target": 9
+          },
+          "output": [
+            0,
+            1
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              3,
+              2,
+              4
+            ],
+            "target": 6
+          },
+          "output": [
+            1,
+            2
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              3,
+              3
+            ],
+            "target": 6
+          },
+          "output": [
+            0,
+            1
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              -1,
+              -2,
+              -3,
+              -4,
+              -5
+            ],
+            "target": -8
+          },
+          "output": [
+            2,
+            4
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              0,
+              4,
+              3,
+              0
+            ],
+            "target": 0
+          },
+          "output": [
+            0,
+            3
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              5,
+              1,
+              5
+            ],
+            "target": 10
+          },
+          "output": [
+            1,
+            3
+          ]
+        },
+        {
+          "input": {
+            "nums": [
+              8,
+              7,
+              2,
+              5
+            ],
+            "target": 9
+          },
+          "output": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 146,
+      "title": "LRU Cache",
+      "cases": [
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "put",
+              "get",
+              "put",
+              "get",
+              "put",
+              "get",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                2
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                1
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                2
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                1
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            null,
+            1,
+            null,
+            -1,
+            null,
+            -1,
+            3,
+            4
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "get",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                1
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            1,
+            null,
+            -1,
+            2
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "put",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                2
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            null,
+            null,
+            -1,
+            2
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "get",
+              "put",
+              "get",
+              "put",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                2
+              ],
+              [
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ]
+            ]
+          },
+          "output": [
+            null,
+            -1,
+            null,
+            1,
+            null,
+            null,
+            2,
+            3
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "put",
+              "get",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                2
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                1
+              ],
+              [
+                3
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            null,
+            1,
+            null,
+            -1,
+            3
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            null,
+            -1,
+            2
+          ]
+        },
+        {
+          "input": {
+            "operations": [
+              "LRUCache",
+              "put",
+              "get",
+              "put",
+              "get",
+              "put",
+              "get",
+              "get"
+            ],
+            "arguments": [
+              [
+                3
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                1
+              ],
+              [
+                2,
+                20
+              ],
+              [
+                2
+              ],
+              [
+                3,
+                30
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ]
+            ]
+          },
+          "output": [
+            null,
+            null,
+            10,
+            null,
+            20,
+            null,
+            30,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "title": "Trapping Rain Water",
+      "cases": [
+        {
+          "input": {
+            "height": [
+              0,
+              1,
+              0,
+              2,
+              1,
+              0,
+              1,
+              3,
+              2,
+              1,
+              2,
+              1
+            ]
+          },
+          "output": 6
+        },
+        {
+          "input": {
+            "height": [
+              4,
+              2,
+              0,
+              3,
+              2,
+              5
+            ]
+          },
+          "output": 9
+        },
+        {
+          "input": {
+            "height": [
+              2,
+              0,
+              2
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "height": [
+              3,
+              0,
+              0,
+              2,
+              0,
+              4
+            ]
+          },
+          "output": 10
+        },
+        {
+          "input": {
+            "height": [
+              0,
+              0,
+              0
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "height": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "height": [
+              5,
+              4,
+              1,
+              2
+            ]
+          },
+          "output": 1
+        }
+      ]
+    },
+    {
+      "id": 408,
+      "title": "Valid Word Abbreviation",
+      "cases": [
+        {
+          "input": {
+            "word": "internationalization",
+            "abbr": "i12iz4n"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "word": "apple",
+            "abbr": "a2e"
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "word": "substitution",
+            "abbr": "s10n"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "word": "substitution",
+            "abbr": "sub4u4"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "word": "word",
+            "abbr": "4"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "word": "word",
+            "abbr": "03d"
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "word": "hi",
+            "abbr": "1i"
+          },
+          "output": true
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Longest Common Prefix",
+      "cases": [
+        {
+          "input": {
+            "strs": [
+              "flower",
+              "flow",
+              "flight"
+            ]
+          },
+          "output": "fl"
+        },
+        {
+          "input": {
+            "strs": [
+              "dog",
+              "racecar",
+              "car"
+            ]
+          },
+          "output": ""
+        },
+        {
+          "input": {
+            "strs": [
+              "interspecies",
+              "interstellar",
+              "interstate"
+            ]
+          },
+          "output": "inters"
+        },
+        {
+          "input": {
+            "strs": [
+              "throne",
+              "throne"
+            ]
+          },
+          "output": "throne"
+        },
+        {
+          "input": {
+            "strs": [
+              "",
+              "b"
+            ]
+          },
+          "output": ""
+        },
+        {
+          "input": {
+            "strs": [
+              "single"
+            ]
+          },
+          "output": "single"
+        },
+        {
+          "input": {
+            "strs": [
+              "re",
+              "reap",
+              "rear",
+              "reason"
+            ]
+          },
+          "output": "re"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Longest Palindromic Substring",
+      "cases": [
+        {
+          "input": {
+            "s": "babad"
+          },
+          "output": "bab"
+        },
+        {
+          "input": {
+            "s": "cbbd"
+          },
+          "output": "bb"
+        },
+        {
+          "input": {
+            "s": "a"
+          },
+          "output": "a"
+        },
+        {
+          "input": {
+            "s": "bb"
+          },
+          "output": "bb"
+        },
+        {
+          "input": {
+            "s": "forgeeksskeegfor"
+          },
+          "output": "geeksskeeg"
+        },
+        {
+          "input": {
+            "s": "abaxyzzyxf"
+          },
+          "output": "xyzzyx"
+        },
+        {
+          "input": {
+            "s": "noonabc"
+          },
+          "output": "noon"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Longest Substring Without Repeating Characters",
+      "cases": [
+        {
+          "input": {
+            "s": "abcabcbb"
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "s": "bbbbb"
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "s": "pwwkew"
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "s": ""
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "s": "dvdf"
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "s": "anviaj"
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "s": "tmmzuxt"
+          },
+          "output": 5
+        }
+      ]
+    },
+    {
+      "id": 121,
+      "title": "Best Time to Buy and Sell Stock",
+      "cases": [
+        {
+          "input": {
+            "prices": [
+              7,
+              1,
+              5,
+              3,
+              6,
+              4
+            ]
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "prices": [
+              7,
+              6,
+              4,
+              3,
+              1
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "prices": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "prices": [
+              2,
+              4,
+              1
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "prices": [
+              3,
+              2,
+              6,
+              5,
+              0,
+              3
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "prices": [
+              5
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "prices": [
+              2,
+              1,
+              2,
+              1,
+              0,
+              1,
+              2
+            ]
+          },
+          "output": 2
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "title": "Merge Intervals",
+      "cases": [
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                8,
+                10
+              ],
+              [
+                15,
+                18
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              6
+            ],
+            [
+              8,
+              10
+            ],
+            [
+              15,
+              18
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                4
+              ],
+              [
+                4,
+                5
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              5
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                4
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                4
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              4
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                6,
+                7
+              ],
+              [
+                8,
+                9
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                7
+              ],
+              [
+                6,
+                8
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              4
+            ],
+            [
+              5,
+              8
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": 253,
+      "title": "Meeting Rooms II",
+      "cases": [
+        {
+          "input": {
+            "intervals": [
+              [
+                0,
+                30
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                15,
+                20
+              ]
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                7,
+                10
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                5
+              ],
+              [
+                8,
+                9
+              ],
+              [
+                8,
+                9
+              ]
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                7
+              ],
+              [
+                3,
+                19
+              ],
+              [
+                8,
+                12
+              ],
+              [
+                10,
+                20
+              ],
+              [
+                11,
+                30
+              ]
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "intervals": []
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "intervals": [
+              [
+                0,
+                5
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                10
+              ]
+            ]
+          },
+          "output": 3
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Add Two Numbers",
+      "cases": [
+        {
+          "input": {
+            "l1": [
+              2,
+              4,
+              3
+            ],
+            "l2": [
+              5,
+              6,
+              4
+            ]
+          },
+          "output": [
+            7,
+            0,
+            8
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              0
+            ],
+            "l2": [
+              0
+            ]
+          },
+          "output": [
+            0
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9
+            ],
+            "l2": [
+              9,
+              9,
+              9,
+              9
+            ]
+          },
+          "output": [
+            8,
+            9,
+            9,
+            9,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              1,
+              8
+            ],
+            "l2": [
+              0
+            ]
+          },
+          "output": [
+            1,
+            8
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              5
+            ],
+            "l2": [
+              5
+            ]
+          },
+          "output": [
+            0,
+            1
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              1,
+              2,
+              3
+            ],
+            "l2": [
+              9,
+              9,
+              9
+            ]
+          },
+          "output": [
+            0,
+            2,
+            3,
+            1
+          ]
+        },
+        {
+          "input": {
+            "l1": [
+              9
+            ],
+            "l2": [
+              1,
+              9,
+              9
+            ]
+          },
+          "output": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 869,
+      "title": "Reordered Power of 2",
+      "cases": [
+        {
+          "input": {
+            "n": 1
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "n": 10
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "n": 16
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "n": 24
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "n": 46
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "n": 128
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "n": 821
+          },
+          "output": true
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Valid Parentheses",
+      "cases": [
+        {
+          "input": {
+            "s": "()"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "s": "()[]{}"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "s": "(]"
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "s": "([)]"
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "s": "{[]}"
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "s": ""
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "s": ")("
+          },
+          "output": false
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Palindrome Number",
+      "cases": [
+        {
+          "input": {
+            "x": 121
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "x": -121
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "x": 10
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "x": 0
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "x": 12321
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "x": 1001
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "x": 2147447412
+          },
+          "output": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Median of Two Sorted Arrays",
+      "cases": [
+        {
+          "input": {
+            "nums1": [
+              1,
+              3
+            ],
+            "nums2": [
+              2
+            ]
+          },
+          "output": 2.0
+        },
+        {
+          "input": {
+            "nums1": [
+              1,
+              2
+            ],
+            "nums2": [
+              3,
+              4
+            ]
+          },
+          "output": 2.5
+        },
+        {
+          "input": {
+            "nums1": [
+              0,
+              0
+            ],
+            "nums2": [
+              0,
+              0
+            ]
+          },
+          "output": 0.0
+        },
+        {
+          "input": {
+            "nums1": [],
+            "nums2": [
+              1
+            ]
+          },
+          "output": 1.0
+        },
+        {
+          "input": {
+            "nums1": [
+              2
+            ],
+            "nums2": []
+          },
+          "output": 2.0
+        },
+        {
+          "input": {
+            "nums1": [
+              1,
+              3,
+              8,
+              9,
+              15
+            ],
+            "nums2": [
+              7,
+              11,
+              18,
+              19,
+              21,
+              25
+            ]
+          },
+          "output": 11.0
+        },
+        {
+          "input": {
+            "nums1": [
+              3,
+              4
+            ],
+            "nums2": [
+              1,
+              2
+            ]
+          },
+          "output": 2.5
+        }
+      ]
+    },
+    {
+      "id": 200,
+      "title": "Number of Islands",
+      "cases": [
+        {
+          "input": {
+            "grid": [
+              [
+                "1",
+                "1",
+                "1",
+                "1",
+                "0"
+              ],
+              [
+                "1",
+                "1",
+                "0",
+                "1",
+                "0"
+              ],
+              [
+                "1",
+                "1",
+                "0",
+                "0",
+                "0"
+              ],
+              [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0"
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "1",
+                "1",
+                "0",
+                "0",
+                "0"
+              ],
+              [
+                "1",
+                "1",
+                "0",
+                "0",
+                "0"
+              ],
+              [
+                "0",
+                "0",
+                "1",
+                "0",
+                "0"
+              ],
+              [
+                "0",
+                "0",
+                "0",
+                "1",
+                "1"
+              ]
+            ]
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "0",
+                "0",
+                "0"
+              ],
+              [
+                "0",
+                "0",
+                "0"
+              ],
+              [
+                "0",
+                "0",
+                "0"
+              ]
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "1",
+                "0",
+                "1",
+                "0",
+                "1"
+              ]
+            ]
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "1",
+                "0"
+              ],
+              [
+                "0",
+                "1"
+              ]
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                "1",
+                "1"
+              ],
+              [
+                "1",
+                "1"
+              ]
+            ]
+          },
+          "output": 1
+        }
+      ]
+    },
+    {
+      "id": 751,
+      "title": "IP to CIDR",
+      "cases": [
+        {
+          "input": {
+            "ip": "255.0.0.7",
+            "n": 10
+          },
+          "output": [
+            "255.0.0.7/32",
+            "255.0.0.8/29",
+            "255.0.0.16/32"
+          ]
+        },
+        {
+          "input": {
+            "ip": "255.0.0.0",
+            "n": 1
+          },
+          "output": [
+            "255.0.0.0/32"
+          ]
+        },
+        {
+          "input": {
+            "ip": "0.0.0.0",
+            "n": 2
+          },
+          "output": [
+            "0.0.0.0/31"
+          ]
+        },
+        {
+          "input": {
+            "ip": "1.1.1.1",
+            "n": 4
+          },
+          "output": [
+            "1.1.1.1/32",
+            "1.1.1.2/31",
+            "1.1.1.4/32"
+          ]
+        },
+        {
+          "input": {
+            "ip": "10.0.0.0",
+            "n": 256
+          },
+          "output": [
+            "10.0.0.0/24"
+          ]
+        },
+        {
+          "input": {
+            "ip": "8.8.8.8",
+            "n": 3
+          },
+          "output": [
+            "8.8.8.8/31",
+            "8.8.8.10/32"
+          ]
+        },
+        {
+          "input": {
+            "ip": "100.64.0.0",
+            "n": 512
+          },
+          "output": [
+            "100.64.0.0/23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1274,
+      "title": "Number of Ships in a Rectangle",
+      "cases": [
+        {
+          "input": {
+            "ships": [
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                3
+              ]
+            ],
+            "topRight": [
+              3,
+              3
+            ],
+            "bottomLeft": [
+              1,
+              1
+            ]
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "ships": [
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                3
+              ]
+            ],
+            "topRight": [
+              2,
+              2
+            ],
+            "bottomLeft": [
+              2,
+              2
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "ships": [
+              [
+                1,
+                1
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                5,
+                5
+              ],
+              [
+                7,
+                7
+              ]
+            ],
+            "topRight": [
+              6,
+              6
+            ],
+            "bottomLeft": [
+              2,
+              2
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "ships": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                3,
+                3
+              ]
+            ],
+            "topRight": [
+              2,
+              2
+            ],
+            "bottomLeft": [
+              0,
+              0
+            ]
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "ships": [
+              [
+                10,
+                10
+              ]
+            ],
+            "topRight": [
+              10,
+              10
+            ],
+            "bottomLeft": [
+              10,
+              10
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "ships": [
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                6,
+                2
+              ]
+            ],
+            "topRight": [
+              4,
+              5
+            ],
+            "bottomLeft": [
+              1,
+              2
+            ]
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "ships": [],
+            "topRight": [
+              5,
+              5
+            ],
+            "bottomLeft": [
+              1,
+              1
+            ]
+          },
+          "output": 0
+        }
+      ]
+    },
+    {
+      "id": 679,
+      "title": "24 Game",
+      "cases": [
+        {
+          "input": {
+            "nums": [
+              4,
+              1,
+              8,
+              7
+            ]
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              2,
+              1,
+              2
+            ]
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "nums": [
+              3,
+              3,
+              8,
+              8
+            ]
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "nums": [
+              7,
+              7,
+              7,
+              7
+            ]
+          },
+          "output": false
+        },
+        {
+          "input": {
+            "nums": [
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              3,
+              4,
+              6
+            ]
+          },
+          "output": true
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              7,
+              8,
+              8
+            ]
+          },
+          "output": true
+        }
+      ]
+    },
+    {
+      "id": 3480,
+      "title": "Maximize Subarrays After Removing One Conflicting Pair",
+      "cases": [
+        {
+          "input": {
+            "n": 4,
+            "conflictingPairs": [
+              [
+                2,
+                3
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          "output": 9
+        },
+        {
+          "input": {
+            "n": 5,
+            "conflictingPairs": [
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          "output": 12
+        },
+        {
+          "input": {
+            "n": 3,
+            "conflictingPairs": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "output": 6
+        },
+        {
+          "input": {
+            "n": 3,
+            "conflictingPairs": [
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "n": 6,
+            "conflictingPairs": [
+              [
+                1,
+                6
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          "output": 17
+        },
+        {
+          "input": {
+            "n": 5,
+            "conflictingPairs": [
+              [
+                1,
+                5
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          "output": 14
+        },
+        {
+          "input": {
+            "n": 4,
+            "conflictingPairs": [
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          "output": 5
+        }
+      ]
+    },
+    {
+      "id": 1249,
+      "title": "Minimum Remove to Make Valid Parentheses",
+      "cases": [
+        {
+          "input": {
+            "s": "lee(t(c)o)de)"
+          },
+          "output": "lee(t(c)o)de"
+        },
+        {
+          "input": {
+            "s": "a)b(c)d"
+          },
+          "output": "ab(c)d"
+        },
+        {
+          "input": {
+            "s": "))("
+          },
+          "output": ""
+        },
+        {
+          "input": {
+            "s": "(a(b(c)d)"
+          },
+          "output": "a(b(c)d)"
+        },
+        {
+          "input": {
+            "s": "abc"
+          },
+          "output": "abc"
+        },
+        {
+          "input": {
+            "s": "(a(b)c)d)"
+          },
+          "output": "(a(b)c)d"
+        },
+        {
+          "input": {
+            "s": "(()"
+          },
+          "output": "()"
+        }
+      ]
+    },
+    {
+      "id": 723,
+      "title": "Candy Crush",
+      "cases": [
+        {
+          "input": {
+            "board": [
+              [
+                110,
+                5,
+                112,
+                113,
+                114
+              ],
+              [
+                210,
+                211,
+                5,
+                213,
+                214
+              ],
+              [
+                310,
+                311,
+                3,
+                313,
+                314
+              ],
+              [
+                410,
+                411,
+                412,
+                5,
+                414
+              ],
+              [
+                5,
+                1,
+                512,
+                3,
+                3
+              ],
+              [
+                610,
+                4,
+                1,
+                613,
+                614
+              ],
+              [
+                710,
+                1,
+                2,
+                713,
+                714
+              ],
+              [
+                810,
+                1,
+                2,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                2,
+                2,
+                2
+              ],
+              [
+                4,
+                1,
+                4,
+                4,
+                1014
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              110,
+              0,
+              0,
+              0,
+              114
+            ],
+            [
+              210,
+              0,
+              0,
+              0,
+              214
+            ],
+            [
+              310,
+              0,
+              0,
+              113,
+              314
+            ],
+            [
+              410,
+              0,
+              0,
+              213,
+              414
+            ],
+            [
+              610,
+              211,
+              112,
+              313,
+              614
+            ],
+            [
+              710,
+              311,
+              412,
+              613,
+              714
+            ],
+            [
+              810,
+              411,
+              512,
+              713,
+              1014
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                1,
+                1,
+                1
+              ],
+              [
+                2,
+                2,
+                2
+              ],
+              [
+                3,
+                3,
+                3
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                4,
+                5,
+                6
+              ],
+              [
+                7,
+                8,
+                9
+              ]
+            ]
+          },
+          "output": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              4,
+              5,
+              6
+            ],
+            [
+              7,
+              8,
+              9
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                1,
+                1,
+                1,
+                2
+              ],
+              [
+                2,
+                3,
+                4,
+                5
+              ],
+              [
+                3,
+                3,
+                3,
+                4
+              ],
+              [
+                4,
+                5,
+                6,
+                7
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              5
+            ],
+            [
+              2,
+              3,
+              4,
+              4
+            ],
+            [
+              4,
+              5,
+              6,
+              7
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                4,
+                3,
+                2,
+                1
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              3,
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                1,
+                2,
+                2,
+                2,
+                3
+              ],
+              [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              [
+                9,
+                9,
+                9,
+                1,
+                2
+              ],
+              [
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0,
+              0,
+              3
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              8
+            ],
+            [
+              4,
+              5,
+              6,
+              1,
+              2
+            ],
+            [
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          ]
+        },
+        {
+          "input": {
+            "board": [
+              [
+                2,
+                2,
+                2,
+                2
+              ],
+              [
+                2,
+                1,
+                1,
+                1
+              ],
+              [
+                2,
+                1,
+                2,
+                2
+              ],
+              [
+                2,
+                2,
+                2,
+                2
+              ]
+            ]
+          },
+          "output": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              2,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": 560,
+      "title": "Subarray Sum Equals K",
+      "cases": [
+        {
+          "input": {
+            "nums": [
+              1,
+              1,
+              1
+            ],
+            "k": 2
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              2,
+              3
+            ],
+            "k": 3
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "nums": [
+              1,
+              -1,
+              0
+            ],
+            "k": 0
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "nums": [
+              3,
+              4,
+              7,
+              2,
+              -3,
+              1,
+              4,
+              2
+            ],
+            "k": 7
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "nums": [
+              1
+            ],
+            "k": 0
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "nums": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "k": 0
+          },
+          "output": 15
+        },
+        {
+          "input": {
+            "nums": [
+              -1,
+              -1,
+              1
+            ],
+            "k": 0
+          },
+          "output": 1
+        }
+      ]
+    },
+    {
+      "id": 2561,
+      "title": "Rearranging Fruits",
+      "cases": [
+        {
+          "input": {
+            "basket1": [
+              4,
+              2,
+              2,
+              2
+            ],
+            "basket2": [
+              1,
+              4,
+              1,
+              2
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "basket1": [
+              2,
+              3,
+              4,
+              1
+            ],
+            "basket2": [
+              3,
+              2,
+              5,
+              1
+            ]
+          },
+          "output": -1
+        },
+        {
+          "input": {
+            "basket1": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "basket2": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "basket1": [
+              1,
+              2
+            ],
+            "basket2": [
+              2,
+              1
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "basket1": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "basket2": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "output": 0
+        },
+        {
+          "input": {
+            "basket1": [
+              1,
+              4,
+              4,
+              4
+            ],
+            "basket2": [
+              2,
+              2,
+              2,
+              4
+            ]
+          },
+          "output": -1
+        },
+        {
+          "input": {
+            "basket1": [
+              5,
+              5,
+              5,
+              1
+            ],
+            "basket2": [
+              5,
+              1,
+              1,
+              1
+            ]
+          },
+          "output": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Container With Most Water",
+      "cases": [
+        {
+          "input": {
+            "height": [
+              1,
+              8,
+              6,
+              2,
+              5,
+              4,
+              8,
+              3,
+              7
+            ]
+          },
+          "output": 49
+        },
+        {
+          "input": {
+            "height": [
+              1,
+              1
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "height": [
+              4,
+              3,
+              2,
+              1,
+              4
+            ]
+          },
+          "output": 16
+        },
+        {
+          "input": {
+            "height": [
+              1,
+              2,
+              1
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "height": [
+              2,
+              3,
+              10,
+              5,
+              7,
+              8,
+              9
+            ]
+          },
+          "output": 36
+        },
+        {
+          "input": {
+            "height": [
+              1,
+              3,
+              2,
+              5,
+              25,
+              24,
+              5
+            ]
+          },
+          "output": 24
+        },
+        {
+          "input": {
+            "height": [
+              2,
+              2,
+              2,
+              2,
+              2
+            ]
+          },
+          "output": 8
+        }
+      ]
+    },
+    {
+      "id": 1434,
+      "title": "Number of Ways to Wear Different Hats to Each Other",
+      "cases": [
+        {
+          "input": {
+            "hats": [
+              [
+                3,
+                4
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                5
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                1,
+                2,
+                3
+              ]
+            ]
+          },
+          "output": 6
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ]
+            ]
+          },
+          "output": 1
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                4,
+                5
+              ]
+            ]
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                5,
+                6
+              ],
+              [
+                6,
+                7
+              ],
+              [
+                7,
+                8
+              ],
+              [
+                8,
+                9
+              ]
+            ]
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "hats": [
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "output": 0
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Roman to Integer",
+      "cases": [
+        {
+          "input": {
+            "s": "III"
+          },
+          "output": 3
+        },
+        {
+          "input": {
+            "s": "IV"
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "s": "IX"
+          },
+          "output": 9
+        },
+        {
+          "input": {
+            "s": "LVIII"
+          },
+          "output": 58
+        },
+        {
+          "input": {
+            "s": "MCMXCIV"
+          },
+          "output": 1994
+        },
+        {
+          "input": {
+            "s": "XL"
+          },
+          "output": 40
+        },
+        {
+          "input": {
+            "s": "MMXXIII"
+          },
+          "output": 2023
+        }
+      ]
+    },
+    {
+      "id": 317,
+      "title": "Shortest Distance from All Buildings",
+      "cases": [
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                0,
+                2,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0
+              ]
+            ]
+          },
+          "output": 7
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                0
+              ],
+              [
+                0,
+                1
+              ]
+            ]
+          },
+          "output": 2
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                2,
+                2,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                2,
+                0
+              ],
+              [
+                0,
+                2,
+                1
+              ],
+              [
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "output": 5
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          },
+          "output": 4
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                1
+              ]
+            ]
+          },
+          "output": 16
+        },
+        {
+          "input": {
+            "grid": [
+              [
+                1,
+                2,
+                0,
+                0
+              ],
+              [
+                0,
+                2,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "output": 6
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "title": "Text Justification",
+      "cases": [
+        {
+          "input": {
+            "words": [
+              "This",
+              "is",
+              "an",
+              "example",
+              "of",
+              "text",
+              "justification."
+            ],
+            "maxWidth": 16
+          },
+          "output": [
+            "This    is    an",
+            "example  of text",
+            "justification.  "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "What",
+              "must",
+              "be",
+              "acknowledgment",
+              "shall",
+              "be"
+            ],
+            "maxWidth": 16
+          },
+          "output": [
+            "What   must   be",
+            "acknowledgment  ",
+            "shall be        "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "Science",
+              "is",
+              "what",
+              "we",
+              "understand",
+              "well",
+              "enough",
+              "to",
+              "explain",
+              "to",
+              "a",
+              "computer."
+            ],
+            "maxWidth": 20
+          },
+          "output": [
+            "Science  is  what we",
+            "understand      well",
+            "enough to explain to",
+            "a computer.         "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "Single"
+            ],
+            "maxWidth": 10
+          },
+          "output": [
+            "Single    "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "Two",
+              "words"
+            ],
+            "maxWidth": 10
+          },
+          "output": [
+            "Two words "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "a",
+              "b",
+              "c",
+              "d",
+              "e"
+            ],
+            "maxWidth": 3
+          },
+          "output": [
+            "a b",
+            "c d",
+            "e  "
+          ]
+        },
+        {
+          "input": {
+            "words": [
+              "Edge",
+              "case",
+              "check"
+            ],
+            "maxWidth": 9
+          },
+          "output": [
+            "Edge case",
+            "check    "
+          ]
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "title": "Group Anagrams",
+      "cases": [
+        {
+          "input": {
+            "strs": [
+              "eat",
+              "tea",
+              "tan",
+              "ate",
+              "nat",
+              "bat"
+            ]
+          },
+          "output": [
+            [
+              "eat",
+              "tea",
+              "ate"
+            ],
+            [
+              "tan",
+              "nat"
+            ],
+            [
+              "bat"
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              ""
+            ]
+          },
+          "output": [
+            [
+              ""
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              "a"
+            ]
+          },
+          "output": [
+            [
+              "a"
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              "abc",
+              "bca",
+              "cab",
+              "xyz",
+              "zyx",
+              "yxz"
+            ]
+          },
+          "output": [
+            [
+              "abc",
+              "bca",
+              "cab"
+            ],
+            [
+              "xyz",
+              "zyx",
+              "yxz"
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              "ab",
+              "ba",
+              "abc",
+              "cba",
+              "bac"
+            ]
+          },
+          "output": [
+            [
+              "ab",
+              "ba"
+            ],
+            [
+              "abc",
+              "cba",
+              "bac"
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              "listen",
+              "silent",
+              "enlist",
+              "inlets",
+              "google"
+            ]
+          },
+          "output": [
+            [
+              "listen",
+              "silent",
+              "enlist",
+              "inlets"
+            ],
+            [
+              "google"
+            ]
+          ]
+        },
+        {
+          "input": {
+            "strs": [
+              "ab",
+              "cd",
+              "ef"
+            ]
+          },
+          "output": [
+            [
+              "ab"
+            ],
+            [
+              "cd"
+            ],
+            [
+              "ef"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

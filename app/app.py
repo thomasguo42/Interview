@@ -3,6 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from uuid import uuid4
+import hashlib
+import logging
+import sys
 
 from flask import (
     Flask,
@@ -17,7 +20,9 @@ import requests
 from requests import RequestException
 
 from .config import config
-from .gemini_client import GeminiClient, GeminiError
+from .gemini_client import GeminiError
+from .openai_client import OpenAIError
+from .llm_client import get_llm_client
 from .resume_processor import allowed_file, extract_text
 from .whisper_service import get_whisper_transcriber
 from .state import (
@@ -58,7 +63,12 @@ from .state import (
 )
 from .ood_questions import get_hard_question, get_stock_match_engine_question
 from .question_bank import get_random_coding_question
-from .question_tests import ensure_tests_for_question, get_cached_tests, format_signatures_for_prompt
+from .question_tests import (
+    ensure_tests_for_question,
+    get_cached_tests,
+    format_signatures_for_prompt,
+    build_starter_code,
+)
 from .test_runner import run_code_tests
 from .tts import KokoroUnavailable, kokoro
 
@@ -70,6 +80,48 @@ def create_app() -> Flask:
     resume_storage = Path(__file__).resolve().parent.parent / "storage" / "resumes"
     resume_storage.mkdir(exist_ok=True, parents=True)
     app.config["UPLOAD_FOLDER"] = resume_storage
+
+    def _setup_debug_logging() -> None:
+        log_dir = Path(__file__).resolve().parent.parent / "storage" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_path = log_dir / "debug.log"
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+        )
+
+        file_handler = logging.FileHandler(log_path, encoding="utf-8")
+        file_handler.setFormatter(formatter)
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+
+        if not any(isinstance(h, logging.FileHandler) and h.baseFilename == str(log_path) for h in logger.handlers):
+            logger.addHandler(file_handler)
+        if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+            logger.addHandler(stream_handler)
+
+        class _TeeStream:
+            def __init__(self, primary, secondary):
+                self.primary = primary
+                self.secondary = secondary
+
+            def write(self, data):
+                self.primary.write(data)
+                self.primary.flush()
+                self.secondary.write(data)
+                self.secondary.flush()
+
+            def flush(self):
+                self.primary.flush()
+                self.secondary.flush()
+
+        debug_file = log_path.open("a", encoding="utf-8")
+        sys.stdout = _TeeStream(sys.stdout, debug_file)
+        sys.stderr = _TeeStream(sys.stderr, debug_file)
+
+    _setup_debug_logging()
 
     def _ensure_session_id() -> str:
         session_id = session.get("session_id")
@@ -190,22 +242,65 @@ def create_app() -> Flask:
             update_last_speech(session_id)
             if code_supported and current_code:
                 update_code(session_id, current_code)
-                if code_changed and interview_state.get("current_phase") == PHASE_CODING:
-                    coding_question = interview_state.get("coding_question") or {}
-                    question_title = coding_question.get("title", "")
-                    if question_title:
+
+        conversation: List[Dict[str, Any]] = get_conversation(session_id)
+        try:
+            model_name = interview_state.get("model") if interview_state else None
+            client = get_llm_client(model_name)
+
+            if interview_state and interview_state.get("current_phase") == PHASE_CODING:
+                coding_question = interview_state.get("coding_question") or {}
+                question_title = coding_question.get("title", "")
+                if question_title and current_code.strip():
+                    code_hash = hashlib.sha256(current_code.encode("utf-8")).hexdigest()
+                    existing_eval = interview_state.get("code_evaluation") or {}
+                    if existing_eval.get("code_hash") != code_hash:
+                        set_code_evaluation(session_id, {})
+                    fallback_hit = _should_run_tests_fallback(user_message)
+                    complete_hit = _code_looks_complete(current_code, interview_state.get("language", ""))
+                    model_hit = client.should_run_tests(
+                        session_id=session_id,
+                        interview_state=interview_state,
+                        conversation=conversation,
+                        user_message=user_message,
+                        current_code=current_code,
+                    )
+                    print(
+                        f"[TEST GATE] fallback={fallback_hit} complete={complete_hit} "
+                        f"model={model_hit} code_hash={code_hash[:10]}"
+                    )
+                    should_run = fallback_hit or complete_hit or model_hit
+                    should_rerun = fallback_hit or model_hit
+                    can_run = should_run and (
+                        existing_eval.get("code_hash") != code_hash or not existing_eval or should_rerun
+                    )
+                    if should_run and not can_run:
+                        print(
+                            "[TEST RUN] Skipped: tests already evaluated for this code hash and no rerun trigger."
+                        )
+                    if can_run:
                         test_spec = get_cached_tests(question_title)
                         if test_spec:
+                            print(f"[TEST RUN] Using test spec for: {question_title}")
                             evaluation = run_code_tests(
                                 interview_state.get("language", ""),
                                 current_code,
                                 test_spec,
                             )
+                            evaluation["code_hash"] = code_hash
                             set_code_evaluation(session_id, evaluation)
-
-        conversation: List[Dict[str, Any]] = get_conversation(session_id)
-        try:
-            client = GeminiClient()
+                            print(
+                                f"[TEST RUN] Result status={evaluation.get('status')} "
+                                f"summary={evaluation.get('summary')}"
+                            )
+                            if evaluation.get("status") == "error":
+                                details = evaluation.get("details")
+                                if details:
+                                    print(f"[TEST RUN] Error details:\\n{details}")
+                                else:
+                                    print(f"[TEST RUN] Error summary: {evaluation.get('summary')}")
+                        else:
+                            print(f"[TEST RUN] Missing test spec for: {question_title}")
 
             # Use structured interview prompts if interview is active
             if interview_state:
@@ -223,7 +318,7 @@ def create_app() -> Flask:
                     resume_text=resume_text,
                     user_message=user_message,
                 )
-        except (ValueError, GeminiError) as exc:
+        except (ValueError, GeminiError, OpenAIError) as exc:
             return jsonify({"error": str(exc)}), 500
 
         print(f"[CHAT DEBUG] Gemini reply length: {len(reply_text)}")
@@ -287,6 +382,47 @@ def create_app() -> Flask:
             "phase": response_phase,
             "interviewEnded": interview_ended,
         })
+
+    def _should_run_tests_fallback(message: str) -> bool:
+        msg = (message or "").lower()
+        keywords = [
+            "i am done",
+            "i'm done",
+            "finished",
+            "ready to test",
+            "run the tests",
+            "run tests",
+            "check my code",
+            "check if the code is correct",
+            "can you check if the code is correct",
+            "can you check my code",
+            "can you verify",
+            "verify my solution",
+            "submit",
+        ]
+        hit = any(kw in msg for kw in keywords)
+        print(f"[TEST GATE] fallback_keywords={hit}")
+        return hit
+
+    def _code_looks_complete(code: str, language: str) -> bool:
+        if not code or "TODO" in code or "pass" in code:
+            print("[TEST GATE] code_complete=False (empty/todo/pass)")
+            return False
+        language = (language or "").lower()
+        if language == "python":
+            ok = "def " in code and "return" in code
+            print(f"[TEST GATE] code_complete={ok} (python)")
+            return ok
+        if language == "java":
+            ok = "class " in code and "return" in code
+            print(f"[TEST GATE] code_complete={ok} (java)")
+            return ok
+        if language == "cpp":
+            ok = "return" in code
+            print(f"[TEST GATE] code_complete={ok} (cpp)")
+            return ok
+        print("[TEST GATE] code_complete=False (unknown language)")
+        return False
 
     @app.route("/api/live/session", methods=["POST"])
     def live_session():
@@ -391,14 +527,16 @@ def create_app() -> Flask:
         )
 
         try:
-            client = GeminiClient()
+            interview_state = get_interview_state(session_id)
+            model_name = interview_state.get("model") if interview_state else None
+            client = get_llm_client(model_name)
             reply_text = client.generate_interview_reply(
                 conversation=conversation,
                 resume_text=resume_text,
                 user_message=intervention_prompt,
                 temperature=0.6,
             )
-        except (ValueError, GeminiError) as exc:
+        except (ValueError, GeminiError, OpenAIError) as exc:
             return jsonify({"error": str(exc)}), 500
 
         try:
@@ -433,14 +571,17 @@ def create_app() -> Flask:
         payload = request.get_json(silent=True) or {}
         language = payload.get("language", "python").lower()
         mode = payload.get("mode", "full")  # "full", "coding_only", or "ood"
+        model_name = (payload.get("model") or config.GEMINI_MODEL or "").strip()
 
-        print(f"[START INTERVIEW] Received request - language: {language}, mode: {mode}")
+        print(f"[START INTERVIEW] Received request - language: {language}, mode: {mode}, model: {model_name}")
 
         if language not in SUPPORTED_LANGUAGES:
             return jsonify({"error": f"Unsupported language. Choose from: {', '.join(SUPPORTED_LANGUAGES)}"}), 400
 
         if mode not in ["full", "coding_only", "ood"]:
             return jsonify({"error": "Invalid mode. Choose 'full', 'coding_only', or 'ood'"}), 400
+        if model_name not in config.SUPPORTED_MODELS:
+            return jsonify({"error": f"Unsupported model. Choose from: {', '.join(config.SUPPORTED_MODELS)}"}), 400
 
         session_id = _ensure_session_id()
         if not session_id:
@@ -453,7 +594,7 @@ def create_app() -> Flask:
             return jsonify({"error": "Upload a resume before starting this interview."}), 400
 
         # Initialize structured interview state
-        interview_state = start_interview(session_id, language, mode)
+        interview_state = start_interview(session_id, language, mode, model_name)
 
         # For OOD mode, force the stock matching engine scenario
         if mode == "ood":
@@ -478,6 +619,7 @@ def create_app() -> Flask:
                     return jsonify({"error": "Failed to generate test cases for the selected question."}), 500
                 print(f"[START INTERVIEW] Test cases ready - {len(test_spec.get('tests', []))} tests")
                 coding_question["signatures"] = format_signatures_for_prompt(test_spec)
+                coding_question["starter_code"] = build_starter_code(test_spec, language)
                 set_coding_question(session_id, coding_question)
 
         print(f"[START INTERVIEW] Created state - phase: {interview_state['current_phase']}, mode: {interview_state['mode']}")
@@ -488,7 +630,14 @@ def create_app() -> Flask:
             "phase": interview_state["current_phase"],
             "language": interview_state["language"],
             "mode": interview_state["mode"],
+            "model": interview_state.get("model", model_name),
         }
+        if mode != "ood" and coding_question:
+            response_data["codingQuestion"] = {
+                "title": coding_question.get("title", ""),
+                "signature": coding_question.get("signatures", {}).get(language, ""),
+                "starterCode": coding_question.get("starter_code", ""),
+            }
 
         print(f"[START INTERVIEW] Returning: {response_data}")
         return jsonify(response_data)
@@ -536,7 +685,8 @@ def create_app() -> Flask:
         problem_presented = interview_state.get("problem_presented", False)
 
         try:
-            client = GeminiClient()
+            model_name = interview_state.get("model")
+            client = get_llm_client(model_name)
             report = client.generate_interview_report(
                 mode=mode,
                 language=language,
@@ -545,7 +695,7 @@ def create_app() -> Flask:
                 code_snapshots=code_snapshots,
                 problem_presented=problem_presented,
             )
-        except (ValueError, GeminiError) as exc:
+        except (ValueError, GeminiError, OpenAIError) as exc:
             return jsonify({"error": str(exc)}), 500
 
         set_interview_report(session_id, report)
@@ -574,7 +724,8 @@ def create_app() -> Flask:
         problem_presented = interview_state.get("problem_presented", False)
 
         try:
-            client = GeminiClient()
+            model_name = interview_state.get("model")
+            client = get_llm_client(model_name)
             report = client.generate_interview_report(
                 mode=mode,
                 language=language,
@@ -583,7 +734,7 @@ def create_app() -> Flask:
                 code_snapshots=code_snapshots,
                 problem_presented=problem_presented,
             )
-        except (ValueError, GeminiError) as exc:
+        except (ValueError, GeminiError, OpenAIError) as exc:
             return jsonify({"error": str(exc)}), 500
 
         set_interview_report(session_id, report)

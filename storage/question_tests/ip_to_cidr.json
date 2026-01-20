@@ -1,0 +1,119 @@
+{
+  "question_title": "IP to CIDR",
+  "tests": [
+    {
+      "input": {
+        "ip": "255.0.0.7",
+        "n": 10
+      },
+      "output": [
+        "255.0.0.7/32",
+        "255.0.0.8/29",
+        "255.0.0.16/32"
+      ]
+    },
+    {
+      "input": {
+        "ip": "255.0.0.0",
+        "n": 1
+      },
+      "output": [
+        "255.0.0.0/32"
+      ]
+    },
+    {
+      "input": {
+        "ip": "0.0.0.0",
+        "n": 2
+      },
+      "output": [
+        "0.0.0.0/31"
+      ]
+    },
+    {
+      "input": {
+        "ip": "1.1.1.1",
+        "n": 4
+      },
+      "output": [
+        "1.1.1.1/32",
+        "1.1.1.2/31",
+        "1.1.1.4/32"
+      ]
+    },
+    {
+      "input": {
+        "ip": "10.0.0.0",
+        "n": 256
+      },
+      "output": [
+        "10.0.0.0/24"
+      ]
+    },
+    {
+      "input": {
+        "ip": "8.8.8.8",
+        "n": 3
+      },
+      "output": [
+        "8.8.8.8/31",
+        "8.8.8.10/32"
+      ]
+    },
+    {
+      "input": {
+        "ip": "100.64.0.0",
+        "n": 512
+      },
+      "output": [
+        "100.64.0.0/23"
+      ]
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "ipToCIDR",
+      "parameters": [
+        {
+          "name": "ip",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "string[]"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "ipToCIDR",
+      "parameters": [
+        {
+          "name": "ip",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "string[]",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "ipToCIDR",
+      "parameters": [
+        {
+          "name": "ip",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "return_type": "vector<string>"
+    }
+  }
+}

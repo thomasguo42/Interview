@@ -1,0 +1,121 @@
+{
+  "question_title": "Best Time to Buy and Sell Stock",
+  "tests": [
+    {
+      "input": {
+        "prices": [
+          7,
+          1,
+          5,
+          3,
+          6,
+          4
+        ]
+      },
+      "output": 5
+    },
+    {
+      "input": {
+        "prices": [
+          7,
+          6,
+          4,
+          3,
+          1
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "prices": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "prices": [
+          2,
+          4,
+          1
+        ]
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "prices": [
+          3,
+          2,
+          6,
+          5,
+          0,
+          3
+        ]
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "prices": [
+          5
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "prices": [
+          2,
+          1,
+          2,
+          1,
+          0,
+          1,
+          2
+        ]
+      },
+      "output": 2
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "maxProfit",
+      "parameters": [
+        {
+          "name": "prices",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "maxProfit",
+      "parameters": [
+        {
+          "name": "prices",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "maxProfit",
+      "parameters": [
+        {
+          "name": "prices",
+          "type": "vector<int>"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

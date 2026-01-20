@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     companyRoleDetails: document.getElementById("company-role-details"),
     companyRoleStatus: document.getElementById("company-role-status"),
     languageSelect: document.getElementById("language-select"),
+    modelSelect: document.getElementById("model-select"),
     startButton: document.getElementById("start-btn"),
     stopButton: document.getElementById("stop-btn"),
     resetButton: document.getElementById("reset-btn"),
@@ -459,6 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastSpeechTime = Date.now();
   let problemStatementSet = false; // Track if initial problem is set
   let problemUpdatesCount = 0; // Track number of updates
+  let starterCode = "";
+  let starterCodeApplied = false;
 
   // OOD interview state
   let oodMonacoEditor = null; // Separate editor for OOD sessions
@@ -983,13 +986,14 @@ elements.startButton?.addEventListener("click", async () => {
   const modeRadio = document.querySelector('input[name="interview-mode"]:checked');
   const mode = modeRadio ? modeRadio.value : "full";
   const language = elements.languageSelect.value;
-  console.log("Starting interview with mode:", mode, "language:", language);
+  const model = elements.modelSelect?.value || "gemini-2.5-flash-lite";
+  console.log("Starting interview with mode:", mode, "language:", language, "model:", model);
 
   try {
     const response = await fetch("/api/start_interview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, mode }),
+      body: JSON.stringify({ language, mode, model }),
       credentials: "same-origin",
     });
 
@@ -1001,6 +1005,9 @@ elements.startButton?.addEventListener("click", async () => {
     console.log("Response data:", data);
     console.log("Starting phase:", data.phase);
     console.log("Starting mode:", data.mode);
+
+    starterCode = (data.codingQuestion && data.codingQuestion.starterCode) || "";
+    starterCodeApplied = false;
 
     interviewActive = true;
     interviewPaused = false;
@@ -1025,6 +1032,7 @@ elements.startButton?.addEventListener("click", async () => {
       // Initialize Monaco Editor FIRST (before updatePhaseUI)
       await initializeMonacoEditor(language);
       console.log("Monaco Editor initialized");
+      applyStarterCodeIfEmpty();
 
       // Hide OOD workspace
       if (elements.oodWorkspace) {
@@ -1249,6 +1257,16 @@ async function initializeMonacoEditor(language) {
   });
 }
 
+function applyStarterCodeIfEmpty() {
+  if (currentMode === "ood") return;
+  if (!starterCode || starterCodeApplied) return;
+  if (!monacoEditor) return;
+  if (monacoEditor.getValue().trim()) return;
+  monacoEditor.setValue(starterCode);
+  starterCodeApplied = true;
+  scheduleCodeSync();
+}
+
 // ============================================================================
 // INTERVIEW TIMING & PHASE MANAGEMENT
 // ============================================================================
@@ -1334,6 +1352,7 @@ async function updatePhaseUI() {
 
       // Always show problem panel in coding phase (even if problem not formally "presented" yet)
       elements.problemPanel.style.display = "block";
+      applyStarterCodeIfEmpty();
     } else {
       // For coding_only mode, NEVER hide the code editor (it starts in coding phase)
       if (currentMode !== "coding_only") {
@@ -1553,7 +1572,7 @@ async function handleUserUtterance(transcript) {
     console.log("Code extraction result:", { hasCode: !!code, textLength: text.length });
 
     // THIRD: Display the text part (without code markers or markdown symbols)
-    appendMessage("Gemini", stripMarkdownMarkers(spokenText), "model");
+    appendMessage("Interviewer", stripMarkdownMarkers(spokenText), "model");
 
     // FOURTH: If Gemini wrote code, update the editor
     const activeEditor = (currentMode === "ood") ? oodMonacoEditor : monacoEditor;
@@ -1613,6 +1632,7 @@ function extractProblemStatement(replyText) {
     </div>`;
     elements.problemPanel.style.display = "block";
     problemStatementSet = true;
+    applyStarterCodeIfEmpty();
     return;
   }
 
@@ -1676,6 +1696,7 @@ function setProblemStatement(problemText) {
   elements.problemPanel.style.display = "block";
   problemStatementSet = true;
   problemUpdatesCount = 0;
+  applyStarterCodeIfEmpty();
 }
 
 function escapeHtml(text) {

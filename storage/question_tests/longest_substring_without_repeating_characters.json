@@ -1,0 +1,81 @@
+{
+  "question_title": "Longest Substring Without Repeating Characters",
+  "tests": [
+    {
+      "input": {
+        "s": "abcabcbb"
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "s": "bbbbb"
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "s": "pwwkew"
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "s": ""
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "s": "dvdf"
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "s": "anviaj"
+      },
+      "output": 5
+    },
+    {
+      "input": {
+        "s": "tmmzuxt"
+      },
+      "output": 5
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "lengthOfLongestSubstring",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "lengthOfLongestSubstring",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "lengthOfLongestSubstring",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

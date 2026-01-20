@@ -37,7 +37,7 @@
 
     <section class="card">
         <h2>1b. Optional: Target company &amp; role</h2>
-        <p class="hint" style="margin-top:0;">Gemini will tailor OOD questions to whatever you enter here.</p>
+        <p class="hint" style="margin-top:0;">The interviewer model will tailor OOD questions to whatever you enter here.</p>
         <form id="company-role-form">
             <label for="company-input" class="sr-only">Company</label>
             <input type="text" id="company-input" placeholder="Company (e.g., Stripe)">
@@ -85,8 +85,14 @@
             <select id="language-select">
                 <option value="python">Python</option>
                 <option value="java">Java</option>
-                <option value="c">C</option>
                 <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div class="language-selector">
+            <label for="model-select">Interview Model:</label>
+            <select id="model-select">
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                <option value="gpt-4o-mini">GPT-4o mini</option>
             </select>
         </div>
         <div class="controls">

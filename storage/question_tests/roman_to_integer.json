@@ -1,0 +1,81 @@
+{
+  "question_title": "Roman to Integer",
+  "tests": [
+    {
+      "input": {
+        "s": "III"
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "s": "IV"
+      },
+      "output": 4
+    },
+    {
+      "input": {
+        "s": "IX"
+      },
+      "output": 9
+    },
+    {
+      "input": {
+        "s": "LVIII"
+      },
+      "output": 58
+    },
+    {
+      "input": {
+        "s": "MCMXCIV"
+      },
+      "output": 1994
+    },
+    {
+      "input": {
+        "s": "XL"
+      },
+      "output": 40
+    },
+    {
+      "input": {
+        "s": "MMXXIII"
+      },
+      "output": 2023
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "romanToInt",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "romanToInt",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "romanToInt",
+      "parameters": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

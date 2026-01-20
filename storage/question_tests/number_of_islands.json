@@ -1,0 +1,185 @@
+{
+  "question_title": "Number of Islands",
+  "tests": [
+    {
+      "input": {
+        "grid": [
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "0",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "1",
+            "1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1",
+            "1"
+          ]
+        ]
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0"
+          ]
+        ]
+      },
+      "output": 0
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "1"
+          ]
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "1",
+            "0",
+            "1",
+            "0",
+            "1"
+          ]
+        ]
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ]
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "grid": [
+          [
+            "1",
+            "1"
+          ],
+          [
+            "1",
+            "1"
+          ]
+        ]
+      },
+      "output": 1
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "numIslands",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "string[][]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "numIslands",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "string[][]"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "numIslands",
+      "parameters": [
+        {
+          "name": "grid",
+          "type": "vector<vector<string>>"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}

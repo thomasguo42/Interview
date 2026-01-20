@@ -1,0 +1,243 @@
+{
+  "question_title": "Number of Ships in a Rectangle",
+  "tests": [
+    {
+      "input": {
+        "ships": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "topRight": [
+          3,
+          3
+        ],
+        "bottomLeft": [
+          1,
+          1
+        ]
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "ships": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "topRight": [
+          2,
+          2
+        ],
+        "bottomLeft": [
+          2,
+          2
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "ships": [
+          [
+            1,
+            1
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            7,
+            7
+          ]
+        ],
+        "topRight": [
+          6,
+          6
+        ],
+        "bottomLeft": [
+          2,
+          2
+        ]
+      },
+      "output": 2
+    },
+    {
+      "input": {
+        "ships": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "topRight": [
+          2,
+          2
+        ],
+        "bottomLeft": [
+          0,
+          0
+        ]
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "ships": [
+          [
+            10,
+            10
+          ]
+        ],
+        "topRight": [
+          10,
+          10
+        ],
+        "bottomLeft": [
+          10,
+          10
+        ]
+      },
+      "output": 1
+    },
+    {
+      "input": {
+        "ships": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            6,
+            2
+          ]
+        ],
+        "topRight": [
+          4,
+          5
+        ],
+        "bottomLeft": [
+          1,
+          2
+        ]
+      },
+      "output": 3
+    },
+    {
+      "input": {
+        "ships": [],
+        "topRight": [
+          5,
+          5
+        ],
+        "bottomLeft": [
+          1,
+          1
+        ]
+      },
+      "output": 0
+    }
+  ],
+  "function_signatures": {
+    "python": {
+      "function_name": "countShips",
+      "parameters": [
+        {
+          "name": "sea",
+          "type": "Sea"
+        },
+        {
+          "name": "topRight",
+          "type": "int[]"
+        },
+        {
+          "name": "bottomLeft",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "int"
+    },
+    "java": {
+      "class_name": "Solution",
+      "method_name": "countShips",
+      "parameters": [
+        {
+          "name": "sea",
+          "type": "Sea"
+        },
+        {
+          "name": "topRight",
+          "type": "int[]"
+        },
+        {
+          "name": "bottomLeft",
+          "type": "int[]"
+        }
+      ],
+      "return_type": "int",
+      "static": true
+    },
+    "cpp": {
+      "function_name": "countShips",
+      "parameters": [
+        {
+          "name": "sea",
+          "type": "Sea"
+        },
+        {
+          "name": "topRight",
+          "type": "vector<int>"
+        },
+        {
+          "name": "bottomLeft",
+          "type": "vector<int>"
+        }
+      ],
+      "return_type": "int"
+    }
+  }
+}
