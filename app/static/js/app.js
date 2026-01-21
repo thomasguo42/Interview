@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let monacoEditor = null;
   let interviewActive = false;
   let interviewPaused = false;
-  let currentPhase = "intro";
+  let currentPhase = "intro_resume";
   let currentMode = "full"; // Track interview mode
   let interviewStartTime = null;
   let phaseStartTime = null;
@@ -1132,7 +1132,7 @@ elements.resetButton?.addEventListener("click", async () => {
     // Reset interview state
     interviewActive = false;
     interviewPaused = false;
-    currentPhase = "intro";
+    currentPhase = "intro_resume";
     currentMode = "full"; // Reset mode
     problemStatementSet = false; // Reset problem tracking
     problemUpdatesCount = 0;
@@ -1319,21 +1319,17 @@ async function updatePhaseUI() {
 
     currentPhase = status.phase;
     const phaseNames = {
-      intro: "Phase 1: Introduction",
-      resume: "Phase 2: Resume Discussion",
-      coding: "Phase 3: Coding Problem",
-      questions: "Phase 4: Your Questions",
+      intro_resume: "Phase 1: Intro + Resume",
+      coding: "Phase 2: Coding Problem",
+      questions: "Phase 3: Your Questions",
       ood_design: "OOD: Design Phase",
       ood_implementation: "OOD: Implementation Phase"
     };
 
     elements.phaseIndicator.textContent = phaseNames[currentPhase] || currentPhase;
 
-    // Show force coding button if stuck in resume phase for >8 minutes
-    if (currentPhase === 'resume' && status.timeInPhase > 8) {
-      elements.forceCodingBtn.style.display = "block";
-      console.log("Showing force coding button - stuck in resume phase for", status.timeInPhase, "minutes");
-    } else {
+    // Force transition is disabled for the new phased flow
+    if (elements.forceCodingBtn) {
       elements.forceCodingBtn.style.display = "none";
     }
 

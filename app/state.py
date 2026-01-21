@@ -3,6 +3,7 @@ from __future__ import annotations
 from threading import Lock
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+import re
 
 
 MAX_RESUME_CHARS = 20000
@@ -14,8 +15,7 @@ _state: Dict[str, Dict[str, Any]] = {}
 _lock = Lock()
 
 # Interview phases
-PHASE_INTRO = "intro"
-PHASE_RESUME = "resume"
+PHASE_INTRO_RESUME = "intro_resume"
 PHASE_CODING = "coding"
 PHASE_QUESTIONS = "questions"
 
@@ -27,14 +27,38 @@ PHASE_OOD_IMPLEMENTATION = "ood_implementation"
 SUPPORTED_LANGUAGES = ["python", "java", "cpp"]
 
 
+def _extract_candidate_name(resume_text: str) -> str:
+    """Best-effort name extraction from resume text."""
+    if not resume_text:
+        return ""
+    lines = [line.strip() for line in resume_text.splitlines() if line.strip()]
+    for line in lines[:5]:
+        lowered = line.lower()
+        if "@" in line or "http" in lowered or "www" in lowered:
+            continue
+        if any(char.isdigit() for char in line):
+            continue
+        words = [w for w in re.split(r"\s+", line) if w]
+        if 2 <= len(words) <= 4 and all(word.isalpha() for word in words):
+            return line
+    return ""
+
+
 def store_resume(session_id: str, resume_text: str) -> None:
     truncated_resume = resume_text.strip()
     if len(truncated_resume) > MAX_RESUME_CHARS:
         truncated_resume = truncated_resume[:MAX_RESUME_CHARS]
 
+    candidate_name = _extract_candidate_name(truncated_resume)
+
     with _lock:
         context = _state.setdefault(session_id, {"resume": None, "conversation": []})
         context["resume"] = truncated_resume
+        if candidate_name:
+            context["candidate_name"] = candidate_name
+        interview = context.get("interview")
+        if interview is not None and candidate_name:
+            interview["candidate_name"] = candidate_name
         context["conversation"] = []
 
 
@@ -50,6 +74,14 @@ def has_resume(session_id: str) -> bool:
     with _lock:
         context = _state.get(session_id)
         return bool(context and context.get("resume"))
+
+
+def get_candidate_name(session_id: str) -> str:
+    with _lock:
+        context = _state.get(session_id)
+        if not context:
+            return ""
+        return str(context.get("candidate_name") or "")
 
 
 def set_company_context(session_id: str, company: str = "", role: str = "", details: str = "") -> None:
@@ -139,7 +171,7 @@ def start_interview(
     elif mode == "coding_only":
         starting_phase = PHASE_CODING
     else:
-        starting_phase = PHASE_INTRO
+        starting_phase = PHASE_INTRO_RESUME
 
     with _lock:
         context = _state.setdefault(session_id, {"resume": None, "conversation": []})
@@ -147,6 +179,7 @@ def start_interview(
             "started_at": datetime.now(),
             "current_phase": starting_phase,
             "phase_started_at": datetime.now(),
+            "phase_turn_start_index": 0,
             "language": language,
             "mode": mode,  # Store the mode
             "model": model,
@@ -158,11 +191,15 @@ def start_interview(
             "code_snapshots": [],
             "coding_question": None,
             "code_evaluation": None,
+            "coding_summary": None,
         }
 
         company_context = context.get("company_context")
         if company_context:
             interview_state["company_context"] = dict(company_context)
+        candidate_name = context.get("candidate_name")
+        if candidate_name:
+            interview_state["candidate_name"] = str(candidate_name)
 
         # Add OOD-specific state
         if mode == "ood":
@@ -191,6 +228,8 @@ def update_interview_phase(session_id: str, new_phase: str) -> None:
         if context and "interview" in context:
             context["interview"]["current_phase"] = new_phase
             context["interview"]["phase_started_at"] = datetime.now()
+            conversation = context.get("conversation", [])
+            context["interview"]["phase_turn_start_index"] = len(conversation)
 
 
 def update_code(session_id: str, code: str) -> None:
@@ -276,6 +315,25 @@ def get_code_evaluation(session_id: str) -> Dict[str, Any]:
         context = _state.get(session_id)
         if context and "interview" in context:
             stored = context["interview"].get("code_evaluation")
+            if stored:
+                return dict(stored)
+        return {}
+
+
+def set_coding_summary(session_id: str, summary: Dict[str, Any]) -> None:
+    """Store a summary of coding performance for the questions phase."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            context["interview"]["coding_summary"] = dict(summary)
+
+
+def get_coding_summary(session_id: str) -> Dict[str, Any]:
+    """Get the stored coding summary, if any."""
+    with _lock:
+        context = _state.get(session_id)
+        if context and "interview" in context:
+            stored = context["interview"].get("coding_summary")
             if stored:
                 return dict(stored)
         return {}

@@ -38,6 +38,7 @@ from .state import (
     set_problem_presented,
     set_coding_question,
     set_code_evaluation,
+    set_coding_summary,
     calculate_time_in_phase,
     calculate_total_time,
     set_ood_question,
@@ -49,8 +50,7 @@ from .state import (
     is_interview_ended,
     set_interview_report,
     get_interview_report,
-    PHASE_INTRO,
-    PHASE_RESUME,
+    PHASE_INTRO_RESUME,
     PHASE_CODING,
     PHASE_QUESTIONS,
     PHASE_OOD_DESIGN,
@@ -67,6 +67,15 @@ from .question_tests import (
 )
 from .test_runner import run_code_tests
 from .tts import KokoroUnavailable, kokoro
+
+
+PHASE_COMPLETE_TOKEN = "[PHASE_COMPLETE]"
+
+FULL_PHASE_RULES = {
+    PHASE_INTRO_RESUME: {"min": 5.0, "max": 10.0, "next": PHASE_CODING},
+    PHASE_CODING: {"min": 0.0, "max": 30.0, "next": PHASE_QUESTIONS},
+    PHASE_QUESTIONS: {"min": 0.0, "max": 5.0, "next": None},
+}
 
 
 def create_app() -> Flask:
@@ -247,7 +256,6 @@ def create_app() -> Flask:
         test_gate_time = 0.0
         test_run_time = 0.0
         llm_reply_time = 0.0
-        phase_decision_time = 0.0
         tts_time = 0.0
         try:
             model_name = interview_state.get("model") if interview_state else None
@@ -340,25 +348,11 @@ def create_app() -> Flask:
         print(f"[CHAT DEBUG] Contains CODE_START: {'[CODE_START]' in reply_text}")
         print(f"[CHAT DEBUG] Contains CODE_END: {'[CODE_END]' in reply_text}")
 
-        phase_decision = None
+        phase_complete = False
         if interview_state:
-            enriched_conversation = list(conversation)
-            enriched_conversation.append({"role": "user", "parts": [{"text": user_message}]})
-            enriched_conversation.append({"role": "model", "parts": [{"text": reply_text}]})
-
-            phase_start = time.perf_counter() if perf_enabled else 0.0
-            phase_decision = client.decide_phase_transition(
-                session_id=session_id,
-                interview_state=interview_state,
-                conversation=enriched_conversation,
-                user_message=user_message,
-                model_reply=reply_text,
-            )
-            if perf_enabled:
-                phase_decision_time = time.perf_counter() - phase_start
-
-            _apply_phase_decision(session_id, interview_state, phase_decision, user_message, reply_text)
-            _handle_problem_presentation(session_id, interview_state, user_message, reply_text, phase_decision)
+            phase_complete, reply_text = _extract_phase_complete(reply_text)
+            _handle_problem_presentation(session_id, interview_state, reply_text)
+            _apply_phase_completion(session_id, interview_state, phase_complete)
 
         # Strip code markers before TTS (code will be displayed in editor, not spoken)
         tts_text = _strip_code_markers(reply_text)
@@ -385,25 +379,23 @@ def create_app() -> Flask:
 
         interview_ended = False
         if interview_state:
-            total_time = calculate_total_time(session_id)
             mode = interview_state.get("mode", "full")
-            current_phase = interview_state.get("current_phase")
-            if total_time >= 40.0 and mode in {"full", "coding_only", "ood"}:
-                set_interview_ended(session_id, True)
-                interview_ended = True
-            elif _detect_interview_close(reply_text):
-                set_interview_ended(session_id, True)
-                interview_ended = True
+            if mode in {"coding_only", "ood"}:
+                total_time = calculate_total_time(session_id)
+                if total_time >= 40.0:
+                    set_interview_ended(session_id, True)
+                elif _detect_interview_close(reply_text):
+                    set_interview_ended(session_id, True)
+            interview_ended = bool(is_interview_ended(session_id))
 
         if perf_enabled:
             total_time = time.perf_counter() - perf_t0
             logging.info(
-                "[PERF][coding_only] total=%.3fs gate=%.3fs test=%.3fs llm=%.3fs phase=%.3fs tts=%.3fs",
+                "[PERF][coding_only] total=%.3fs gate=%.3fs test=%.3fs llm=%.3fs tts=%.3fs",
                 total_time,
                 test_gate_time,
                 test_run_time,
                 llm_reply_time,
-                phase_decision_time,
                 tts_time,
             )
 
@@ -781,8 +773,7 @@ def create_app() -> Flask:
         new_phase = payload.get("phase")
 
         valid_phases = [
-            PHASE_INTRO,
-            PHASE_RESUME,
+            PHASE_INTRO_RESUME,
             PHASE_CODING,
             PHASE_QUESTIONS,
             PHASE_OOD_DESIGN,
@@ -800,11 +791,11 @@ def create_app() -> Flask:
             return jsonify({"error": "No active interview"}), 400
 
         if interview_state.get("mode") == "full":
-            total_time = calculate_total_time(session_id)
-            if new_phase == PHASE_CODING and total_time < 5.0:
-                return jsonify({"error": "Cannot enter coding before 5 minutes total time."}), 400
-            if new_phase == PHASE_QUESTIONS and total_time < 35.0:
-                return jsonify({"error": "Cannot enter questions before 35 minutes total time."}), 400
+            time_in_phase = calculate_time_in_phase(session_id)
+            if new_phase == PHASE_CODING and time_in_phase < FULL_PHASE_RULES[PHASE_INTRO_RESUME]["min"]:
+                return jsonify({"error": "Cannot enter coding before 5 minutes in intro/resume."}), 400
+            if new_phase == PHASE_QUESTIONS and time_in_phase < FULL_PHASE_RULES[PHASE_CODING]["min"]:
+                return jsonify({"error": "Cannot enter questions before coding begins."}), 400
 
         update_interview_phase(session_id, new_phase)
         return jsonify({"message": f"Transitioned to {new_phase} phase"})
@@ -816,6 +807,7 @@ def create_app() -> Flask:
         cleaned = re.sub(r'\[CODE_START\].*?\[CODE_END\]', '', text, flags=re.DOTALL)
         cleaned = re.sub(r'\[CODE_START\].*$', '', cleaned, flags=re.DOTALL)
         cleaned = re.sub(r'\[PROBLEM_START\].*?\[PROBLEM_END\]', '', cleaned, flags=re.DOTALL)
+        cleaned = cleaned.replace(PHASE_COMPLETE_TOKEN, "")
         cleaned = cleaned.strip()
         return _strip_markdown_symbols(cleaned)
 
@@ -851,119 +843,70 @@ def create_app() -> Flask:
         cleaned = re.sub(r"^#{1,6}\s+", "", cleaned, flags=re.MULTILINE)
         return cleaned.strip()
 
-    def _apply_phase_decision(
+    def _extract_phase_complete(text: str) -> tuple[bool, str]:
+        if not text:
+            return False, ""
+        if PHASE_COMPLETE_TOKEN in text:
+            cleaned = text.replace(PHASE_COMPLETE_TOKEN, "").strip()
+            return True, cleaned
+        return False, text
+
+    def _apply_phase_completion(
         session_id: str,
         interview_state: Dict[str, Any],
-        decision: Optional[Dict[str, Any]],
-        user_message: str,
-        model_reply: str,
+        phase_complete: bool,
     ) -> None:
-        """Apply phase decision returned by the coordinator model with safe fallbacks."""
-        if not interview_state:
+        if not interview_state or interview_state.get("mode") != "full":
             return
-
         current_phase = interview_state.get("current_phase")
         if not current_phase:
             return
-        interview_mode = interview_state.get("mode", "full")
-        total_time = calculate_total_time(session_id)
+        rules = FULL_PHASE_RULES.get(current_phase)
+        if not rules:
+            return
+        time_in_phase = calculate_time_in_phase(session_id)
+        min_minutes = float(rules.get("min", 0.0))
+        max_minutes = float(rules.get("max", 0.0))
+        next_phase = rules.get("next")
 
-        if interview_mode == "full":
-            if total_time >= 35.0 and current_phase != PHASE_QUESTIONS:
-                print(f"[PHASE HARD STOP] Forcing questions at {total_time:.1f} min total")
-                update_interview_phase(session_id, PHASE_QUESTIONS)
-                interview_state["current_phase"] = PHASE_QUESTIONS
-                return
-            if total_time >= 10.0 and current_phase in {PHASE_INTRO, PHASE_RESUME}:
-                print(f"[PHASE HARD STOP] Forcing coding at {total_time:.1f} min total")
-                update_interview_phase(session_id, PHASE_CODING)
-                interview_state["current_phase"] = PHASE_CODING
-                return
+        if phase_complete and time_in_phase < min_minutes:
+            phase_complete = False
 
-        should_transition = False
-        if decision is not None:
-            raw_flag = decision.get("should_transition", False)
-            if isinstance(raw_flag, str):
-                should_transition = raw_flag.lower() == "true"
-            else:
-                should_transition = bool(raw_flag)
-
-        if should_transition and decision:
-            next_phase = decision.get("next_phase")
-            reason = decision.get("reason", "")
-            if next_phase and next_phase != current_phase:
-                if interview_mode == "full":
-                    if total_time < 5.0 and next_phase in {PHASE_CODING, PHASE_QUESTIONS}:
-                        print(f"[PHASE GUARD] Blocked early transition to {next_phase} at {total_time:.1f} min")
-                        return
-                    if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
-                        print(f"[PHASE GUARD] Blocked questions before 35 min at {total_time:.1f} min")
-                        return
-                print(f"[PHASE DECISION] {current_phase} → {next_phase} (reason: {reason})")
-                update_interview_phase(session_id, next_phase)
-                interview_state["current_phase"] = next_phase
+        force_end = max_minutes > 0.0 and time_in_phase >= max_minutes
+        if not (phase_complete or force_end):
             return
 
-        keyword_transition = _detect_content_transition(current_phase, user_message, model_reply)
-        if keyword_transition:
-            next_phase, reason = keyword_transition
-            if interview_mode == "full":
-                if total_time < 5.0 and next_phase in {PHASE_CODING, PHASE_QUESTIONS}:
-                    print(f"[PHASE GUARD] Blocked early transition to {next_phase} at {total_time:.1f} min")
-                    return
-                if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
-                    print(f"[PHASE GUARD] Blocked questions before 35 min at {total_time:.1f} min")
-                    return
-            print(f"[PHASE CONTENT] {current_phase} → {next_phase} (reason: {reason})")
+        if current_phase == PHASE_CODING and phase_complete and not force_end:
+            evaluation = interview_state.get("code_evaluation") or {}
+            if str(evaluation.get("status", "")).strip() != "pass":
+                return
+
+        if next_phase:
+            if current_phase == PHASE_CODING:
+                summary = _build_coding_summary(interview_state)
+                if summary:
+                    set_coding_summary(session_id, summary)
             update_interview_phase(session_id, next_phase)
             interview_state["current_phase"] = next_phase
             return
 
-        # Fallback: guard against getting stuck in a phase for far too long
-        if interview_mode == "full":
-            fallback_thresholds = {
-                PHASE_INTRO: 5.0,
-                PHASE_RESUME: 5.0,
-                PHASE_CODING: 25.0,
-            }
-        else:
-            fallback_thresholds = {
-                PHASE_INTRO: 7.0,
-                PHASE_RESUME: 18.0,
-                PHASE_CODING: 45.0,
-                PHASE_OOD_DESIGN: 20.0,  # 20 minutes for design phase
-                PHASE_OOD_IMPLEMENTATION: 20.0,  # 20 minutes for implementation phase
-            }
-        time_in_phase = calculate_time_in_phase(session_id)
-        if current_phase in fallback_thresholds and time_in_phase > fallback_thresholds[current_phase]:
-            next_phase_map = {
-                PHASE_INTRO: PHASE_RESUME,
-                PHASE_RESUME: PHASE_CODING,
-                PHASE_CODING: PHASE_QUESTIONS,
-                PHASE_OOD_DESIGN: PHASE_OOD_IMPLEMENTATION,  # Auto-transition to implementation
-            }
-            next_phase = next_phase_map.get(current_phase)
-            if next_phase:
-                if interview_mode == "full":
-                    total_time = calculate_total_time(session_id)
-                    if total_time < 5.0 and next_phase == PHASE_CODING:
-                        return
-                    if total_time < 35.0 and next_phase == PHASE_QUESTIONS:
-                        return
-                print(f"[PHASE FALLBACK] {current_phase} → {next_phase} (time_in_phase={time_in_phase:.1f} min)")
-                update_interview_phase(session_id, next_phase)
-                interview_state["current_phase"] = next_phase
+        set_interview_ended(session_id, True)
 
-                # Mark design phase complete when transitioning to implementation
-                if current_phase == PHASE_OOD_DESIGN and next_phase == PHASE_OOD_IMPLEMENTATION:
-                    set_design_phase_complete(session_id, True)
+    def _build_coding_summary(interview_state: Dict[str, Any]) -> Dict[str, Any]:
+        coding_question = interview_state.get("coding_question") or {}
+        evaluation = interview_state.get("code_evaluation") or {}
+        summary: Dict[str, Any] = {}
+        if coding_question:
+            summary["question_title"] = coding_question.get("title", "")
+        if evaluation:
+            summary["status"] = evaluation.get("status", "")
+            summary["summary"] = evaluation.get("summary", "")
+        return summary
 
     def _handle_problem_presentation(
         session_id: str,
         interview_state: Dict[str, Any],
-        user_message: str,
         reply_text: str,
-        decision: Optional[Dict[str, Any]],
     ) -> None:
         """Track when the coding problem has been formally presented."""
         if not interview_state or interview_state.get("current_phase") != PHASE_CODING:
@@ -972,107 +915,9 @@ def create_app() -> Flask:
         if interview_state.get("problem_presented"):
             return
 
-        mark_problem = False
-        if decision is not None:
-            raw_mark = decision.get("mark_problem_presented", False)
-            if isinstance(raw_mark, str):
-                mark_problem = raw_mark.lower() == "true"
-            else:
-                mark_problem = bool(raw_mark)
-
-        if mark_problem:
-            print("[PROBLEM PRESENTED] Marked via phase decision model")
+        if "[PROBLEM_START]" in reply_text and "[PROBLEM_END]" in reply_text:
             set_problem_presented(session_id, True)
-            interview_state["problem_presented"] = True
-            return
-
-        reply_lower = reply_text.lower()
-        user_lower = (user_message or "").lower()
-        problem_keywords = [
-            "given an array",
-            "given a",
-            "design a",
-            "implement a",
-            "find the",
-            "return",
-            "write a function",
-            "create a function",
-            "you need to",
-            "your task is",
-            "the problem is",
-        ]
-        if any(phrase in reply_lower for phrase in problem_keywords):
-            print("[PROBLEM PRESENTED] Detected problem presentation keywords (fallback)")
-            set_problem_presented(session_id, True)
-            interview_state["problem_presented"] = True
-            return
-
-        # Candidate explicitly acknowledging problem can also mark it
-        candidate_ack = [
-            "okay what's the problem",
-            "ready for the problem",
-            "sounds good let's code",
-            "yes let's do the coding problem",
-            "ready for coding",
-        ]
-        if any(phrase in user_lower for phrase in candidate_ack):
-            print("[PROBLEM PRESENTED] Candidate acknowledged problem (fallback)")
-            set_problem_presented(session_id, True)
-            interview_state["problem_presented"] = True
-
-    def _detect_content_transition(current_phase: str, user_message: str, model_reply: str) -> Optional[tuple[str, str]]:
-        """Use conversational keywords to trigger coherent transitions."""
-        if not current_phase:
-            return None
-
-        user_lower = (user_message or "").lower()
-        reply_lower = (model_reply or "").lower()
-
-        if current_phase == PHASE_INTRO:
-            intro_to_resume = [
-                "tell me about yourself",
-                "walk me through your background",
-                "let's start with your background",
-                "let's talk about your resume",
-                "start with your experience",
-            ]
-            if any(phrase in reply_lower for phrase in intro_to_resume):
-                return (PHASE_RESUME, "Interviewer invited resume discussion")
-
-        if current_phase == PHASE_RESUME:
-            resume_to_coding = [
-                "let's move to coding",
-                "let's move on to coding",
-                "let's move on to the coding",
-                "let's work on a coding problem",
-                "time for a coding challenge",
-                "let's switch to the coding problem",
-                "let's start the coding challenge",
-            ]
-            candidate_ready = [
-                "ready for the coding problem",
-                "can we start coding",
-                "i'm ready to start coding",
-                "let's start coding",
-                "let's jump into coding",
-            ]
-            if any(phrase in reply_lower for phrase in resume_to_coding):
-                return (PHASE_CODING, "Interviewer prompted coding phase")
-            if any(phrase in user_lower for phrase in candidate_ready):
-                return (PHASE_CODING, "Candidate requested coding phase")
-
-        if current_phase == PHASE_CODING:
-            coding_to_questions = [
-                "what questions do you have for me",
-                "do you have any questions for me",
-                "any questions about the team",
-                "your questions for me",
-                "ask me anything about the role",
-            ]
-            if any(phrase in reply_lower for phrase in coding_to_questions):
-                return (PHASE_QUESTIONS, "Interviewer invited candidate questions")
-
-        return None
+            print("[PROBLEM PRESENTED] Marked via problem block in reply")
 
     return app
 

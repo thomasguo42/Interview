@@ -100,8 +100,7 @@ class OpenAIClient:
 
         next_phase = decision.get("next_phase")
         if next_phase and next_phase not in {
-            state.PHASE_INTRO,
-            state.PHASE_RESUME,
+            state.PHASE_INTRO_RESUME,
             state.PHASE_CODING,
             state.PHASE_QUESTIONS,
         }:
@@ -118,7 +117,7 @@ class OpenAIClient:
         user_message: str,
         current_code: str,
     ) -> bool:
-        current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
+        current_phase = interview_state.get("current_phase", state.PHASE_INTRO_RESUME)
         if current_phase != state.PHASE_CODING:
             return False
 

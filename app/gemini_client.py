@@ -406,7 +406,7 @@ class GeminiClient:
     ) -> Dict[str, Any]:
         """Build payload with phase-aware prompting for structured interview"""
 
-        current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
+        current_phase = interview_state.get("current_phase", state.PHASE_INTRO_RESUME)
         language = interview_state.get("language", "python")
         problem_presented = interview_state.get("problem_presented", False)
         mode = interview_state.get("mode", "full")
@@ -414,6 +414,8 @@ class GeminiClient:
         ood_question = interview_state.get("ood_question")
         coding_question = interview_state.get("coding_question")
         code_evaluation = state.get_code_evaluation(session_id)
+        coding_summary = state.get_coding_summary(session_id)
+        candidate_name = str(interview_state.get("candidate_name") or "")
 
         normalized_code = self._normalize_editor_code(current_code)
 
@@ -428,6 +430,7 @@ class GeminiClient:
             current_phase,
             language,
             resume_text,
+            candidate_name,
             normalized_code,
             code_changed,
             problem_presented,
@@ -440,10 +443,12 @@ class GeminiClient:
             ood_question,
             coding_question,
             code_evaluation,
+            coding_summary,
         )
 
-        # Build conversation payload
-        conversation_payload = list(conversation)
+        # Build conversation payload (limit to current phase turns)
+        phase_start_index = int(interview_state.get("phase_turn_start_index", 0) or 0)
+        conversation_payload = list(conversation[phase_start_index:])
         enriched_user_message = self._build_user_payload_with_editor_context(
             user_message=user_message,
             normalized_code=normalized_code,
@@ -533,8 +538,7 @@ class GeminiClient:
 
         next_phase = decision.get("next_phase")
         if next_phase and next_phase not in {
-            state.PHASE_INTRO,
-            state.PHASE_RESUME,
+            state.PHASE_INTRO_RESUME,
             state.PHASE_CODING,
             state.PHASE_QUESTIONS,
         }:
@@ -552,7 +556,7 @@ class GeminiClient:
         current_code: str,
     ) -> bool:
         """Decide if the candidate appears finished and tests should run."""
-        current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
+        current_phase = interview_state.get("current_phase", state.PHASE_INTRO_RESUME)
         if current_phase != state.PHASE_CODING:
             return False
 
@@ -654,7 +658,7 @@ class GeminiClient:
         silence_duration: float,
         code_idle_duration: float,
     ) -> Dict[str, Any]:
-        current_phase = interview_state.get("current_phase", state.PHASE_INTRO)
+        current_phase = interview_state.get("current_phase", state.PHASE_INTRO_RESUME)
         mode = interview_state.get("mode", "full")
         time_in_phase = float(time_in_phase or 0.0)
         total_time = float(total_time or 0.0)
@@ -667,6 +671,9 @@ class GeminiClient:
             "mode": mode,
             "time_in_phase_minutes": round(time_in_phase, 2),
             "total_time_minutes": round(total_time, 2),
+            "minutes_until_coding_window": round(max(0.0, 10.0 - total_time), 2),
+            "minutes_until_questions_window": round(max(0.0, 35.0 - total_time), 2),
+            "minutes_remaining_total": round(max(0.0, 40.0 - total_time), 2),
             "seconds_since_candidate_spoke": round(float(silence_duration or 0.0), 1),
             "seconds_since_code_change": round(float(code_idle_duration or 0.0), 1),
             "problem_already_presented": problem_presented,
@@ -674,8 +681,7 @@ class GeminiClient:
             "model_reply_being_sent": model_reply,
             "conversation_excerpt": snippet,
             "phase_options": [
-                state.PHASE_INTRO,
-                state.PHASE_RESUME,
+                state.PHASE_INTRO_RESUME,
                 state.PHASE_CODING,
                 state.PHASE_QUESTIONS,
             ],
@@ -776,6 +782,7 @@ class GeminiClient:
         current_phase: str,
         language: str,
         resume_text: Optional[str],
+        candidate_name: str,
         current_code: str,
         code_changed: bool,
         problem_presented: bool,
@@ -788,6 +795,7 @@ class GeminiClient:
         ood_question: Optional[Dict[str, Any]] = None,
         coding_question: Optional[Dict[str, Any]] = None,
         code_evaluation: Optional[Dict[str, Any]] = None,
+        coding_summary: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build phase-specific system prompt"""
 
@@ -826,7 +834,7 @@ Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
 """
         else:
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE technical interview.
-This is a 40-minute structured interview with natural, back-and-forth CONVERSATION.
+This is a single-phase session. You ONLY handle the current phase and do NOT know later phases.
 
 🎯 SPEECH OUTPUT - THIS IS CRITICAL:
 Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
@@ -868,11 +876,36 @@ CURRENT STATE:
 - Seconds since code changed: {code_idle_duration:.0f}s
 
 """
+        elif mode == "full":
+            phase_min = {
+                state.PHASE_INTRO_RESUME: 5.0,
+                state.PHASE_CODING: 0.0,
+                state.PHASE_QUESTIONS: 0.0,
+            }
+            phase_max = {
+                state.PHASE_INTRO_RESUME: 10.0,
+                state.PHASE_CODING: 30.0,
+                state.PHASE_QUESTIONS: 5.0,
+            }
+            min_minutes = phase_min.get(current_phase, 0.0)
+            max_minutes = phase_max.get(current_phase, 0.0)
+            remaining = max(0.0, max_minutes - time_in_phase) if max_minutes else 0.0
+            structure = f"""FULL MODE (3 phases; separate interviewer per phase):
+Phase A: Intro + Resume (5-10 minutes)
+Phase B: Coding (up to 30 minutes)
+Phase C: Questions (up to 5 minutes)
+
+CURRENT PHASE:
+- Phase: {current_phase.upper()}
+- Minutes elapsed in this phase: {time_in_phase:.1f}
+- Minutes remaining in this phase: {remaining:.1f}
+- Minimum minutes before ending this phase: {min_minutes:.1f}
+- Seconds since candidate spoke: {silence_duration:.0f}s
+- Seconds since code changed: {code_idle_duration:.0f}s
+
+"""
         else:
-            structure = f"""INTERVIEW STRUCTURE (40 minutes total):
-Phase 1: Intro + Resume (0-10min) - Quick rapport + background
-Phase 2: Coding Problem (10-35min) - Technical assessment
-Phase 3: Candidate Questions (35-40min) - Reverse interview
+            structure = f"""SESSION TYPE: OOD MODE (40 minutes total)
 
 CURRENT STATE:
 - Phase: {current_phase.upper()}
@@ -884,7 +917,7 @@ CURRENT STATE:
 """
 
         company_lines: List[str] = []
-        if company_context:
+        if company_context and mode != "full":
             company_value = (company_context.get("company") or "").strip()
             role_value = (company_context.get("role") or "").strip()
             details_value = (company_context.get("details") or "").strip()
@@ -899,30 +932,29 @@ CURRENT STATE:
             structure += "COMPANY & ROLE CONTEXT:\n" + "\n".join(f"- {line}" for line in company_lines) + "\n\n"
 
         # Phase-specific instructions
-        if current_phase == state.PHASE_INTRO:
-            phase_instructions = """INTRODUCTION PHASE:
-Your first response (if just starting):
-- ONE sentence intro: "Hi, I'm [Name], senior engineer at [Company]."
-- ONE sentence about format: "This'll be a 40-minute interview - intro, coding, then your questions."
-- ONE sentence warmup: "Sound good?" or "Ready to start?"
-Total: 3 sentences max (under 30 words)
-
-After they respond:
-- Move to resume discussion: "Great. Tell me about yourself."
-- Keep everything conversational and brief
-- No need to explain every detail upfront
-
-TRANSITION at 3-5 minutes total: "Let's talk about your background."
-"""
-
-        elif current_phase == state.PHASE_RESUME:
+        if current_phase == state.PHASE_INTRO_RESUME:
             resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
-            phase_instructions = f"""RESUME DISCUSSION PHASE:{resume_context}
+            name_line = f"Candidate name: {candidate_name}" if candidate_name else "Candidate name: [unknown]"
+            phase_instructions = f"""INTRO + RESUME PHASE:
+You are ONLY responsible for a 5-10 minute resume discussion. You do NOT know about later phases.
+{name_line}{resume_context}
 
 RESPONSE STYLE:
 - Ask ONE question at a time (10-15 words)
 - Follow-ups should be brief: "Tell me more about that" or "What challenges did you face?"
 - Listen more, talk less
+
+TIMING (THIS PHASE ONLY):
+- Minutes elapsed: {time_in_phase:.1f}
+- Minimum required before ending: 5.0
+- Maximum allowed: 10.0
+- Do NOT end before 5 minutes
+- You MUST end by 10 minutes
+
+ENDING THIS PHASE:
+- When you are ready to end AND elapsed >= 5.0 minutes, append this token on a NEW line at the end:
+  [PHASE_COMPLETE]
+- Do NOT include the token unless you are ending the phase
 
 QUESTIONS TO ASK (pick 3-4 total):
 - Recent projects and impact
@@ -930,12 +962,11 @@ QUESTIONS TO ASK (pick 3-4 total):
 - Technologies they're comfortable with
 - What they're excited about
 
-TIMING: Time in phase {time_in_phase:.1f}min | Total {total_time:.1f}min
-- Target: Finish by 10 min total
-- At 10 min OR after 3-4 questions: TRANSITION
-
-TRANSITION: Include this EXACT phrase: "Let's move to coding"
-Example: "Sounds great. Let's move to coding now. Ready?"
+STARTING SCRIPT (first response only):
+- ONE sentence intro: "Hi, I'm [Name], senior engineer at [Company]."
+- ONE sentence about format: "We'll spend about 5 to 10 minutes on your resume."
+- ONE sentence warmup: "Sound good?"
+Total: 3 sentences max (under 30 words)
 """
 
         elif current_phase == state.PHASE_CODING:
@@ -945,6 +976,7 @@ Example: "Sounds great. Let's move to coding now. Ready?"
                 "c": "C",
                 "cpp": "C++"
             }.get(language, language)
+            name_line = f"Candidate name: {candidate_name}" if candidate_name else "Candidate name: [unknown]"
 
             # Show code without markdown formatting (model should not output markdown)
             if current_code.strip():
@@ -983,6 +1015,15 @@ Example: "Sounds great. Let's move to coding now. Ready?"
                             "Guidance: The solution likely has issues. You may question correctness and ask for fixes.\n"
                         )
                     evaluation_block += "Use this only to guide your feedback.\n\n"
+
+            remaining_coding = max(0.0, 30.0 - time_in_phase)
+            timing_block = (
+                "TIMING (THIS PHASE ONLY):\n"
+                f"- Minutes elapsed: {time_in_phase:.1f}\n"
+                f"- Minutes remaining: {remaining_coding:.1f}\n"
+                "- Maximum allowed: 30.0\n"
+                "- End the phase when done or when time is up by appending [PHASE_COMPLETE] on a NEW line.\n\n"
+            )
 
             selected_question_block = ""
             if coding_question and coding_question.get("title"):
@@ -1035,8 +1076,9 @@ DEFAULT: 1-2 sentence responses. Let them work."""
                 else:
                     phase_instructions = f"""CODING PHASE - PROBLEM PRESENTATION STAGE:
 
+{name_line}
 LANGUAGE: {language_display}
-{code_display}{visibility_instructions}{evaluation_block}
+{timing_block}{code_display}{visibility_instructions}{evaluation_block}
 {selected_question_block}
 
 YOUR TASK NOW:
@@ -1095,8 +1137,9 @@ REMEMBER: After presenting, I will mark problem as presented."""
             else:
                 phase_instructions = f"""CODING PHASE - ACTIVE SOLVING:
 
+{name_line}
 LANGUAGE: {language_display}
-{code_display}{visibility_instructions}{evaluation_block}
+{timing_block}{code_display}{visibility_instructions}{evaluation_block}
 
 RESPONSE GUIDE (choose based on situation):
 
@@ -1122,27 +1165,51 @@ WRITING CODE:
 Only if: time almost up OR they're stuck and ask for solution
 Format: "Let me show you. [CODE_START]...code...[CODE_END] This is O(n) time."
 
-TIME: {time_in_phase:.1f}min in phase, {total_time:.1f}min total
-At ~25min in phase: "Let's start wrapping up."
-At ~35min total: "Nice work. What questions do you have for me?"
+PROBLEM SWITCH REQUESTS:
+- If they ask to switch problems, say no and continue the current problem.
+- Do NOT end the phase when they ask to switch.
+
+ENDING THIS PHASE:
+- ONLY end if the solution is correct OR time is up (30 minutes).
+- If they ask to switch problems, politely refuse and continue on the same problem.
+- When ending, append [PHASE_COMPLETE] on a NEW line.
 """
 
         elif current_phase == state.PHASE_QUESTIONS:
+            resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
+            summary_lines: List[str] = []
+            if coding_question:
+                title = str(coding_question.get("title", "")).strip()
+                if title:
+                    summary_lines.append(f"- Coding question: {title}")
+            if coding_summary:
+                status = str(coding_summary.get("status", "")).strip()
+                summary = str(coding_summary.get("summary", "")).strip()
+                if status:
+                    summary_lines.append(f"- Coding result status: {status}")
+                if summary:
+                    summary_lines.append(f"- Coding summary: {summary}")
+            summary_block = "\n".join(summary_lines) if summary_lines else "- Coding summary: [unavailable]"
+            remaining_questions = max(0.0, 5.0 - time_in_phase)
             phase_instructions = f"""QUESTIONS PHASE - THEIR TURN:
+You only answer their questions and then end. You do NOT resume coding.
+{resume_context}
 
-ROLE: Answer their questions about the company/role/team
+CODING CONTEXT:
+{summary_block}
 
 STYLE:
 - Keep answers conversational and genuine (2-3 sentences each)
 - Make up reasonable details about team, tech stack, culture
 - Be helpful and encouraging
 
+TIMING (THIS PHASE ONLY):
+- Minutes elapsed: {time_in_phase:.1f}
+- Minutes remaining: {remaining_questions:.1f}
+- Maximum allowed: 5.0
+- End when questions are done or time is up by appending [PHASE_COMPLETE] on a NEW line.
+
 OPENING: "What questions do you have for me?"
-
-CLOSING (at ~40 min total):
-"Thanks for your time today. We'll be in touch soon. Best of luck!"
-
-TIME: {time_in_phase:.1f}min in phase
 """
 
         elif current_phase == state.PHASE_OOD_DESIGN:
