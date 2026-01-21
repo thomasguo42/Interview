@@ -9,15 +9,11 @@ import sys
 
 from flask import (
     Flask,
-    Response,
     jsonify,
     render_template,
     request,
     session,
 )
-
-import requests
-from requests import RequestException
 
 from .config import config
 from .gemini_client import GeminiError
@@ -85,6 +81,7 @@ def create_app() -> Flask:
         log_dir = Path(__file__).resolve().parent.parent / "storage" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / "debug.log"
+        log_path.write_text("", encoding="utf-8")
 
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
@@ -194,6 +191,7 @@ def create_app() -> Flask:
 
     @app.route("/api/chat", methods=["POST"])
     def chat():
+        import time
         payload = request.get_json(silent=True) or {}
         user_message = (payload.get("message") or "").strip()
         if not user_message:
@@ -244,6 +242,13 @@ def create_app() -> Flask:
                 update_code(session_id, current_code)
 
         conversation: List[Dict[str, Any]] = get_conversation(session_id)
+        perf_enabled = bool(interview_state and interview_state.get("mode") == "coding_only")
+        perf_t0 = time.perf_counter() if perf_enabled else 0.0
+        test_gate_time = 0.0
+        test_run_time = 0.0
+        llm_reply_time = 0.0
+        phase_decision_time = 0.0
+        tts_time = 0.0
         try:
             model_name = interview_state.get("model") if interview_state else None
             client = get_llm_client(model_name)
@@ -258,6 +263,7 @@ def create_app() -> Flask:
                         set_code_evaluation(session_id, {})
                     fallback_hit = _should_run_tests_fallback(user_message)
                     complete_hit = _code_looks_complete(current_code, interview_state.get("language", ""))
+                    test_gate_start = time.perf_counter() if perf_enabled else 0.0
                     model_hit = client.should_run_tests(
                         session_id=session_id,
                         interview_state=interview_state,
@@ -265,6 +271,8 @@ def create_app() -> Flask:
                         user_message=user_message,
                         current_code=current_code,
                     )
+                    if perf_enabled:
+                        test_gate_time = time.perf_counter() - test_gate_start
                     print(
                         f"[TEST GATE] fallback={fallback_hit} complete={complete_hit} "
                         f"model={model_hit} code_hash={code_hash[:10]}"
@@ -282,11 +290,14 @@ def create_app() -> Flask:
                         test_spec = get_cached_tests(question_title)
                         if test_spec:
                             print(f"[TEST RUN] Using test spec for: {question_title}")
+                            test_run_start = time.perf_counter() if perf_enabled else 0.0
                             evaluation = run_code_tests(
                                 interview_state.get("language", ""),
                                 current_code,
                                 test_spec,
                             )
+                            if perf_enabled:
+                                test_run_time = time.perf_counter() - test_run_start
                             evaluation["code_hash"] = code_hash
                             set_code_evaluation(session_id, evaluation)
                             print(
@@ -304,6 +315,7 @@ def create_app() -> Flask:
 
             # Use structured interview prompts if interview is active
             if interview_state:
+                llm_start = time.perf_counter() if perf_enabled else 0.0
                 reply_text = client.generate_structured_interview_reply(
                     session_id=session_id,
                     conversation=conversation,
@@ -312,6 +324,8 @@ def create_app() -> Flask:
                     current_code=current_code,
                     code_changed=code_changed,
                 )
+                if perf_enabled:
+                    llm_reply_time = time.perf_counter() - llm_start
             else:
                 reply_text = client.generate_interview_reply(
                     conversation=conversation,
@@ -332,6 +346,7 @@ def create_app() -> Flask:
             enriched_conversation.append({"role": "user", "parts": [{"text": user_message}]})
             enriched_conversation.append({"role": "model", "parts": [{"text": reply_text}]})
 
+            phase_start = time.perf_counter() if perf_enabled else 0.0
             phase_decision = client.decide_phase_transition(
                 session_id=session_id,
                 interview_state=interview_state,
@@ -339,6 +354,8 @@ def create_app() -> Flask:
                 user_message=user_message,
                 model_reply=reply_text,
             )
+            if perf_enabled:
+                phase_decision_time = time.perf_counter() - phase_start
 
             _apply_phase_decision(session_id, interview_state, phase_decision, user_message, reply_text)
             _handle_problem_presentation(session_id, interview_state, user_message, reply_text, phase_decision)
@@ -350,7 +367,10 @@ def create_app() -> Flask:
             print(f"[BACKEND DEBUG] About to call kokoro.synthesize_base64")
             print(f"[BACKEND DEBUG] Reply text: '{tts_text[:100]}...'")
             print(f"[BACKEND DEBUG] Reply text length: {len(tts_text)}")
+            tts_start = time.perf_counter() if perf_enabled else 0.0
             reply_audio = kokoro.synthesize_base64(tts_text)
+            if perf_enabled:
+                tts_time = time.perf_counter() - tts_start
             print(f"[BACKEND DEBUG] Audio generated successfully, length: {len(reply_audio)}")
         except KokoroUnavailable as exc:
             print(f"[BACKEND DEBUG] KokoroUnavailable error: {exc}")
@@ -374,6 +394,18 @@ def create_app() -> Flask:
             elif _detect_interview_close(reply_text):
                 set_interview_ended(session_id, True)
                 interview_ended = True
+
+        if perf_enabled:
+            total_time = time.perf_counter() - perf_t0
+            logging.info(
+                "[PERF][coding_only] total=%.3fs gate=%.3fs test=%.3fs llm=%.3fs phase=%.3fs tts=%.3fs",
+                total_time,
+                test_gate_time,
+                test_run_time,
+                llm_reply_time,
+                phase_decision_time,
+                tts_time,
+            )
 
         response_phase = interview_state.get("current_phase") if interview_state else None
         return jsonify({
@@ -423,86 +455,6 @@ def create_app() -> Flask:
             return ok
         print("[TEST GATE] code_complete=False (unknown language)")
         return False
-
-    @app.route("/api/live/session", methods=["POST"])
-    def live_session():
-        if not config.GEMINI_API_KEY:
-            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
-
-        payload = request.get_json(silent=True) or {}
-        model = payload.get("model") or config.GEMINI_MODEL or "models/gemini-1.5-pro-latest"
-        language_code = payload.get("languageCode") or "en-US"
-        voice_name = payload.get("voiceName") or "Poppy"
-
-        session_payload: Dict[str, Any] = {
-            "model": model,
-            "languageCode": language_code,
-            "voiceConfig": {
-                "speechConfig": {
-                    "voiceName": voice_name,
-                }
-            },
-        }
-
-        try:
-            response = requests.post(
-                "https://generativelanguage.googleapis.com/v1beta/sessions",
-                headers={
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": config.GEMINI_API_KEY,
-                },
-                json=session_payload,
-                timeout=30,
-            )
-        except RequestException as exc:
-            return jsonify({"error": f"Failed to reach Gemini Live API: {exc}"}), 502
-
-        if response.status_code != 200:
-            try:
-                error_payload = response.json()
-                message = error_payload.get("error", error_payload)
-            except ValueError:
-                message = response.text
-            return jsonify({"error": f"Gemini Live API error: {message}"}), response.status_code
-
-        return jsonify(response.json())
-
-    @app.route("/api/live/connect", methods=["POST"])
-    def live_connect():
-        if not config.GEMINI_API_KEY:
-            return jsonify({"error": "Gemini API key is not configured on the server."}), 500
-
-        payload = request.get_json(silent=True) or {}
-        session_name = (payload.get("session") or "").strip()
-        client_sdp = (payload.get("sdp") or "").strip()
-
-        if not session_name or not client_sdp:
-            return jsonify({"error": "Both session and sdp are required."}), 400
-
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/{session_name}:connect"
-
-        try:
-            response = requests.post(
-                endpoint,
-                headers={
-                    "Content-Type": "application/sdp",
-                    "x-goog-api-key": config.GEMINI_API_KEY,
-                },
-                data=client_sdp,
-                timeout=30,
-            )
-        except RequestException as exc:
-            return jsonify({"error": f"Failed to connect to Gemini Live session: {exc}"}), 502
-
-        if response.status_code != 200:
-            try:
-                error_payload = response.json()
-                message = error_payload.get("error", error_payload)
-            except ValueError:
-                message = response.text
-            return jsonify({"error": f"Gemini Live connect error: {message}"}), response.status_code
-
-        return Response(response.text, mimetype="application/sdp")
 
     @app.route("/api/intervene", methods=["POST"])
     def intervene():
