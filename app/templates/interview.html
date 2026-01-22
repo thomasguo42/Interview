@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Session</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-interview-id="{{ interview.id }}">
+<main class="layout">
+    <header class="header">
+        <h1>Mock Interview Session</h1>
+        <p class="tagline">Mode: {{ interview.mode | replace('_', ' ') | title }} · Language: {{ interview.language }} · Model: {{ interview.model }}</p>
+    </header>
+
+    <section class="card">
+        <h2>Session details</h2>
+        <p class="hint">Resume: {{ resume.filename if resume else "None selected" }}</p>
+        <p class="hint">Company profile: {% if company_profile %}{{ company_profile.company }}{% if company_profile.role %} — {{ company_profile.role }}{% endif %}{% else %}None{% endif %}</p>
+        <div class="controls">
+            <button id="start-btn">Start Interview</button>
+            <button id="stop-btn" disabled>Stop Listening</button>
+            <button id="end-btn" disabled class="secondary">End Interview</button>
+            <button id="reset-btn" disabled class="secondary">Reset Conversation</button>
+            <a href="{{ url_for('dashboard') }}" class="secondary link-button">Back to Dashboard</a>
+        </div>
+        <p id="resume-status" class="status-message"></p>
+        <div id="live-caption" class="caption"></div>
+        <audio id="remote-audio" autoplay playsinline hidden></audio>
+    </section>
+
+    <div id="interview-timer" class="interview-timer" style="display:none;">
+        <div class="timer-content">
+            <span id="phase-indicator" class="phase-badge">Phase 1: Introduction</span>
+            <span id="time-display" class="time-display">0:00 / 60:00</span>
+            <button id="force-coding-btn" class="force-transition-btn" style="display:none;">
+                Force Coding Phase →
+            </button>
+        </div>
+    </div>
+
+    <section id="problem-panel" class="card problem-panel" style="display:none;">
+        <h2>Coding Problem</h2>
+        <div id="problem-statement" class="problem-statement">
+            Problem will appear here during the coding phase...
+        </div>
+    </section>
+
+    <section id="code-editor-section" class="card code-editor-section" style="display:none;">
+        <h2>Code Editor</h2>
+        <div id="code-editor" class="code-editor"></div>
+    </section>
+
+    <section id="ood-workspace" class="ood-workspace" style="display:none;">
+        <section class="card ood-code-section">
+            <h2>Design &amp; Code Editor</h2>
+            <p class="hint" style="margin-top:0;">Use this single editor for brainstorming, pseudocode, and final implementation.</p>
+            <div id="ood-code-editor" class="code-editor"></div>
+        </section>
+    </section>
+
+    <section class="card">
+        <h2>Conversation</h2>
+        <div id="conversation-log" class="transcript" aria-live="polite"></div>
+    </section>
+
+    <section id="report-section" class="card report-section" style="display:none;">
+        <h2>Interview Feedback Report</h2>
+        <div id="report-body" class="report-body"></div>
+    </section>
+</main>
+
+<template id="message-template">
+    <div class="message">
+        <span class="speaker"></span>
+        <p class="text"></p>
+    </div>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

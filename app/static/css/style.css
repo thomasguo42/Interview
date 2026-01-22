@@ -20,6 +20,96 @@ body {
     gap: 1.75rem;
 }
 
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: #fff;
+    box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.2);
+}
+
+.top-nav a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.inline-form {
+    margin: 0;
+}
+
+.auth-card {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.stacked-form {
+    display: grid;
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.stacked-form input,
+.stacked-form textarea,
+.stacked-form select {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.95rem;
+}
+
+.list-grid {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.list-item-column {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.muted {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.link-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    text-decoration: none;
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
 .header {
     text-align: center;
 }

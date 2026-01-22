@@ -38,8 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   console.log("Elements found:", elements);
-
-  loadCompanyRoleContext();
+  const interviewId = document.body.dataset.interviewId;
 
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -830,19 +829,35 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================================================
 
 async function fetchStatus() {
+  if (!interviewId) return;
   try {
-    const response = await fetch("/api/status");
+    const response = await fetch(`/api/interviews/${interviewId}/status`);
     if (!response.ok) throw new Error("Failed to fetch status");
     const status = await response.json();
-    if (status.resumeLoaded) {
+    interviewActive = status.interviewActive;
+    interviewPaused = status.status === "paused";
+    currentPhase = status.phase || currentPhase;
+    currentMode = status.mode || currentMode;
+    if (typeof status.totalTime === "number") {
+      interviewStartTime = Date.now() - status.totalTime * 60 * 1000;
+    }
+    if (typeof status.timeInPhase === "number") {
+      phaseStartTime = Date.now() - status.timeInPhase * 60 * 1000;
+    }
+    if (status.status === "ended") {
+      interviewActive = false;
+      interviewPaused = false;
+      disableInterviewControls();
+      setStatus("Interview ended. View the report below.", "info");
+      await fetchInterviewReport();
+      return;
+    }
+    if (interviewActive) {
       enableInterviewControls();
       if (elements.resetButton) {
         elements.resetButton.disabled = false;
       }
-      setStatus(
-        "Resume loaded. Choose mode and click start.",
-        "success"
-      );
+      setStatus("Interview ready. Click start to begin.", "success");
     }
   } catch (error) {
     console.warn("Status check failed:", error);
@@ -852,13 +867,10 @@ async function fetchStatus() {
 // Enable start button for coding-only mode even without resume
 function updateStartButtonForMode() {
   const modeRadio = document.querySelector('input[name="interview-mode"]:checked');
-  const mode = modeRadio ? modeRadio.value : "full";
-
-  // For coding_only mode, enable start button even without resume
-  if (mode === "coding_only" && !interviewActive) {
-    if (elements.startButton) {
-      elements.startButton.disabled = false;
-    }
+  if (!modeRadio) return;
+  const mode = modeRadio.value;
+  if (mode === "coding_only" && !interviewActive && elements.startButton) {
+    elements.startButton.disabled = false;
   }
 }
 
@@ -866,9 +878,6 @@ function updateStartButtonForMode() {
 document.querySelectorAll('input[name="interview-mode"]').forEach(radio => {
   radio.addEventListener('change', updateStartButtonForMode);
 });
-
-// Check mode on page load
-setTimeout(updateStartButtonForMode, 100);
 
 // ============================================================================
 // COMPANY / ROLE CONTEXT
@@ -968,11 +977,19 @@ elements.startButton?.addEventListener("click", async () => {
   console.log("Start button clicked");
   if (interviewActive && interviewPaused) {
     console.log("Resuming paused interview");
+    if (!interviewId) {
+      setStatus("Missing interview id.", "error");
+      return;
+    }
     interviewPaused = false;
     micEnabled = true;
     updateControlStates();
     startTimers();
     await setupAudioMonitoring();
+    await fetch(`/api/interviews/${interviewId}/resume`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
     tryStartListening();
     setStatus("Interview resumed. Pick up where you left off.", "success");
     return;
@@ -982,18 +999,13 @@ elements.startButton?.addEventListener("click", async () => {
     return;
   }
 
-  // Get selected mode and language
-  const modeRadio = document.querySelector('input[name="interview-mode"]:checked');
-  const mode = modeRadio ? modeRadio.value : "full";
-  const language = elements.languageSelect.value;
-  const model = elements.modelSelect?.value || "gemini-2.5-flash-lite";
-  console.log("Starting interview with mode:", mode, "language:", language, "model:", model);
-
   try {
-    const response = await fetch("/api/start_interview", {
+    if (!interviewId) {
+      throw new Error("Missing interview id.");
+    }
+    const response = await fetch(`/api/interviews/${interviewId}/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, mode, model }),
       credentials: "same-origin",
     });
 
@@ -1001,7 +1013,6 @@ elements.startButton?.addEventListener("click", async () => {
     if (!response.ok) throw new Error(data.error || "Failed to start interview");
 
     console.log("=== INTERVIEW START DEBUG ===");
-    console.log("Mode sent:", mode);
     console.log("Response data:", data);
     console.log("Starting phase:", data.phase);
     console.log("Starting mode:", data.mode);
@@ -1013,8 +1024,12 @@ elements.startButton?.addEventListener("click", async () => {
     interviewPaused = false;
     currentPhase = data.phase;
     currentMode = data.mode; // Store the mode
-    interviewStartTime = Date.now();
-    phaseStartTime = Date.now();
+    if (!interviewStartTime) {
+      interviewStartTime = Date.now();
+    }
+    if (!phaseStartTime) {
+      phaseStartTime = Date.now();
+    }
 
     // Show interview timer
     elements.interviewTimer.style.display = "block";
@@ -1022,7 +1037,7 @@ elements.startButton?.addEventListener("click", async () => {
     // Initialize based on mode
     if (data.mode === "ood") {
       console.log("OOD MODE - initializing unified OOD code editor");
-      await initializeOodCodeEditor(language);
+      await initializeOodCodeEditor(data.language);
       // Show OOD workspace
       elements.oodWorkspace.style.display = "block";
       // Hide regular code editor and problem panel
@@ -1030,7 +1045,7 @@ elements.startButton?.addEventListener("click", async () => {
       elements.problemPanel.style.display = "none";
     } else {
       // Initialize Monaco Editor FIRST (before updatePhaseUI)
-      await initializeMonacoEditor(language);
+      await initializeMonacoEditor(data.language);
       console.log("Monaco Editor initialized");
       applyStarterCodeIfEmpty();
 
@@ -1095,6 +1110,14 @@ elements.stopButton?.addEventListener("click", () => {
   if (interviewActive) {
     interviewPaused = true;
   }
+  if (interviewId && interviewActive) {
+    fetch(`/api/interviews/${interviewId}/pause`, {
+      method: "POST",
+      credentials: "same-origin",
+    }).catch((error) => {
+      console.warn("Failed to pause interview on server:", error);
+    });
+  }
   updateControlStates();
   setStatus("Interview paused. Press start to resume.", "info");
 });
@@ -1102,7 +1125,7 @@ elements.stopButton?.addEventListener("click", () => {
 elements.endButton?.addEventListener("click", async () => {
   if (!interviewActive) return;
   try {
-    const response = await fetch("/api/end_interview", {
+    const response = await fetch(`/api/interviews/${interviewId}/end`, {
       method: "POST",
       credentials: "same-origin",
     });
@@ -1122,7 +1145,7 @@ elements.endButton?.addEventListener("click", async () => {
 
 elements.resetButton?.addEventListener("click", async () => {
   try {
-    const response = await fetch("/api/reset", {
+    const response = await fetch(`/api/interviews/${interviewId}/reset`, {
       method: "POST",
       credentials: "same-origin",
     });
@@ -1176,7 +1199,7 @@ elements.forceCodingBtn?.addEventListener("click", async () => {
     const response = await fetch("/api/transition_phase", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phase: "coding" }),
+      body: JSON.stringify({ phase: "coding", interview_id: interviewId }),
       credentials: "same-origin",
     });
 
@@ -1311,13 +1334,15 @@ function updateTimerDisplay() {
 async function updatePhaseUI() {
   // Fetch current phase from server
   try {
-    const response = await fetch("/api/interview_status");
+    if (!interviewId) return;
+    const response = await fetch(`/api/interviews/${interviewId}/status`);
     if (!response.ok) return;
 
     const status = await response.json();
     if (!status.interviewActive) return;
 
     currentPhase = status.phase;
+    currentMode = status.mode || currentMode;
     const phaseNames = {
       intro_resume: "Phase 1: Intro + Resume",
       coding: "Phase 2: Coding Problem",
@@ -1342,7 +1367,7 @@ async function updatePhaseUI() {
       // Initialize Monaco if not already done
       if (!monacoEditor) {
         console.log("Monaco Editor not initialized, initializing now...");
-        const language = document.getElementById("language-select")?.value || "python";
+        const language = status.language || "python";
         await initializeMonacoEditor(language);
       }
 
@@ -1393,7 +1418,7 @@ async function sendCodeSnapshot(options = {}) {
     await fetch("/api/update_code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, interview_id: interviewId }),
       credentials: "same-origin",
     });
     lastSyncedCode = code;
@@ -1535,6 +1560,7 @@ async function handleUserUtterance(transcript) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: transcript,
+        interview_id: interviewId,
         code: currentCode,
         code_changed: codeChanged
       }),
@@ -1777,9 +1803,8 @@ function appendSystemMessage(text) {
 
 async function fetchInterviewReport() {
   if (!elements.reportSection || !elements.reportBody) return;
-  if (!interviewActive) return;
   try {
-    const response = await fetch("/api/interview_report", {
+    const response = await fetch(`/api/interviews/${interviewId}/report`, {
       method: "POST",
       credentials: "same-origin",
     });

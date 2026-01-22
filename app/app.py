@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+from datetime import datetime
 from uuid import uuid4
+from pathlib import Path
+from typing import Any, Dict, List
 import hashlib
 import logging
-import sys
 
 from flask import (
     Flask,
@@ -13,51 +13,25 @@ from flask import (
     render_template,
     request,
     session,
+    redirect,
+    url_for,
+    flash,
+    send_file,
+    abort,
 )
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
+from .auth import login_required, get_current_user
 from .config import config
+from .db import init_db, SessionLocal
 from .gemini_client import GeminiError
 from .openai_client import OpenAIError
 from .llm_client import get_llm_client
-from .resume_processor import allowed_file, extract_text
-from .whisper_service import get_whisper_transcriber
-from .state import (
-    append_turn,
-    clear_conversation,
-    get_conversation,
-    get_resume,
-    has_resume,
-    store_resume,
-    # Structured interview functions
-    start_interview,
-    get_interview_state,
-    update_interview_phase,
-    update_code,
-    get_current_code,
-    update_last_speech,
-    set_problem_presented,
-    set_coding_question,
-    set_code_evaluation,
-    set_coding_summary,
-    calculate_time_in_phase,
-    calculate_total_time,
-    set_ood_question,
-    get_ood_question,
-    set_design_phase_complete,
-    set_company_context,
-    get_company_context,
-    set_interview_ended,
-    is_interview_ended,
-    set_interview_report,
-    get_interview_report,
-    PHASE_INTRO_RESUME,
-    PHASE_CODING,
-    PHASE_QUESTIONS,
-    PHASE_OOD_DESIGN,
-    PHASE_OOD_IMPLEMENTATION,
-    SUPPORTED_LANGUAGES,
-)
-from .ood_questions import get_hard_question, get_stock_match_engine_question
+from .models import User, Resume, CompanyProfile, Interview
+from .ood_questions import get_stock_match_engine_question
 from .question_bank import get_random_coding_question
 from .question_tests import (
     ensure_tests_for_question,
@@ -65,8 +39,18 @@ from .question_tests import (
     format_signatures_for_prompt,
     build_starter_code,
 )
+from .resume_processor import allowed_file, extract_text
 from .test_runner import run_code_tests
 from .tts import KokoroUnavailable, kokoro
+from .whisper_service import get_whisper_transcriber
+from .state import (
+    PHASE_INTRO_RESUME,
+    PHASE_CODING,
+    PHASE_QUESTIONS,
+    PHASE_OOD_DESIGN,
+    PHASE_OOD_IMPLEMENTATION,
+    SUPPORTED_LANGUAGES,
+)
 
 
 PHASE_COMPLETE_TOKEN = "[PHASE_COMPLETE]"
@@ -86,727 +70,130 @@ def create_app() -> Flask:
     resume_storage.mkdir(exist_ok=True, parents=True)
     app.config["UPLOAD_FOLDER"] = resume_storage
 
-    def _setup_debug_logging() -> None:
+    def _setup_debug_logging() -> logging.Logger:
         log_dir = Path(__file__).resolve().parent.parent / "storage" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / "debug.log"
-        log_path.write_text("", encoding="utf-8")
 
-        logger = logging.getLogger()
+        logger = logging.getLogger("interview")
         logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-        )
-
-        file_handler = logging.FileHandler(log_path, encoding="utf-8")
-        file_handler.setFormatter(formatter)
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setFormatter(formatter)
+        formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 
         if not any(isinstance(h, logging.FileHandler) and h.baseFilename == str(log_path) for h in logger.handlers):
+            file_handler = logging.FileHandler(log_path, encoding="utf-8")
+            file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
+
         if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(formatter)
             logger.addHandler(stream_handler)
 
-        class _TeeStream:
-            def __init__(self, primary, secondary):
-                self.primary = primary
-                self.secondary = secondary
+        return logger
 
-            def write(self, data):
-                self.primary.write(data)
-                self.primary.flush()
-                self.secondary.write(data)
-                self.secondary.flush()
+    logger = _setup_debug_logging()
 
-            def flush(self):
-                self.primary.flush()
-                self.secondary.flush()
+    init_db()
 
-        debug_file = log_path.open("a", encoding="utf-8")
-        sys.stdout = _TeeStream(sys.stdout, debug_file)
-        sys.stderr = _TeeStream(sys.stderr, debug_file)
+    def _db() -> Session:
+        return SessionLocal()
 
-    _setup_debug_logging()
+    def _ensure_logged_in(db: Session) -> User:
+        user = get_current_user(db)
+        if not user:
+            abort(401)
+        return user
 
-    def _ensure_session_id() -> str:
-        session_id = session.get("session_id")
-        if not session_id:
-            session_id = uuid4().hex
-            session["session_id"] = session_id
-        return session_id
+    def _load_interview(db: Session, interview_id: int, user_id: int) -> Interview:
+        interview = db.get(Interview, interview_id)
+        if not interview or interview.user_id != user_id or interview.status == "deleted":
+            abort(404)
+        return interview
 
-    @app.route("/")
-    def index() -> str:
-        return render_template("index.html")
+    def _now() -> datetime:
+        return datetime.utcnow()
 
-    @app.route("/api/status", methods=["GET"])
-    def status():
-        session_id = session.get("session_id")
-        resume_loaded = False
-        conversation_started = False
-        if session_id:
-            resume_loaded = has_resume(session_id)
-            conversation_started = resume_loaded and bool(get_conversation(session_id))
+    def _set_updated(interview: Interview) -> None:
+        interview.updated_at = _now()
 
-        return jsonify(
-            {
-                "resumeLoaded": resume_loaded,
-                "conversationStarted": conversation_started,
-            }
-        )
-
-    @app.route("/api/upload_resume", methods=["POST"])
-    def upload_resume():
-        if "file" not in request.files:
-            return jsonify({"error": "No file part in the request."}), 400
-
-        file = request.files["file"]
-        if file.filename == "":
-            return jsonify({"error": "No file selected."}), 400
-
-        if not allowed_file(file.filename):
-            return jsonify(
-                {"error": "Unsupported file type. Upload a PDF or TXT resume."}
-            ), 400
-
-        try:
-            resume_text = extract_text(file)
-        except ValueError as exc:
-            return jsonify({"error": str(exc)}), 400
-        except Exception:
-            return jsonify({"error": "Failed to process the resume file."}), 500
-
-        session_id = _ensure_session_id()
-        store_resume(session_id, resume_text)
-
-        return jsonify({"message": "Resume uploaded successfully."})
-
-    @app.route("/api/company_context", methods=["GET", "POST"])
-    def company_context_endpoint():
-        session_id = session.get("session_id") or _ensure_session_id()
-
-        if request.method == "GET":
-            context = get_company_context(session_id)
-            return jsonify(context)
-
-        payload = request.get_json(silent=True) or {}
-        company = (payload.get("company") or "").strip()
-        role = (payload.get("role") or "").strip()
-        details = (payload.get("details") or "").strip()
-
-        set_company_context(session_id, company=company, role=role, details=details)
-        return jsonify({"message": "Company & role context saved."})
-
-    @app.route("/api/chat", methods=["POST"])
-    def chat():
-        import time
-        payload = request.get_json(silent=True) or {}
-        user_message = (payload.get("message") or "").strip()
-        if not user_message:
-            return jsonify({"error": "Message is required."}), 400
-
-        session_id = session.get("session_id")
-        if not session_id:
-            return (
-                jsonify({"error": "Upload a resume before starting the interview."}),
-                400,
-            )
-
-        # Check if structured interview is active
-        interview_state = get_interview_state(session_id)
-
-        resume_text = get_resume(session_id)
-
-        # Resume is optional for coding_only mode, required for full mode
-        interview_mode = interview_state.get("mode") if interview_state else None
+    def _extract_candidate_name(resume_text: str) -> str:
         if not resume_text:
-            resume_required = not interview_state or interview_mode in {"full"}
-            if resume_required:
-                return jsonify({"error": "Upload a resume before starting the interview."}), 400
-        current_code = payload.get("code", "")
-        code_changed = payload.get("code_changed", False)
-
-        code_supported = bool(
-            interview_state and interview_state.get("mode") in {"full", "coding_only", "ood"}
-        )
-
-        if code_supported and interview_state and not current_code:
-            stored_code = get_current_code(session_id)
-            if stored_code:
-                current_code = stored_code
-                code_changed = False
-        # Preserve existing code snapshot so Gemini still sees editor content even if frontend omits it
-        print("[CHAT DEBUG] No code payload received; using last stored code snapshot.")
-
-        print(f"[CHAT DEBUG] User message: '{user_message}'")
-        print(f"[CHAT DEBUG] Code received - length: {len(current_code)}, changed: {code_changed}")
-        if current_code:
-            print(f"[CHAT DEBUG] Code preview: {current_code[:150]}...")
-
-        # Update state
-        if interview_state:
-            update_last_speech(session_id)
-            if code_supported and current_code:
-                update_code(session_id, current_code)
-
-        conversation: List[Dict[str, Any]] = get_conversation(session_id)
-        perf_enabled = bool(interview_state and interview_state.get("mode") == "coding_only")
-        perf_t0 = time.perf_counter() if perf_enabled else 0.0
-        test_gate_time = 0.0
-        test_run_time = 0.0
-        llm_reply_time = 0.0
-        tts_time = 0.0
-        try:
-            model_name = interview_state.get("model") if interview_state else None
-            client = get_llm_client(model_name)
-
-            if interview_state and interview_state.get("current_phase") == PHASE_CODING:
-                coding_question = interview_state.get("coding_question") or {}
-                question_title = coding_question.get("title", "")
-                if question_title and current_code.strip():
-                    code_hash = hashlib.sha256(current_code.encode("utf-8")).hexdigest()
-                    existing_eval = interview_state.get("code_evaluation") or {}
-                    if existing_eval.get("code_hash") != code_hash:
-                        set_code_evaluation(session_id, {})
-                    fallback_hit = _should_run_tests_fallback(user_message)
-                    complete_hit = _code_looks_complete(current_code, interview_state.get("language", ""))
-                    test_gate_start = time.perf_counter() if perf_enabled else 0.0
-                    model_hit = client.should_run_tests(
-                        session_id=session_id,
-                        interview_state=interview_state,
-                        conversation=conversation,
-                        user_message=user_message,
-                        current_code=current_code,
-                    )
-                    if perf_enabled:
-                        test_gate_time = time.perf_counter() - test_gate_start
-                    print(
-                        f"[TEST GATE] fallback={fallback_hit} complete={complete_hit} "
-                        f"model={model_hit} code_hash={code_hash[:10]}"
-                    )
-                    should_run = fallback_hit or complete_hit or model_hit
-                    should_rerun = fallback_hit or model_hit
-                    can_run = should_run and (
-                        existing_eval.get("code_hash") != code_hash or not existing_eval or should_rerun
-                    )
-                    if should_run and not can_run:
-                        print(
-                            "[TEST RUN] Skipped: tests already evaluated for this code hash and no rerun trigger."
-                        )
-                    if can_run:
-                        test_spec = get_cached_tests(question_title)
-                        if test_spec:
-                            print(f"[TEST RUN] Using test spec for: {question_title}")
-                            test_run_start = time.perf_counter() if perf_enabled else 0.0
-                            evaluation = run_code_tests(
-                                interview_state.get("language", ""),
-                                current_code,
-                                test_spec,
-                            )
-                            if perf_enabled:
-                                test_run_time = time.perf_counter() - test_run_start
-                            evaluation["code_hash"] = code_hash
-                            set_code_evaluation(session_id, evaluation)
-                            print(
-                                f"[TEST RUN] Result status={evaluation.get('status')} "
-                                f"summary={evaluation.get('summary')}"
-                            )
-                            if evaluation.get("status") == "error":
-                                details = evaluation.get("details")
-                                if details:
-                                    print(f"[TEST RUN] Error details:\\n{details}")
-                                else:
-                                    print(f"[TEST RUN] Error summary: {evaluation.get('summary')}")
-                        else:
-                            print(f"[TEST RUN] Missing test spec for: {question_title}")
-
-            # Use structured interview prompts if interview is active
-            if interview_state:
-                llm_start = time.perf_counter() if perf_enabled else 0.0
-                reply_text = client.generate_structured_interview_reply(
-                    session_id=session_id,
-                    conversation=conversation,
-                    resume_text=resume_text,
-                    user_message=user_message,
-                    current_code=current_code,
-                    code_changed=code_changed,
-                )
-                if perf_enabled:
-                    llm_reply_time = time.perf_counter() - llm_start
-            else:
-                reply_text = client.generate_interview_reply(
-                    conversation=conversation,
-                    resume_text=resume_text,
-                    user_message=user_message,
-                )
-        except (ValueError, GeminiError, OpenAIError) as exc:
-            return jsonify({"error": str(exc)}), 500
-
-        print(f"[CHAT DEBUG] Gemini reply length: {len(reply_text)}")
-        print(f"[CHAT DEBUG] Gemini reply preview: {reply_text[:200]}...")
-        print(f"[CHAT DEBUG] Contains CODE_START: {'[CODE_START]' in reply_text}")
-        print(f"[CHAT DEBUG] Contains CODE_END: {'[CODE_END]' in reply_text}")
-
-        phase_complete = False
-        if interview_state:
-            phase_complete, reply_text = _extract_phase_complete(reply_text)
-            _handle_problem_presentation(session_id, interview_state, reply_text)
-            _apply_phase_completion(session_id, interview_state, phase_complete)
-
-        # Strip code markers before TTS (code will be displayed in editor, not spoken)
-        tts_text = _strip_code_markers(reply_text)
-
-        try:
-            print(f"[BACKEND DEBUG] About to call kokoro.synthesize_base64")
-            print(f"[BACKEND DEBUG] Reply text: '{tts_text[:100]}...'")
-            print(f"[BACKEND DEBUG] Reply text length: {len(tts_text)}")
-            tts_start = time.perf_counter() if perf_enabled else 0.0
-            reply_audio = kokoro.synthesize_base64(tts_text)
-            if perf_enabled:
-                tts_time = time.perf_counter() - tts_start
-            print(f"[BACKEND DEBUG] Audio generated successfully, length: {len(reply_audio)}")
-        except KokoroUnavailable as exc:
-            print(f"[BACKEND DEBUG] KokoroUnavailable error: {exc}")
-            return jsonify({"error": str(exc)}), 500
-        except Exception as exc:
-            print(f"[BACKEND DEBUG] Unexpected error in TTS: {exc}")
-            import traceback
-            print(f"[BACKEND DEBUG] Traceback: {traceback.format_exc()}")
-            return jsonify({"error": f"TTS error: {exc}"}), 500
-
-        append_turn(session_id, user_message, reply_text)
-
-        interview_ended = False
-        if interview_state:
-            mode = interview_state.get("mode", "full")
-            if mode in {"coding_only", "ood"}:
-                total_time = calculate_total_time(session_id)
-                if total_time >= 40.0:
-                    set_interview_ended(session_id, True)
-                elif _detect_interview_close(reply_text):
-                    set_interview_ended(session_id, True)
-            interview_ended = bool(is_interview_ended(session_id))
-
-        if perf_enabled:
-            total_time = time.perf_counter() - perf_t0
-            logging.info(
-                "[PERF][coding_only] total=%.3fs gate=%.3fs test=%.3fs llm=%.3fs tts=%.3fs",
-                total_time,
-                test_gate_time,
-                test_run_time,
-                llm_reply_time,
-                tts_time,
-            )
-
-        response_phase = interview_state.get("current_phase") if interview_state else None
-        return jsonify({
-            "reply": reply_text,
-            "replyAudio": reply_audio,
-            "phase": response_phase,
-            "interviewEnded": interview_ended,
-        })
-
-    def _should_run_tests_fallback(message: str) -> bool:
-        msg = (message or "").lower()
-        keywords = [
-            "i am done",
-            "i'm done",
-            "finished",
-            "ready to test",
-            "run the tests",
-            "run tests",
-            "check my code",
-            "check if the code is correct",
-            "can you check if the code is correct",
-            "can you check my code",
-            "can you verify",
-            "verify my solution",
-            "submit",
-        ]
-        hit = any(kw in msg for kw in keywords)
-        print(f"[TEST GATE] fallback_keywords={hit}")
-        return hit
-
-    def _code_looks_complete(code: str, language: str) -> bool:
-        if not code or "TODO" in code or "pass" in code:
-            print("[TEST GATE] code_complete=False (empty/todo/pass)")
-            return False
-        language = (language or "").lower()
-        if language == "python":
-            ok = "def " in code and "return" in code
-            print(f"[TEST GATE] code_complete={ok} (python)")
-            return ok
-        if language == "java":
-            ok = "class " in code and "return" in code
-            print(f"[TEST GATE] code_complete={ok} (java)")
-            return ok
-        if language == "cpp":
-            ok = "return" in code
-            print(f"[TEST GATE] code_complete={ok} (cpp)")
-            return ok
-        print("[TEST GATE] code_complete=False (unknown language)")
-        return False
-
-    @app.route("/api/intervene", methods=["POST"])
-    def intervene():
-        payload = request.get_json(silent=True) or {}
-        partial_text = (payload.get("partial") or "").strip()
-        if not partial_text:
-            return jsonify({"error": "Partial transcript required."}), 400
-
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"error": "Upload a resume before starting the interview."}), 400
-
-        resume_text = get_resume(session_id)
-        if not resume_text:
-            return jsonify({"error": "Upload a resume before starting the interview."}), 400
-
-        conversation: List[Dict[str, Any]] = get_conversation(session_id)
-        intervention_prompt = (
-            "Coach, interrupt the candidate constructively. You just heard this partial thought:\n"
-            f"{partial_text}\n"
-            "Politely interject if they are rambling or off track. Be brief (<=2 sentences) and specific."
-        )
-
-        try:
-            interview_state = get_interview_state(session_id)
-            model_name = interview_state.get("model") if interview_state else None
-            client = get_llm_client(model_name)
-            reply_text = client.generate_interview_reply(
-                conversation=conversation,
-                resume_text=resume_text,
-                user_message=intervention_prompt,
-                temperature=0.6,
-            )
-        except (ValueError, GeminiError, OpenAIError) as exc:
-            return jsonify({"error": str(exc)}), 500
-
-        try:
-            print(f"Generating intervention audio for: {reply_text[:100]}...")
-            reply_audio = kokoro.synthesize_base64(reply_text)
-            print(f"Intervention audio generated successfully, length: {len(reply_audio)}")
-        except KokoroUnavailable as exc:
-            print(f"Kokoro intervention error: {exc}")
-            return jsonify({"error": str(exc)}), 500
-        except Exception as exc:
-            print(f"Unexpected error in intervention TTS: {exc}")
-            return jsonify({"error": f"TTS error: {exc}"}), 500
-
-        append_turn(session_id, f"[intervention] {partial_text}", reply_text)
-
-        return jsonify({"reply": reply_text, "replyAudio": reply_audio})
-
-    @app.route("/api/reset", methods=["POST"])
-    def reset():
-        session_id = session.get("session_id")
-        if session_id:
-            clear_conversation(session_id)
-        return jsonify({"message": "Conversation reset."})
-
-    # ============================================================================
-    # STRUCTURED INTERVIEW ENDPOINTS
-    # ============================================================================
-
-    @app.route("/api/start_interview", methods=["POST"])
-    def start_structured_interview():
-        """Initialize a structured interview session"""
-        payload = request.get_json(silent=True) or {}
-        language = payload.get("language", "python").lower()
-        mode = payload.get("mode", "full")  # "full", "coding_only", or "ood"
-        model_name = (payload.get("model") or config.GEMINI_MODEL or "").strip()
-
-        print(f"[START INTERVIEW] Received request - language: {language}, mode: {mode}, model: {model_name}")
-
-        if language not in SUPPORTED_LANGUAGES:
-            return jsonify({"error": f"Unsupported language. Choose from: {', '.join(SUPPORTED_LANGUAGES)}"}), 400
-
-        if mode not in ["full", "coding_only", "ood"]:
-            return jsonify({"error": "Invalid mode. Choose 'full', 'coding_only', or 'ood'"}), 400
-        if model_name not in config.SUPPORTED_MODELS:
-            return jsonify({"error": f"Unsupported model. Choose from: {', '.join(config.SUPPORTED_MODELS)}"}), 400
-
-        session_id = _ensure_session_id()
-        if not session_id:
-            return jsonify({"error": "Failed to create session"}), 500
-
-        resume_text = get_resume(session_id)
-        company_context = get_company_context(session_id)
-        # Resume is optional for coding_only and ood modes
-        if not resume_text and mode in {"full"}:
-            return jsonify({"error": "Upload a resume before starting this interview."}), 400
-
-        # Initialize structured interview state
-        interview_state = start_interview(session_id, language, mode, model_name)
-
-        # For OOD mode, force the stock matching engine scenario
-        if mode == "ood":
-            question = get_stock_match_engine_question()
-            set_ood_question(session_id, question)
-            context_summary = company_context.get("company") or company_context.get("role")
-            if context_summary:
-                print(
-                    f"[OOD INTERVIEW] Stock matching engine question selected for context: {context_summary}"
-                )
-            else:
-                print("[OOD INTERVIEW] Stock matching engine question selected")
-        else:
-            coding_question = get_random_coding_question()
-            print(f"[START INTERVIEW] Selected question: {coding_question.get('title', 'UNKNOWN')}")
-            if coding_question:
-                question_title = coding_question.get("title", "")
-                print(f"[START INTERVIEW] Generating/fetching test cases for: {question_title}")
-                test_spec = ensure_tests_for_question(question_title)
-                if not test_spec:
-                    print(f"[START INTERVIEW ERROR] Failed to generate test cases for: {question_title}")
-                    return jsonify({"error": "Failed to generate test cases for the selected question."}), 500
-                print(f"[START INTERVIEW] Test cases ready - {len(test_spec.get('tests', []))} tests")
-                coding_question["signatures"] = format_signatures_for_prompt(test_spec)
-                coding_question["starter_code"] = build_starter_code(test_spec, language)
-                set_coding_question(session_id, coding_question)
-
-        print(f"[START INTERVIEW] Created state - phase: {interview_state['current_phase']}, mode: {interview_state['mode']}")
-
-        mode_name = {"full": "Full", "coding_only": "Coding-only", "ood": "OOD"}
-        response_data = {
-            "message": f"{mode_name[mode]} interview started",
-            "phase": interview_state["current_phase"],
-            "language": interview_state["language"],
-            "mode": interview_state["mode"],
-            "model": interview_state.get("model", model_name),
-        }
-        if mode != "ood" and coding_question:
-            response_data["codingQuestion"] = {
-                "title": coding_question.get("title", ""),
-                "signature": coding_question.get("signatures", {}).get(language, ""),
-                "starterCode": coding_question.get("starter_code", ""),
-            }
-
-        print(f"[START INTERVIEW] Returning: {response_data}")
-        return jsonify(response_data)
-
-    @app.route("/api/interview_status", methods=["GET"])
-    def interview_status():
-        """Get current interview state and timing"""
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"interviewActive": False})
-
-        interview_state = get_interview_state(session_id)
-        if not interview_state:
-            return jsonify({"interviewActive": False})
-
-        return jsonify({
-            "interviewActive": True,
-            "phase": interview_state["current_phase"],
-            "language": interview_state["language"],
-            "timeInPhase": calculate_time_in_phase(session_id),
-            "totalTime": calculate_total_time(session_id),
-            "problemPresented": interview_state.get("problem_presented", False),
-            "interviewEnded": bool(interview_state.get("ended", False)),
-        })
-
-    @app.route("/api/interview_report", methods=["POST"])
-    def interview_report():
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"error": "No active session"}), 400
-
-        interview_state = get_interview_state(session_id)
-        if not interview_state:
-            return jsonify({"error": "No active interview"}), 400
-
-        cached = get_interview_report(session_id)
-        if cached:
-            return jsonify({"report": cached, "cached": True})
-
-        conversation = get_conversation(session_id)
-        current_code = get_current_code(session_id)
-        mode = interview_state.get("mode", "full")
-        language = interview_state.get("language", "python")
-        code_snapshots = interview_state.get("code_snapshots", [])
-        problem_presented = interview_state.get("problem_presented", False)
-
-        try:
-            model_name = interview_state.get("model")
-            client = get_llm_client(model_name)
-            report = client.generate_interview_report(
-                mode=mode,
-                language=language,
-                conversation=conversation,
-                current_code=current_code,
-                code_snapshots=code_snapshots,
-                problem_presented=problem_presented,
-            )
-        except (ValueError, GeminiError, OpenAIError) as exc:
-            return jsonify({"error": str(exc)}), 500
-
-        set_interview_report(session_id, report)
-        return jsonify({"report": report, "cached": False})
-
-    @app.route("/api/end_interview", methods=["POST"])
-    def end_interview():
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"error": "No active session"}), 400
-
-        interview_state = get_interview_state(session_id)
-        if not interview_state:
-            return jsonify({"error": "No active interview"}), 400
-
-        set_interview_ended(session_id, True)
-        report = get_interview_report(session_id)
-        if report:
-            return jsonify({"report": report, "cached": True})
-
-        conversation = get_conversation(session_id)
-        current_code = get_current_code(session_id)
-        mode = interview_state.get("mode", "full")
-        language = interview_state.get("language", "python")
-        code_snapshots = interview_state.get("code_snapshots", [])
-        problem_presented = interview_state.get("problem_presented", False)
-
-        try:
-            model_name = interview_state.get("model")
-            client = get_llm_client(model_name)
-            report = client.generate_interview_report(
-                mode=mode,
-                language=language,
-                conversation=conversation,
-                current_code=current_code,
-                code_snapshots=code_snapshots,
-                problem_presented=problem_presented,
-            )
-        except (ValueError, GeminiError, OpenAIError) as exc:
-            return jsonify({"error": str(exc)}), 500
-
-        set_interview_report(session_id, report)
-        return jsonify({"report": report, "cached": False})
-
-    @app.route("/api/update_code", methods=["POST"])
-    def update_code_endpoint():
-        """Update current code snapshot"""
-        payload = request.get_json(silent=True) or {}
-        code = payload.get("code", "")
-
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"error": "No active session"}), 400
-
-        interview_state = get_interview_state(session_id)
-        if not interview_state:
-            return jsonify({"error": "No active interview"}), 400
-
-        update_code(session_id, code)
-        return jsonify({"message": "Code updated"})
-
-    @app.route("/api/transcribe", methods=["POST"])
-    def transcribe_audio():
-        """
-        Transcribe audio using Whisper for accurate speech-to-text.
-        Accepts audio blob from frontend (WebM, WAV, etc.)
-        """
-        import time
-        import logging
-
-        start_time = time.time()
-
-        try:
-            # Get audio data from request
-            if 'audio' not in request.files:
-                return jsonify({"error": "No audio file provided"}), 400
-
-            audio_file = request.files['audio']
-            audio_format = request.form.get('format', 'webm')
-
-            # Read audio bytes
-            audio_bytes = audio_file.read()
-
-            if not audio_bytes:
-                return jsonify({"error": "Empty audio file"}), 400
-
-            audio_size_kb = len(audio_bytes) / 1024
-            logging.info(f"[WHISPER] Received {audio_size_kb:.1f} KB audio file ({audio_format})")
-
-            # Get Whisper transcriber instance
-            transcriber = get_whisper_transcriber(model_size="base")
-
-            # Transcribe audio
-            transcribe_start = time.time()
-            result = transcriber.transcribe_bytes(
-                audio_bytes,
-                audio_format=audio_format,
-                language="en"
-            )
-            transcribe_time = time.time() - transcribe_start
-
-            total_time = time.time() - start_time
-
-            logging.info(
-                f"[WHISPER] Transcription complete in {transcribe_time:.3f}s "
-                f"(total: {total_time:.3f}s) - Device: {transcriber.device} - "
-                f"Text: \"{result['text'][:50]}...\""
-            )
-
-            return jsonify({
-                "text": result["text"],
-                "raw_text": result["raw_text"],
-                "language": result["language"],
-                "duration": result["duration"],
-                "transcription_time": transcribe_time,
-                "device": transcriber.device,
-                "success": True
-            })
-
-        except Exception as e:
-            logging.error(f"[WHISPER] Transcription error: {e}", exc_info=True)
-            return jsonify({
-                "error": str(e),
-                "success": False
-            }), 500
-
-    @app.route("/api/transition_phase", methods=["POST"])
-    def transition_phase():
-        """Manually transition to next phase"""
-        payload = request.get_json(silent=True) or {}
-        new_phase = payload.get("phase")
-
-        valid_phases = [
-            PHASE_INTRO_RESUME,
-            PHASE_CODING,
-            PHASE_QUESTIONS,
-            PHASE_OOD_DESIGN,
-            PHASE_OOD_IMPLEMENTATION,
-        ]
-        if new_phase not in valid_phases:
-            return jsonify({"error": "Invalid phase"}), 400
-
-        session_id = session.get("session_id")
-        if not session_id:
-            return jsonify({"error": "No active session"}), 400
-
-        interview_state = get_interview_state(session_id)
-        if not interview_state:
-            return jsonify({"error": "No active interview"}), 400
-
-        if interview_state.get("mode") == "full":
-            time_in_phase = calculate_time_in_phase(session_id)
-            if new_phase == PHASE_CODING and time_in_phase < FULL_PHASE_RULES[PHASE_INTRO_RESUME]["min"]:
-                return jsonify({"error": "Cannot enter coding before 5 minutes in intro/resume."}), 400
-            if new_phase == PHASE_QUESTIONS and time_in_phase < FULL_PHASE_RULES[PHASE_CODING]["min"]:
-                return jsonify({"error": "Cannot enter questions before coding begins."}), 400
-
-        update_interview_phase(session_id, new_phase)
-        return jsonify({"message": f"Transitioned to {new_phase} phase"})
+            return ""
+        lines = [line.strip() for line in resume_text.splitlines() if line.strip()]
+        for line in lines[:5]:
+            lowered = line.lower()
+            if "@" in line or "http" in lowered or "www" in lowered:
+                continue
+            if any(char.isdigit() for char in line):
+                continue
+            words = [w for w in line.split() if w]
+            if 2 <= len(words) <= 4 and all(word.isalpha() for word in words):
+                return line
+        return ""
+
+    def _append_turn(interview: Interview, user_message: str, model_message: str) -> None:
+        conversation = list(interview.conversation or [])
+        conversation.append({"role": "user", "parts": [{"text": user_message}]})
+        conversation.append({"role": "model", "parts": [{"text": model_message}]})
+        if len(conversation) > 40:
+            conversation = conversation[-40:]
+        interview.conversation = conversation
+
+    def _update_code(interview: Interview, code: str) -> None:
+        interview.current_code = code
+        interview.last_code_change_at = _now()
+        snapshots = list(interview.code_snapshots or [])
+        snapshots.append({"code": code, "timestamp": _now().isoformat()})
+        if len(snapshots) > 10:
+            snapshots = snapshots[-10:]
+        interview.code_snapshots = snapshots
+
+    def _calculate_time_in_phase(interview: Interview) -> float:
+        if not interview.phase_started_at:
+            return 0.0
+        return (_now() - interview.phase_started_at).total_seconds() / 60.0
+
+    def _calculate_total_time(interview: Interview) -> float:
+        if not interview.started_at:
+            return 0.0
+        return (_now() - interview.started_at).total_seconds() / 60.0
+
+    def _calculate_silence_duration(interview: Interview) -> float:
+        if not interview.last_speech_at:
+            return 0.0
+        return (_now() - interview.last_speech_at).total_seconds()
+
+    def _calculate_code_idle_duration(interview: Interview) -> float:
+        if not interview.last_code_change_at:
+            return 0.0
+        return (_now() - interview.last_code_change_at).total_seconds()
+
+    def _extract_phase_complete(text: str) -> tuple[bool, str]:
+        if not text:
+            return False, ""
+        if PHASE_COMPLETE_TOKEN in text:
+            cleaned = text.replace(PHASE_COMPLETE_TOKEN, "").strip()
+            return True, cleaned
+        return False, text
+
+    def _strip_markdown_symbols(text: str) -> str:
+        import re
+        if not text:
+            return ""
+        cleaned = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+        cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)
+        cleaned = re.sub(r"__(.*?)__", r"\1", cleaned)
+        cleaned = re.sub(r"\*(.*?)\*", r"\1", cleaned)
+        cleaned = re.sub(r"_(.*?)_", r"\1", cleaned)
+        cleaned = re.sub(r"^#{1,6}\s+", "", cleaned, flags=re.MULTILINE)
+        return cleaned.strip()
 
     def _strip_code_markers(text: str) -> str:
-        """Remove code markers from text before TTS"""
-        # Find and remove [CODE_START]...[CODE_END] blocks
         import re
-        cleaned = re.sub(r'\[CODE_START\].*?\[CODE_END\]', '', text, flags=re.DOTALL)
-        cleaned = re.sub(r'\[CODE_START\].*$', '', cleaned, flags=re.DOTALL)
-        cleaned = re.sub(r'\[PROBLEM_START\].*?\[PROBLEM_END\]', '', cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"\[CODE_START\].*?\[CODE_END\]", "", text, flags=re.DOTALL)
+        cleaned = re.sub(r"\[CODE_START\].*$", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"\[PROBLEM_START\].*?\[PROBLEM_END\]", "", cleaned, flags=re.DOTALL)
         cleaned = cleaned.replace(PHASE_COMPLETE_TOKEN, "")
         cleaned = cleaned.strip()
         return _strip_markdown_symbols(cleaned)
@@ -829,47 +216,108 @@ def create_app() -> Flask:
         ]
         return any(phrase in reply_lower for phrase in closing_phrases)
 
-    def _strip_markdown_symbols(text: str) -> str:
-        """Remove common markdown symbols so TTS doesn't speak them."""
-        import re
-        if not text:
-            return ""
-        cleaned = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
-        cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
-        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)
-        cleaned = re.sub(r"__(.*?)__", r"\1", cleaned)
-        cleaned = re.sub(r"\*(.*?)\*", r"\1", cleaned)
-        cleaned = re.sub(r"_(.*?)_", r"\1", cleaned)
-        cleaned = re.sub(r"^#{1,6}\s+", "", cleaned, flags=re.MULTILINE)
-        return cleaned.strip()
+    def _should_run_tests_fallback(message: str) -> bool:
+        msg = (message or "").lower()
+        keywords = [
+            "i am done",
+            "i'm done",
+            "finished",
+            "ready to test",
+            "run the tests",
+            "run tests",
+            "check my code",
+            "check if the code is correct",
+            "can you check if the code is correct",
+            "can you check my code",
+            "can you verify",
+            "verify my solution",
+            "submit",
+        ]
+        return any(kw in msg for kw in keywords)
 
-    def _extract_phase_complete(text: str) -> tuple[bool, str]:
-        if not text:
-            return False, ""
-        if PHASE_COMPLETE_TOKEN in text:
-            cleaned = text.replace(PHASE_COMPLETE_TOKEN, "").strip()
-            return True, cleaned
-        return False, text
+    def _code_looks_complete(code: str, language: str) -> bool:
+        if not code or "TODO" in code or "pass" in code:
+            return False
+        language = (language or "").lower()
+        if language == "python":
+            return "def " in code and "return" in code
+        if language == "java":
+            return "class " in code and "return" in code
+        if language == "cpp":
+            return "return" in code
+        return False
 
-    def _apply_phase_completion(
-        session_id: str,
-        interview_state: Dict[str, Any],
-        phase_complete: bool,
-    ) -> None:
-        if not interview_state or interview_state.get("mode") != "full":
+    def _build_coding_summary(interview: Interview) -> Dict[str, Any]:
+        summary: Dict[str, Any] = {}
+        if interview.coding_question:
+            summary["question_title"] = interview.coding_question.get("title", "")
+        if interview.code_evaluation:
+            summary["status"] = interview.code_evaluation.get("status", "")
+            summary["summary"] = interview.code_evaluation.get("summary", "")
+        return summary
+
+    def _handle_problem_presentation(interview: Interview, reply_text: str) -> None:
+        if not reply_text:
             return
-        current_phase = interview_state.get("current_phase")
+        if interview.current_phase != PHASE_CODING:
+            return
+        if interview.problem_presented:
+            return
+        if "[PROBLEM_START]" in reply_text and "[PROBLEM_END]" in reply_text:
+            interview.problem_presented = True
+
+    def _calculate_phase_signal(interview: Interview, time_in_phase: float) -> str:
+        """
+        Calculate phase signal based on time constraints.
+        Returns: "keep_going", "end_if_you_want", or "must_end_now"
+        """
+        if interview.mode != "full":
+            return "end_if_you_want"
+
+        current_phase = interview.current_phase
+        if not current_phase:
+            return "end_if_you_want"
+
+        rules = FULL_PHASE_RULES.get(current_phase)
+        if not rules:
+            return "end_if_you_want"
+
+        min_minutes = float(rules.get("min", 0.0))
+        max_minutes = float(rules.get("max", 0.0))
+
+        # Must end if we've hit the maximum time
+        if max_minutes > 0.0 and time_in_phase >= max_minutes:
+            return "must_end_now"
+
+        # Must continue if we haven't hit the minimum time
+        if min_minutes > 0.0 and time_in_phase < min_minutes:
+            return "keep_going"
+
+        # In the allowed window - model can decide
+        return "end_if_you_want"
+
+    def _apply_phase_completion(interview: Interview, phase_complete: bool) -> None:
+        if interview.mode != "full":
+            return
+        current_phase = interview.current_phase
         if not current_phase:
             return
         rules = FULL_PHASE_RULES.get(current_phase)
         if not rules:
             return
-        time_in_phase = calculate_time_in_phase(session_id)
+        time_in_phase = _calculate_time_in_phase(interview)
         min_minutes = float(rules.get("min", 0.0))
         max_minutes = float(rules.get("max", 0.0))
         next_phase = rules.get("next")
 
         if phase_complete and time_in_phase < min_minutes:
+            logger.warning(
+                "[PHASE BLOCKED] Model tried to end %s at %.1fm but minimum is %.1fm (%.1fm remaining)",
+                current_phase,
+                time_in_phase,
+                min_minutes,
+                min_minutes - time_in_phase,
+            )
             phase_complete = False
 
         force_end = max_minutes > 0.0 and time_in_phase >= max_minutes
@@ -877,47 +325,852 @@ def create_app() -> Flask:
             return
 
         if current_phase == PHASE_CODING and phase_complete and not force_end:
-            evaluation = interview_state.get("code_evaluation") or {}
+            evaluation = interview.code_evaluation or {}
             if str(evaluation.get("status", "")).strip() != "pass":
                 return
 
         if next_phase:
             if current_phase == PHASE_CODING:
-                summary = _build_coding_summary(interview_state)
+                summary = _build_coding_summary(interview)
                 if summary:
-                    set_coding_summary(session_id, summary)
-            update_interview_phase(session_id, next_phase)
-            interview_state["current_phase"] = next_phase
+                    interview.coding_summary = summary
+            logger.info(
+                "[PHASE SHIFT] full mode %s -> %s (phase_complete=%s force_end=%s)",
+                current_phase,
+                next_phase,
+                phase_complete,
+                force_end,
+            )
+            interview.current_phase = next_phase
+            interview.phase_started_at = _now()
+            interview.phase_turn_start_index = len(interview.conversation or [])
             return
 
-        set_interview_ended(session_id, True)
+        logger.info("[PHASE SHIFT] full mode %s -> ended", current_phase)
+        interview.status = "ended"
+        interview.ended_at = _now()
 
-    def _build_coding_summary(interview_state: Dict[str, Any]) -> Dict[str, Any]:
-        coding_question = interview_state.get("coding_question") or {}
-        evaluation = interview_state.get("code_evaluation") or {}
-        summary: Dict[str, Any] = {}
-        if coding_question:
-            summary["question_title"] = coding_question.get("title", "")
-        if evaluation:
-            summary["status"] = evaluation.get("status", "")
-            summary["summary"] = evaluation.get("summary", "")
-        return summary
-
-    def _handle_problem_presentation(
-        session_id: str,
-        interview_state: Dict[str, Any],
-        reply_text: str,
-    ) -> None:
-        """Track when the coding problem has been formally presented."""
-        if not interview_state or interview_state.get("current_phase") != PHASE_CODING:
+    def _transition_ood_phase(interview: Interview) -> None:
+        if interview.mode != "ood":
             return
-
-        if interview_state.get("problem_presented"):
+        if interview.current_phase != PHASE_OOD_DESIGN:
             return
+        if _calculate_time_in_phase(interview) >= 20.0:
+            logger.info("[PHASE SHIFT] ood_design -> ood_implementation")
+            interview.current_phase = PHASE_OOD_IMPLEMENTATION
+            interview.phase_started_at = _now()
+            interview.phase_turn_start_index = len(interview.conversation or [])
 
-        if "[PROBLEM_START]" in reply_text and "[PROBLEM_END]" in reply_text:
-            set_problem_presented(session_id, True)
-            print("[PROBLEM PRESENTED] Marked via problem block in reply")
+    def _ensure_interview_started(interview: Interview) -> None:
+        now = _now()
+        if not interview.started_at:
+            interview.started_at = now
+        if not interview.phase_started_at:
+            interview.phase_started_at = now
+        if not interview.last_speech_at:
+            interview.last_speech_at = now
+        if not interview.last_code_change_at:
+            interview.last_code_change_at = now
+
+    @app.route("/")
+    def home():
+        if session.get("user_id"):
+            return redirect(url_for("dashboard"))
+        return redirect(url_for("login"))
+
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
+        if request.method == "GET":
+            return render_template("register.html")
+
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        confirm = request.form.get("confirm") or ""
+
+        if not email or not password:
+            flash("Email and password are required.", "error")
+            return render_template("register.html")
+        if password != confirm:
+            flash("Passwords do not match.", "error")
+            return render_template("register.html")
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.", "error")
+            return render_template("register.html")
+
+        with _db() as db:
+            existing = db.scalar(select(User).where(User.email == email))
+            if existing:
+                flash("An account with that email already exists.", "error")
+                return render_template("register.html")
+            user = User(email=email, password_hash=generate_password_hash(password))
+            db.add(user)
+            db.commit()
+            session["user_id"] = user.id
+            return redirect(url_for("dashboard"))
+
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        if request.method == "GET":
+            return render_template("login.html")
+
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+
+        with _db() as db:
+            user = db.scalar(select(User).where(User.email == email))
+            if not user or not check_password_hash(user.password_hash, password):
+                flash("Invalid email or password.", "error")
+                return render_template("login.html")
+            session["user_id"] = user.id
+            return redirect(url_for("dashboard"))
+
+    @app.route("/logout", methods=["POST"])
+    def logout():
+        session.clear()
+        return redirect(url_for("login"))
+
+    @app.route("/dashboard")
+    @login_required
+    def dashboard():
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            resumes = db.scalars(select(Resume).where(Resume.user_id == user.id)).all()
+            companies = db.scalars(select(CompanyProfile).where(CompanyProfile.user_id == user.id)).all()
+            interviews = db.scalars(
+                select(Interview).where(Interview.user_id == user.id, Interview.status != "deleted").order_by(Interview.updated_at.desc())
+            ).all()
+            return render_template(
+                "dashboard.html",
+                user=user,
+                resumes=resumes,
+                companies=companies,
+                interviews=interviews,
+                supported_models=list(config.SUPPORTED_MODELS.keys()),
+            )
+
+    @app.route("/resumes/upload", methods=["POST"])
+    @login_required
+    def upload_resume():
+        if "file" not in request.files:
+            flash("No file part in the request.", "error")
+            return redirect(url_for("dashboard"))
+
+        file = request.files["file"]
+        if file.filename == "":
+            flash("No file selected.", "error")
+            return redirect(url_for("dashboard"))
+
+        if not allowed_file(file.filename):
+            flash("Unsupported file type. Upload a PDF or TXT resume.", "error")
+            return redirect(url_for("dashboard"))
+
+        safe_name = secure_filename(file.filename)
+        file_id = uuid4().hex
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            user_dir = app.config["UPLOAD_FOLDER"] / str(user.id)
+            user_dir.mkdir(parents=True, exist_ok=True)
+            stored_name = f"{file_id}_{safe_name}"
+            stored_path = user_dir / stored_name
+            file.save(stored_path)
+
+            try:
+                file.stream.seek(0)
+                resume_text = extract_text(file)
+            except Exception as exc:
+                stored_path.unlink(missing_ok=True)
+                flash(f"Failed to process resume: {exc}", "error")
+                return redirect(url_for("dashboard"))
+
+            resume = Resume(
+                user_id=user.id,
+                filename=safe_name,
+                content_type=file.mimetype or "application/octet-stream",
+                size_bytes=stored_path.stat().st_size,
+                storage_path=str(stored_path),
+                text=resume_text.strip(),
+            )
+            db.add(resume)
+            db.commit()
+
+        flash("Resume uploaded successfully.", "success")
+        return redirect(url_for("dashboard"))
+
+    @app.route("/resumes/<int:resume_id>/download")
+    @login_required
+    def download_resume(resume_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            resume = db.get(Resume, resume_id)
+            if not resume or resume.user_id != user.id:
+                abort(404)
+            return send_file(resume.storage_path, as_attachment=True, download_name=resume.filename)
+
+    @app.route("/companies/create", methods=["POST"])
+    @login_required
+    def create_company_profile():
+        company = (request.form.get("company") or "").strip()
+        role = (request.form.get("role") or "").strip()
+        details = (request.form.get("details") or "").strip()
+
+        if not company and not role:
+            flash("Company or role is required.", "error")
+            return redirect(url_for("dashboard"))
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            profile = CompanyProfile(
+                user_id=user.id,
+                company=company,
+                role=role,
+                details=details,
+            )
+            db.add(profile)
+            db.commit()
+
+        flash("Company profile saved.", "success")
+        return redirect(url_for("dashboard"))
+
+    @app.route("/interviews/create", methods=["POST"])
+    @login_required
+    def create_interview():
+        mode = (request.form.get("mode") or "full").strip()
+        language = (request.form.get("language") or "python").strip().lower()
+        model_name = (request.form.get("model") or config.GEMINI_MODEL or "").strip()
+        resume_id = request.form.get("resume_id")
+        company_profile_id = request.form.get("company_profile_id")
+
+        if language not in SUPPORTED_LANGUAGES:
+            flash("Unsupported language.", "error")
+            return redirect(url_for("dashboard"))
+        if mode not in {"full", "coding_only", "ood"}:
+            flash("Invalid interview mode.", "error")
+            return redirect(url_for("dashboard"))
+        if model_name not in config.SUPPORTED_MODELS:
+            flash("Unsupported model.", "error")
+            return redirect(url_for("dashboard"))
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+
+            resume = None
+            if resume_id:
+                resume = db.get(Resume, int(resume_id))
+                if not resume or resume.user_id != user.id:
+                    flash("Selected resume not found.", "error")
+                    return redirect(url_for("dashboard"))
+            if not resume and mode == "full":
+                flash("Resume is required for full interviews.", "error")
+                return redirect(url_for("dashboard"))
+
+            company_profile = None
+            if company_profile_id:
+                company_profile = db.get(CompanyProfile, int(company_profile_id))
+                if not company_profile or company_profile.user_id != user.id:
+                    flash("Selected company profile not found.", "error")
+                    return redirect(url_for("dashboard"))
+
+            candidate_name = _extract_candidate_name(resume.text if resume else "")
+
+            interview = Interview(
+                user_id=user.id,
+                resume_id=resume.id if resume else None,
+                company_profile_id=company_profile.id if company_profile else None,
+                mode=mode,
+                language=language,
+                model=model_name,
+                status="created",
+                current_phase=None,
+                candidate_name=candidate_name,
+                company_context={
+                    "company": company_profile.company if company_profile else "",
+                    "role": company_profile.role if company_profile else "",
+                    "details": company_profile.details if company_profile else "",
+                },
+            )
+            db.add(interview)
+            db.commit()
+            return redirect(url_for("interview_page", interview_id=interview.id))
+
+    @app.route("/interviews/delete", methods=["POST"])
+    @login_required
+    def delete_interview():
+        interview_id = request.form.get("interview_id")
+        if not interview_id:
+            return redirect(url_for("dashboard"))
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, int(interview_id), user.id)
+            interview.status = "deleted"
+            interview.ended_at = _now()
+            _set_updated(interview)
+            db.commit()
+        return redirect(url_for("dashboard"))
+
+    @app.route("/interviews/<int:interview_id>")
+    @login_required
+    def interview_page(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            resume = interview.resume
+            company_profile = interview.company_profile
+            return render_template(
+                "interview.html",
+                interview=interview,
+                resume=resume,
+                company_profile=company_profile,
+            )
+
+    @app.route("/api/interviews/<int:interview_id>/status", methods=["GET"])
+    @login_required
+    def interview_status(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            return jsonify({
+                "interviewActive": interview.status == "active",
+                "status": interview.status,
+                "phase": interview.current_phase,
+                "language": interview.language,
+                "mode": interview.mode,
+                "timeInPhase": _calculate_time_in_phase(interview),
+                "totalTime": _calculate_total_time(interview),
+                "problemPresented": bool(interview.problem_presented),
+                "interviewEnded": interview.status == "ended",
+            })
+
+    @app.route("/api/interviews/<int:interview_id>/start", methods=["POST"])
+    @login_required
+    def start_interview(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+
+            if interview.status in {"ended", "deleted"}:
+                return jsonify({"error": "Interview already ended."}), 400
+
+            was_started = interview.started_at is not None
+
+            if interview.status != "active":
+                interview.status = "active"
+
+            if not interview.candidate_name and interview.resume and interview.resume.text:
+                interview.candidate_name = _extract_candidate_name(interview.resume.text)
+
+            if interview.mode == "ood":
+                interview.current_phase = interview.current_phase or PHASE_OOD_DESIGN
+            elif interview.mode == "coding_only":
+                interview.current_phase = interview.current_phase or PHASE_CODING
+            else:
+                interview.current_phase = interview.current_phase or PHASE_INTRO_RESUME
+
+            _ensure_interview_started(interview)
+            if not was_started and interview.phase_started_at:
+                interview.phase_turn_start_index = len(interview.conversation or [])
+
+            if interview.mode == "ood" and not interview.ood_question:
+                interview.ood_question = get_stock_match_engine_question()
+
+            coding_question = None
+            if interview.mode != "ood" and not interview.coding_question:
+                coding_question = get_random_coding_question()
+                if coding_question:
+                    question_title = coding_question.get("title", "")
+                    test_spec = ensure_tests_for_question(question_title)
+                    if not test_spec:
+                        return jsonify({"error": "Failed to generate test cases for the selected question."}), 500
+                    coding_question["signatures"] = format_signatures_for_prompt(test_spec)
+                    coding_question["starter_code"] = build_starter_code(test_spec, interview.language)
+                    interview.coding_question = coding_question
+
+            _set_updated(interview)
+            db.commit()
+
+            response_data = {
+                "message": "Interview started",
+                "phase": interview.current_phase,
+                "language": interview.language,
+                "mode": interview.mode,
+                "model": interview.model,
+            }
+            if interview.mode != "ood":
+                coding_question = interview.coding_question or {}
+                response_data["codingQuestion"] = {
+                    "title": coding_question.get("title", ""),
+                    "signature": (coding_question.get("signatures") or {}).get(interview.language, ""),
+                    "starterCode": coding_question.get("starter_code", ""),
+                }
+            return jsonify(response_data)
+
+    @app.route("/api/interviews/<int:interview_id>/pause", methods=["POST"])
+    @login_required
+    def pause_interview(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            if interview.status == "active":
+                interview.status = "paused"
+                _set_updated(interview)
+                db.commit()
+            return jsonify({"message": "Interview paused."})
+
+    @app.route("/api/interviews/<int:interview_id>/resume", methods=["POST"])
+    @login_required
+    def resume_interview(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            if interview.status in {"created", "paused"}:
+                interview.status = "active"
+                _ensure_interview_started(interview)
+                _set_updated(interview)
+                db.commit()
+            return jsonify({"message": "Interview resumed."})
+
+    @app.route("/api/interviews/<int:interview_id>/delete", methods=["POST"])
+    @login_required
+    def delete_interview_api(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            interview.status = "deleted"
+            interview.ended_at = _now()
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"message": "Interview deleted."})
+
+    @app.route("/api/interviews/<int:interview_id>/reset", methods=["POST"])
+    @login_required
+    def reset_interview(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            interview.conversation = []
+            interview.current_code = ""
+            interview.code_snapshots = []
+            interview.code_evaluation = {}
+            interview.coding_summary = {}
+            interview.report = {}
+            interview.problem_presented = False
+            interview.phase_turn_start_index = 0
+            interview.phase_started_at = _now() if interview.current_phase else None
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"message": "Interview reset."})
+
+    @app.route("/api/chat", methods=["POST"])
+    @login_required
+    def chat():
+        import time
+
+        payload = request.get_json(silent=True) or {}
+        user_message = (payload.get("message") or "").strip()
+        interview_id = payload.get("interview_id")
+        if not user_message:
+            return jsonify({"error": "Message is required."}), 400
+        if not interview_id:
+            return jsonify({"error": "Interview ID is required."}), 400
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, int(interview_id), user.id)
+
+            if interview.status != "active":
+                return jsonify({"error": "Interview is not active."}), 400
+
+            full_resume_text = interview.resume.text if interview.resume else ""
+            interview_state = {
+                "current_phase": interview.current_phase,
+                "language": interview.language,
+                "mode": interview.mode,
+                "model": interview.model,
+                "problem_presented": interview.problem_presented,
+                "code_snapshots": interview.code_snapshots,
+                "coding_question": interview.coding_question,
+                "code_evaluation": interview.code_evaluation,
+                "coding_summary": interview.coding_summary,
+                "company_context": interview.company_context,
+                "ood_question": interview.ood_question,
+                "candidate_name": interview.candidate_name,
+                "phase_turn_start_index": interview.phase_turn_start_index,
+            }
+            resume_text = full_resume_text if interview.current_phase in {PHASE_INTRO_RESUME, PHASE_QUESTIONS} else None
+
+            current_code = payload.get("code", "")
+            code_changed = payload.get("code_changed", False)
+
+            if not current_code:
+                current_code = interview.current_code or ""
+                code_changed = False
+
+            if current_code:
+                _update_code(interview, current_code)
+
+            interview.last_speech_at = _now()
+
+            conversation: List[Dict[str, Any]] = list(interview.conversation or [])
+            perf_enabled = bool(interview.mode == "coding_only")
+            perf_t0 = time.perf_counter() if perf_enabled else 0.0
+            test_gate_time = 0.0
+            test_run_time = 0.0
+            llm_reply_time = 0.0
+            tts_time = 0.0
+            try:
+                client = get_llm_client(interview.model)
+
+                if interview.current_phase == PHASE_CODING:
+                    coding_question = interview.coding_question or {}
+                    question_title = coding_question.get("title", "")
+                    if question_title and current_code.strip():
+                        code_hash = hashlib.sha256(current_code.encode("utf-8")).hexdigest()
+                        existing_eval = interview.code_evaluation or {}
+                        if existing_eval.get("code_hash") != code_hash:
+                            interview.code_evaluation = {}
+                        fallback_hit = _should_run_tests_fallback(user_message)
+                        complete_hit = _code_looks_complete(current_code, interview.language)
+                        test_gate_start = time.perf_counter() if perf_enabled else 0.0
+                        model_hit = client.should_run_tests(
+                            interview_state=interview_state,
+                            conversation=conversation,
+                            user_message=user_message,
+                            current_code=current_code,
+                        )
+                        if perf_enabled:
+                            test_gate_time = time.perf_counter() - test_gate_start
+                        logger.info(
+                            "[TEST GATE] phase=%s fallback=%s complete=%s model=%s",
+                            interview.current_phase,
+                            fallback_hit,
+                            complete_hit,
+                            model_hit,
+                        )
+                        should_run = fallback_hit or complete_hit or model_hit
+                        should_rerun = fallback_hit or model_hit
+                        can_run = should_run and (
+                            existing_eval.get("code_hash") != code_hash or not existing_eval or should_rerun
+                        )
+                        if can_run:
+                            test_spec = get_cached_tests(question_title)
+                            if test_spec:
+                                logger.info("[TEST RUN] phase=%s question=%s", interview.current_phase, question_title)
+                                test_run_start = time.perf_counter() if perf_enabled else 0.0
+                                evaluation = run_code_tests(
+                                    interview.language,
+                                    current_code,
+                                    test_spec,
+                                )
+                                if perf_enabled:
+                                    test_run_time = time.perf_counter() - test_run_start
+                                if str(evaluation.get("status", "")).strip() == "pass":
+                                    pass_turn_count = existing_eval.get("pass_turn_count")
+                                    if pass_turn_count is None:
+                                        pass_turn_count = len(conversation) // 2
+                                    evaluation["pass_turn_count"] = pass_turn_count
+                                evaluation["code_hash"] = code_hash
+                                interview.code_evaluation = evaluation
+                                interview_state["code_evaluation"] = evaluation
+                                logger.info(
+                                    "[TEST RUN] phase=%s status=%s summary=%s",
+                                    interview.current_phase,
+                                    evaluation.get("status"),
+                                    evaluation.get("summary"),
+                                )
+
+                time_in_phase = _calculate_time_in_phase(interview)
+                total_time = _calculate_total_time(interview)
+                silence_duration = _calculate_silence_duration(interview)
+                code_idle_duration = _calculate_code_idle_duration(interview)
+
+                # Calculate phase signal based on time constraints
+                phase_signal = _calculate_phase_signal(interview, time_in_phase)
+
+                logger.info(
+                    "[MODEL REQUEST] phase=%s mode=%s time_in_phase=%.1fm phase_signal=%s user_message=%s",
+                    interview.current_phase,
+                    interview.mode,
+                    time_in_phase,
+                    phase_signal,
+                    user_message[:100] + "..." if len(user_message) > 100 else user_message,
+                )
+                llm_start = time.perf_counter() if perf_enabled else 0.0
+                reply_text = client.generate_structured_interview_reply(
+                    interview_state=interview_state,
+                    conversation=conversation,
+                    resume_text=resume_text,
+                    user_message=user_message,
+                    current_code=current_code,
+                    code_changed=code_changed,
+                    time_in_phase=time_in_phase,
+                    total_time=total_time,
+                    silence_duration=silence_duration,
+                    code_idle_duration=code_idle_duration,
+                    phase_signal=phase_signal,
+                )
+                if perf_enabled:
+                    llm_reply_time = time.perf_counter() - llm_start
+                logger.info(
+                    "[MODEL RESPONSE] phase=%s reply_len=%s llm_time=%.3fs",
+                    interview.current_phase,
+                    len(reply_text or ""),
+                    llm_reply_time,
+                )
+            except (ValueError, GeminiError, OpenAIError) as exc:
+                logger.error("[MODEL ERROR] %s", exc)
+                return jsonify({"error": str(exc)}), 500
+
+            phase_complete = False
+            phase_before_transition = interview.current_phase
+            phase_complete, reply_text = _extract_phase_complete(reply_text)
+            if interview.mode == "full" and interview.current_phase == PHASE_CODING:
+                evaluation = interview.code_evaluation or {}
+                if str(evaluation.get("status", "")).strip() == "pass":
+                    pass_turn_count = evaluation.get("pass_turn_count")
+                    if isinstance(pass_turn_count, int):
+                        projected_turns = (len(conversation) // 2) + 1
+                        turns_since_pass = projected_turns - pass_turn_count
+                        if turns_since_pass >= 10:
+                            phase_complete = True
+            logger.info(
+                "[PHASE CHECK] phase=%s phase_complete=%s time_in_phase=%.1fm",
+                phase_before_transition,
+                phase_complete,
+                time_in_phase,
+            )
+            _handle_problem_presentation(interview, reply_text)
+            _apply_phase_completion(interview, phase_complete)
+            _transition_ood_phase(interview)
+            if interview.current_phase != phase_before_transition:
+                logger.info(
+                    "[PHASE TRANSITION] %s -> %s",
+                    phase_before_transition,
+                    interview.current_phase,
+                )
+
+            tts_text = _strip_code_markers(reply_text)
+
+            try:
+                tts_start = time.perf_counter() if perf_enabled else 0.0
+                reply_audio = kokoro.synthesize_base64(tts_text)
+                if perf_enabled:
+                    tts_time = time.perf_counter() - tts_start
+            except KokoroUnavailable as exc:
+                logger.error("[TTS ERROR] %s", exc)
+                return jsonify({"error": str(exc)}), 500
+            except Exception as exc:
+                logger.error("[TTS ERROR] %s", exc)
+                return jsonify({"error": f"TTS error: {exc}"}), 500
+
+            _append_turn(interview, user_message, reply_text)
+
+            interview_ended = False
+            if interview.mode in {"coding_only", "ood"}:
+                total_time = _calculate_total_time(interview)
+                if interview.mode == "coding_only":
+                    evaluation = interview.code_evaluation or {}
+                    if str(evaluation.get("status", "")).strip() == "pass":
+                        pass_turn_count = evaluation.get("pass_turn_count")
+                        if isinstance(pass_turn_count, int):
+                            projected_turns = (len(interview.conversation or []) // 2)
+                            turns_since_pass = projected_turns - pass_turn_count
+                            if turns_since_pass >= 10:
+                                interview.status = "ended"
+                                interview.ended_at = _now()
+                if interview.mode == "coding_only" and phase_complete:
+                    evaluation = interview.code_evaluation or {}
+                    if str(evaluation.get("status", "")).strip() == "pass":
+                        interview.status = "ended"
+                        interview.ended_at = _now()
+                if total_time >= 40.0:
+                    interview.status = "ended"
+                    interview.ended_at = _now()
+                elif _detect_interview_close(reply_text):
+                    interview.status = "ended"
+                    interview.ended_at = _now()
+            interview_ended = interview.status == "ended"
+
+            if perf_enabled:
+                total_time = time.perf_counter() - perf_t0
+                logger.info(
+                    "[PERF][coding_only] total=%.3fs gate=%.3fs test=%.3fs llm=%.3fs tts=%.3fs",
+                    total_time,
+                    test_gate_time,
+                    test_run_time,
+                    llm_reply_time,
+                    tts_time,
+                )
+
+            _set_updated(interview)
+            db.commit()
+
+            return jsonify({
+                "reply": reply_text,
+                "replyAudio": reply_audio,
+                "phase": interview.current_phase,
+                "interviewEnded": interview_ended,
+            })
+
+    @app.route("/api/update_code", methods=["POST"])
+    @login_required
+    def update_code_endpoint():
+        payload = request.get_json(silent=True) or {}
+        code = payload.get("code", "")
+        interview_id = payload.get("interview_id")
+        if not interview_id:
+            return jsonify({"error": "Interview ID is required."}), 400
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, int(interview_id), user.id)
+            _update_code(interview, code)
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"message": "Code updated"})
+
+    @app.route("/api/interviews/<int:interview_id>/end", methods=["POST"])
+    @login_required
+    def end_interview(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+
+            interview.status = "ended"
+            interview.ended_at = _now()
+
+            if interview.report:
+                _set_updated(interview)
+                db.commit()
+                return jsonify({"report": interview.report, "cached": True})
+
+            try:
+                client = get_llm_client(interview.model)
+                report = client.generate_interview_report(
+                    mode=interview.mode,
+                    language=interview.language,
+                    conversation=interview.conversation or [],
+                    current_code=interview.current_code or "",
+                    code_snapshots=interview.code_snapshots or [],
+                    problem_presented=bool(interview.problem_presented),
+                )
+            except (ValueError, GeminiError, OpenAIError) as exc:
+                return jsonify({"error": str(exc)}), 500
+
+            interview.report = report
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"report": report, "cached": False})
+
+    @app.route("/api/interviews/<int:interview_id>/report", methods=["POST"])
+    @login_required
+    def interview_report(interview_id: int):
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+
+            if interview.report:
+                return jsonify({"report": interview.report, "cached": True})
+
+            try:
+                client = get_llm_client(interview.model)
+                report = client.generate_interview_report(
+                    mode=interview.mode,
+                    language=interview.language,
+                    conversation=interview.conversation or [],
+                    current_code=interview.current_code or "",
+                    code_snapshots=interview.code_snapshots or [],
+                    problem_presented=bool(interview.problem_presented),
+                )
+            except (ValueError, GeminiError, OpenAIError) as exc:
+                return jsonify({"error": str(exc)}), 500
+
+            interview.report = report
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"report": report, "cached": False})
+
+    @app.route("/api/transition_phase", methods=["POST"])
+    @login_required
+    def transition_phase():
+        payload = request.get_json(silent=True) or {}
+        new_phase = payload.get("phase")
+        interview_id = payload.get("interview_id")
+        if not interview_id:
+            return jsonify({"error": "Interview ID is required."}), 400
+
+        valid_phases = [
+            PHASE_INTRO_RESUME,
+            PHASE_CODING,
+            PHASE_QUESTIONS,
+            PHASE_OOD_DESIGN,
+            PHASE_OOD_IMPLEMENTATION,
+        ]
+        if new_phase not in valid_phases:
+            return jsonify({"error": "Invalid phase"}), 400
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, int(interview_id), user.id)
+
+            if interview.mode == "full":
+                time_in_phase = _calculate_time_in_phase(interview)
+                if new_phase == PHASE_CODING and time_in_phase < FULL_PHASE_RULES[PHASE_INTRO_RESUME]["min"]:
+                    return jsonify({"error": "Cannot enter coding before 5 minutes in intro/resume."}), 400
+                if new_phase == PHASE_QUESTIONS and time_in_phase < FULL_PHASE_RULES[PHASE_CODING]["min"]:
+                    return jsonify({"error": "Cannot enter questions before coding begins."}), 400
+
+            interview.current_phase = new_phase
+            interview.phase_started_at = _now()
+            interview.phase_turn_start_index = len(interview.conversation or [])
+            _set_updated(interview)
+            db.commit()
+            return jsonify({"message": f"Transitioned to {new_phase} phase"})
+
+    @app.route("/api/transcribe", methods=["POST"])
+    @login_required
+    def transcribe_audio():
+        import time
+        start_time = time.time()
+
+        try:
+            if "audio" not in request.files:
+                return jsonify({"error": "No audio file provided"}), 400
+
+            audio_file = request.files["audio"]
+            audio_format = request.form.get("format", "webm")
+            audio_bytes = audio_file.read()
+            if not audio_bytes:
+                return jsonify({"error": "Empty audio file"}), 400
+
+            transcriber = get_whisper_transcriber(model_size="base")
+            transcribe_start = time.time()
+            result = transcriber.transcribe_bytes(
+                audio_bytes,
+                audio_format=audio_format,
+                language="en",
+            )
+            transcribe_time = time.time() - transcribe_start
+
+            total_time = time.time() - start_time
+            logging.info(
+                "[WHISPER] Transcription complete in %.3fs (total: %.3fs)",
+                transcribe_time,
+                total_time,
+            )
+
+            return jsonify({
+                "text": result["text"],
+                "raw_text": result["raw_text"],
+                "language": result["language"],
+                "duration": result["duration"],
+                "transcription_time": transcribe_time,
+                "device": transcriber.device,
+                "success": True,
+            })
+
+        except Exception as e:
+            logging.error("[WHISPER] Transcription error: %s", e, exc_info=True)
+            return jsonify({"error": str(e), "success": False}), 500
 
     return app
 
@@ -926,4 +1179,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1111, debug=True)
+    app.run(host="0.0.0.0", port=1111, debug=False)

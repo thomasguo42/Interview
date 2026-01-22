@@ -41,46 +41,62 @@ class OpenAIClient:
 
     def generate_structured_interview_reply(
         self,
-        session_id: str,
+        interview_state: Dict[str, Any],
         conversation: List[Dict[str, Any]],
         resume_text: str | None,
         user_message: str,
         current_code: str = "",
         code_changed: bool = False,
+        time_in_phase: float = 0.0,
+        total_time: float = 0.0,
+        silence_duration: float = 0.0,
+        code_idle_duration: float = 0.0,
+        phase_signal: str = "end_if_you_want",
         temperature: float = 0.7,
     ) -> str:
-        interview_state = state.get_interview_state(session_id)
         if not interview_state:
             return self.generate_interview_reply(conversation, resume_text, user_message, temperature)
 
         payload = self._builder._build_structured_payload(
-            session_id,
             interview_state,
             conversation,
             resume_text,
             user_message,
             current_code,
             code_changed,
+            time_in_phase,
+            total_time,
+            silence_duration,
+            code_idle_duration,
+            phase_signal,
             temperature,
         )
 
+        current_phase = interview_state.get("current_phase", "unknown")
+        mode = interview_state.get("mode", "unknown")
         system_prompt = payload.get("systemInstruction", {}).get("parts", [{}])[0].get("text", "")
-        logging.info("[OPENAI DEBUG] System prompt length: %s", len(system_prompt))
+        code_in_prompt = bool('CURRENT CODE IN EDITOR' in system_prompt)
+        logging.info(f"[OPENAI DEBUG] phase={current_phase} mode={mode} time_in_phase={time_in_phase:.1f}m")
+        logging.info(f"[OPENAI DEBUG] phase={current_phase} current_code_length={len(current_code)}")
+        logging.info(f"[OPENAI DEBUG] phase={current_phase} code_included_in_prompt={code_in_prompt}")
+        if current_phase == "coding":
+            evaluation = interview_state.get("code_evaluation") or {}
+            test_status = str(evaluation.get("status", "")).strip() or "not_run"
+            logging.info(f"[OPENAI DEBUG] phase={current_phase} test_status={test_status} code_access_granted={code_in_prompt}")
+        logging.info(f"[OPENAI DEBUG] phase={current_phase} system_prompt_length={len(system_prompt)}")
         return self._post_for_text(payload)
 
     def decide_phase_transition(
         self,
-        session_id: str,
         interview_state: Dict[str, Any],
         conversation: List[Dict[str, Any]],
         user_message: str,
         model_reply: str,
+        time_in_phase: float,
+        total_time: float,
+        silence_duration: float,
+        code_idle_duration: float,
     ) -> Optional[Dict[str, Any]]:
-        time_in_phase = state.calculate_time_in_phase(session_id)
-        total_time = state.calculate_total_time(session_id)
-        silence_duration = state.calculate_silence_duration(session_id)
-        code_idle_duration = state.calculate_code_idle_duration(session_id)
-
         payload = self._builder._build_phase_decision_payload(
             interview_state=interview_state,
             conversation=conversation,
@@ -111,7 +127,6 @@ class OpenAIClient:
 
     def should_run_tests(
         self,
-        session_id: str,
         interview_state: Dict[str, Any],
         conversation: List[Dict[str, Any]],
         user_message: str,

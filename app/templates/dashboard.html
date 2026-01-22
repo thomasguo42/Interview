@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="header">
+    <h1>Dashboard</h1>
+    <p class="tagline">Manage resumes, company profiles, and mock interviews.</p>
+</header>
+
+<section class="card">
+    <h2>Resumes</h2>
+    <form method="post" action="{{ url_for('upload_resume') }}" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".pdf,.txt" required>
+        <button type="submit">Upload resume</button>
+    </form>
+    {% if resumes %}
+    <div class="list-grid">
+        {% for resume in resumes %}
+        <div class="list-item">
+            <div>
+                <strong>{{ resume.filename }}</strong>
+                <div class="muted">{{ resume.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+            </div>
+            <a href="{{ url_for('download_resume', resume_id=resume.id) }}">Download</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="hint">No resumes yet. Upload one to enable full interview mode.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Company profiles</h2>
+    <form method="post" action="{{ url_for('create_company_profile') }}" class="stacked-form">
+        <label>Company</label>
+        <input type="text" name="company" placeholder="Stripe">
+        <label>Role</label>
+        <input type="text" name="role" placeholder="Payments Platform Engineer">
+        <label>Details</label>
+        <textarea name="details" rows="3" placeholder="Team, product, or interview focus (optional)"></textarea>
+        <button type="submit">Save profile</button>
+    </form>
+    {% if companies %}
+    <div class="list-grid">
+        {% for company in companies %}
+        <div class="list-item">
+            <div>
+                <strong>{{ company.company or "Company profile" }}</strong>
+                <div class="muted">{{ company.role }}</div>
+            </div>
+            <div class="muted">{{ company.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="hint">Add a profile to tailor OOD interviews.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Start a new interview</h2>
+    <form method="post" action="{{ url_for('create_interview') }}" class="stacked-form">
+        <label>Mode</label>
+        <select name="mode" required>
+            <option value="full">Full (intro + coding + questions)</option>
+            <option value="coding_only">Coding only</option>
+            <option value="ood">OOD (design + implementation)</option>
+        </select>
+        <label>Language</label>
+        <select name="language" required>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+        </select>
+        <label>Model</label>
+        <select name="model" required>
+            {% for model in supported_models %}
+            <option value="{{ model }}">{{ model }}</option>
+            {% endfor %}
+        </select>
+        <label>Resume (required for full mode)</label>
+        <select name="resume_id">
+            <option value="">No resume</option>
+            {% for resume in resumes %}
+            <option value="{{ resume.id }}">{{ resume.filename }}</option>
+            {% endfor %}
+        </select>
+        <label>Company profile (optional)</label>
+        <select name="company_profile_id">
+            <option value="">No profile</option>
+            {% for company in companies %}
+            <option value="{{ company.id }}">{{ company.company or "Profile" }}{% if company.role %} — {{ company.role }}{% endif %}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Create interview</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Your interviews</h2>
+    {% if interviews %}
+    <div class="list-grid">
+        {% for interview in interviews %}
+        <div class="list-item list-item-column">
+            <div>
+                <strong>{{ interview.mode | replace('_', ' ') | title }} interview</strong>
+                <div class="muted">{{ interview.language }} · {{ interview.model }}</div>
+                <div class="muted">Status: {{ interview.status }}</div>
+                <div class="muted">Updated: {{ interview.updated_at.strftime("%Y-%m-%d %H:%M") }}</div>
+            </div>
+            <div class="actions">
+                <a href="{{ url_for('interview_page', interview_id=interview.id) }}">Open</a>
+                <form action="{{ url_for('delete_interview') }}" method="post" class="inline-form">
+                    <input type="hidden" name="interview_id" value="{{ interview.id }}">
+                    <button type="submit" class="secondary">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="hint">No interviews yet. Create one above.</p>
+    {% endif %}
+</section>
+{% endblock %}

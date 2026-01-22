@@ -5,3 +5,1317 @@
  * Running on http://127.0.0.1:1111
  * Running on http://172.17.0.2:1111
 2026-01-21 05:51:11,651 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-01-21 23:37:23,447 [INFO] [MODEL] reply_len=112 llm_time=0.000s
+2026-01-21 23:37:40,359 [INFO] [MODEL] reply_len=105 llm_time=0.000s
+2026-01-21 23:37:54,539 [INFO] [MODEL] reply_len=67 llm_time=0.000s
+2026-01-21 23:38:05,359 [INFO] [MODEL] reply_len=82 llm_time=0.000s
+2026-01-21 23:38:17,947 [INFO] [MODEL] reply_len=65 llm_time=0.000s
+2026-01-21 23:38:27,788 [INFO] [MODEL] reply_len=59 llm_time=0.000s
+2026-01-21 23:38:39,816 [INFO] [MODEL] reply_len=114 llm_time=0.000s
+2026-01-21 23:38:55,695 [INFO] [MODEL] reply_len=66 llm_time=0.000s
+2026-01-21 23:39:07,253 [INFO] [MODEL] reply_len=69 llm_time=0.000s
+2026-01-21 23:39:18,135 [INFO] [MODEL] reply_len=76 llm_time=0.000s
+2026-01-21 23:39:28,809 [INFO] [MODEL] reply_len=117 llm_time=0.000s
+2026-01-21 23:39:41,961 [INFO] [MODEL] reply_len=108 llm_time=0.000s
+2026-01-21 23:39:58,527 [INFO] [MODEL] reply_len=81 llm_time=0.000s
+2026-01-21 23:40:09,187 [INFO] [MODEL] reply_len=92 llm_time=0.000s
+2026-01-21 23:40:22,132 [INFO] [MODEL] reply_len=49 llm_time=0.000s
+2026-01-21 23:40:31,726 [INFO] [MODEL] reply_len=65 llm_time=0.000s
+2026-01-21 23:40:40,466 [INFO] [MODEL] reply_len=92 llm_time=0.000s
+2026-01-21 23:40:53,975 [INFO] [MODEL] reply_len=61 llm_time=0.000s
+2026-01-21 23:41:05,605 [INFO] [MODEL] reply_len=123 llm_time=0.000s
+2026-01-21 23:41:19,798 [INFO] [MODEL] reply_len=53 llm_time=0.000s
+2026-01-21 23:41:33,046 [INFO] [MODEL] reply_len=149 llm_time=0.000s
+2026-01-21 23:41:45,202 [INFO] [MODEL] reply_len=112 llm_time=0.000s
+2026-01-21 23:41:55,561 [INFO] [MODEL] reply_len=1635 llm_time=0.000s
+2026-01-21 23:42:17,120 [INFO] [MODEL] reply_len=105 llm_time=0.000s
+2026-01-21 23:42:34,870 [INFO] [MODEL] reply_len=101 llm_time=0.000s
+2026-01-22 00:07:13,566 [INFO] [MODEL] reply_len=113 llm_time=0.000s
+2026-01-22 00:07:28,053 [INFO] [MODEL] reply_len=114 llm_time=0.000s
+2026-01-22 00:07:41,296 [INFO] [MODEL] reply_len=180 llm_time=0.000s
+2026-01-22 00:08:03,051 [INFO] [MODEL] reply_len=103 llm_time=0.000s
+2026-01-22 00:20:14,854 [INFO] [MODEL] reply_len=107 llm_time=0.000s
+2026-01-22 00:20:29,118 [INFO] [MODEL] reply_len=117 llm_time=0.000s
+2026-01-22 00:20:46,726 [INFO] [MODEL] reply_len=67 llm_time=0.000s
+2026-01-22 00:21:04,789 [INFO] [MODEL] reply_len=76 llm_time=0.000s
+2026-01-22 00:21:19,334 [INFO] [MODEL] reply_len=133 llm_time=0.000s
+2026-01-22 00:21:35,851 [INFO] [MODEL] reply_len=97 llm_time=0.000s
+2026-01-22 00:21:48,376 [INFO] [MODEL] reply_len=91 llm_time=0.000s
+2026-01-22 00:22:01,208 [INFO] [MODEL] reply_len=97 llm_time=0.000s
+2026-01-22 00:22:14,631 [INFO] [MODEL] reply_len=78 llm_time=0.000s
+2026-01-22 00:22:28,971 [INFO] [MODEL] reply_len=71 llm_time=0.000s
+2026-01-22 00:22:43,314 [INFO] [MODEL] reply_len=95 llm_time=0.000s
+2026-01-22 00:22:54,503 [INFO] [MODEL] reply_len=895 llm_time=0.000s
+2026-01-22 00:50:09,935 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m user_message=hello
+2026-01-22 00:50:10,499 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=108 llm_time=0.000s
+2026-01-22 00:50:10,500 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-22 00:50:23,495 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m user_message=yeah sure
+2026-01-22 00:50:24,039 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=155 llm_time=0.000s
+2026-01-22 00:50:24,039 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-22 00:50:39,942 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.6m user_message=I'm very interested in soft engineering
+2026-01-22 00:50:40,606 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=57 llm_time=0.000s
+2026-01-22 00:50:40,606 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.6m
+2026-01-22 00:50:50,358 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m user_message=love doing CS work and I love designing web apps and AIS
+2026-01-22 00:50:52,690 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=118 llm_time=0.000s
+2026-01-22 00:50:52,691 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-22 00:51:04,613 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m user_message=once I use machine learning algorithms disputed
+2026-01-22 00:51:05,118 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-22 00:51:05,119 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-22 00:51:18,439 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.2m user_message=songs that we basically developed a
+2026-01-22 00:51:18,999 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=83 llm_time=0.000s
+2026-01-22 00:51:18,999 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.2m
+2026-01-22 00:51:33,356 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.4m user_message=yeah I'm through a bunch of machine learning algorithms in a lot of ways and and and Rule base logic...
+2026-01-22 00:51:33,788 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-22 00:51:33,788 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.4m
+2026-01-22 00:51:43,032 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.6m user_message=a lot of algorithms
+2026-01-22 00:51:43,555 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=60 llm_time=0.000s
+2026-01-22 00:51:43,555 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.6m
+2026-01-22 00:51:57,021 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m user_message=I use you know machine learnings and also yet AIS
+2026-01-22 00:51:57,465 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=62 llm_time=0.000s
+2026-01-22 00:51:57,465 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-22 00:52:07,461 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.0m user_message=neural networks random Forest those kind of things
+2026-01-22 00:52:09,617 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=76 llm_time=0.000s
+2026-01-22 00:52:09,617 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.0m
+2026-01-22 00:52:18,903 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.2m user_message=not much
+2026-01-22 00:52:19,415 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=121 llm_time=0.000s
+2026-01-22 00:52:19,415 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.2m
+2026-01-22 00:52:35,247 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.5m user_message=it was used to predict you know locking anomalies and those kind of stuff
+2026-01-22 00:52:35,719 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-22 00:52:35,719 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.5m
+2026-01-22 00:52:44,368 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.6m user_message=tensorflow is great I love Google
+2026-01-22 00:52:44,925 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=169 llm_time=0.000s
+2026-01-22 00:52:44,926 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.6m
+2026-01-22 00:53:01,374 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m user_message=yeah I mean it's cool
+2026-01-22 00:53:01,894 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=57 llm_time=0.000s
+2026-01-22 00:53:01,894 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-22 00:53:12,007 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.1m user_message=the purpose is to video sharing
+2026-01-22 00:53:12,504 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=140 llm_time=0.000s
+2026-01-22 00:53:12,504 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.1m
+2026-01-22 00:53:29,458 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.4m user_message=I'm handsome in the USB as you know looking good on the face
+2026-01-22 00:53:29,990 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=124 llm_time=0.000s
+2026-01-22 00:53:29,990 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.4m
+2026-01-22 00:53:42,267 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.6m user_message=I don't know anything about front end
+2026-01-22 00:53:42,803 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=147 llm_time=0.000s
+2026-01-22 00:53:42,803 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.6m
+2026-01-22 00:53:58,977 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.9m user_message=yeah I lie look I lied about that in my resume
+2026-01-22 00:53:59,577 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=165 llm_time=0.000s
+2026-01-22 00:53:59,578 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.9m
+2026-01-22 00:54:14,353 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.1m user_message=not much I did everything easily
+2026-01-22 00:54:14,960 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=102 llm_time=0.000s
+2026-01-22 00:54:14,960 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.1m
+2026-01-22 00:54:28,309 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.4m user_message=I used
+2026-01-22 00:54:28,843 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=132 llm_time=0.000s
+2026-01-22 00:54:28,843 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.4m
+2026-01-22 00:54:41,413 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.6m user_message=it's easy
+2026-01-22 00:54:41,899 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-22 00:54:41,899 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.6m
+2026-01-22 00:54:52,658 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.8m user_message=the objective was to be an AR referee
+2026-01-22 00:54:53,584 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-22 00:54:53,584 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.8m
+2026-01-22 00:55:01,693 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m user_message=ai ai referee
+2026-01-22 00:55:02,159 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=113 llm_time=0.000s
+2026-01-22 00:55:02,160 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-22 00:55:14,442 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m user_message=it is better than human
+2026-01-22 00:55:14,935 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=97 llm_time=0.000s
+2026-01-22 00:55:14,935 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-22 00:55:24,780 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m user_message=the accuracy of judging
+2026-01-22 00:55:25,221 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-22 00:55:25,221 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-22 00:55:36,361 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.5m user_message=from 75% for humans to around like 85 to 90 for men
+2026-01-22 00:55:36,907 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-22 00:55:36,908 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.5m
+2026-01-22 00:55:50,895 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.7m user_message=yeah
+2026-01-22 00:55:51,373 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=184 llm_time=0.000s
+2026-01-22 00:55:51,373 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.7m
+2026-01-22 00:56:06,642 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.0m user_message=I don't
+2026-01-22 00:56:07,869 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=94 llm_time=0.000s
+2026-01-22 00:56:07,869 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=6.0m
+2026-01-22 00:56:07,869 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=False)
+2026-01-22 00:56:07,869 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-22 00:56:16,167 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:56:16,167 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.1m user_message=okay
+2026-01-22 00:56:17,090 [INFO] [MODEL RESPONSE] phase=coding reply_len=444 llm_time=0.000s
+2026-01-22 00:56:17,090 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-22 00:56:17,090 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-22 00:56:34,585 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:56:34,585 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.4m user_message=hello
+2026-01-22 00:56:35,763 [INFO] [MODEL RESPONSE] phase=coding reply_len=486 llm_time=0.000s
+2026-01-22 00:56:35,763 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.4m
+2026-01-22 00:57:08,002 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:57:08,003 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.0m user_message=I'm going to start the intervals first
+2026-01-22 00:57:08,548 [INFO] [MODEL RESPONSE] phase=coding reply_len=40 llm_time=0.000s
+2026-01-22 00:57:08,548 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.0m
+2026-01-22 00:57:17,207 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:57:17,208 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.2m user_message=from the start time
+2026-01-22 00:57:17,552 [INFO] [MODEL RESPONSE] phase=coding reply_len=41 llm_time=0.000s
+2026-01-22 00:57:17,553 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.2m
+2026-01-22 00:57:27,080 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:57:27,080 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.3m user_message=I will iterate through using a sweep line
+2026-01-22 00:57:27,587 [INFO] [MODEL RESPONSE] phase=coding reply_len=250 llm_time=0.000s
+2026-01-22 00:57:27,588 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.3m
+2026-01-22 00:57:37,235 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:57:37,235 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.5m user_message=I'm thinking about it
+2026-01-22 00:57:37,688 [INFO] [MODEL RESPONSE] phase=coding reply_len=22 llm_time=0.000s
+2026-01-22 00:57:37,688 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.5m
+2026-01-22 00:58:13,257 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:58:13,257 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.1m user_message=should I store my start time or end time
+2026-01-22 00:58:13,710 [INFO] [MODEL RESPONSE] phase=coding reply_len=54 llm_time=0.000s
+2026-01-22 00:58:13,711 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.1m
+2026-01-22 00:58:24,830 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 00:58:24,830 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.3m user_message=no I mean asking you should I sort the array by start time or end time
+2026-01-22 00:58:25,952 [INFO] [MODEL RESPONSE] phase=coding reply_len=964 llm_time=0.000s
+2026-01-22 00:58:25,952 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.3m
+2026-01-22 00:58:33,630 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 00:58:33,630 [INFO] [TEST RUN] phase=coding question=Meeting Rooms II
+2026-01-22 00:58:34,489 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 00:58:34,489 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.4m user_message=can I store it by end time
+2026-01-22 00:58:34,935 [INFO] [MODEL RESPONSE] phase=coding reply_len=71 llm_time=0.000s
+2026-01-22 00:58:34,936 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.4m
+2026-01-22 00:58:46,211 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 00:58:46,211 [INFO] [TEST RUN] phase=coding question=Meeting Rooms II
+2026-01-22 00:58:47,039 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 00:58:47,039 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.7m user_message=why did you just update a code editor
+2026-01-22 00:58:47,626 [INFO] [MODEL RESPONSE] phase=coding reply_len=72 llm_time=0.000s
+2026-01-22 00:58:47,626 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-22 00:58:57,160 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 00:58:57,161 [INFO] [TEST RUN] phase=coding question=Meeting Rooms II
+2026-01-22 00:58:58,034 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 00:58:58,034 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.8m user_message=no it wasn't you updated code editor
+2026-01-22 00:58:58,415 [INFO] [MODEL RESPONSE] phase=coding reply_len=63 llm_time=0.000s
+2026-01-22 00:58:58,416 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.8m
+2026-01-22 00:59:59,759 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m user_message=hello
+2026-01-22 01:00:00,275 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=107 llm_time=0.000s
+2026-01-22 01:00:00,275 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-22 01:00:14,682 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m user_message=yeah sure
+2026-01-22 01:00:15,317 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=148 llm_time=0.000s
+2026-01-22 01:00:15,317 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-22 01:00:28,794 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.5m user_message=I'm excited about a lot of things
+2026-01-22 01:00:29,218 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-22 01:00:29,219 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.5m
+2026-01-22 01:00:36,297 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m user_message=nothing
+2026-01-22 01:00:37,087 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=121 llm_time=0.000s
+2026-01-22 01:00:37,087 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-22 01:00:47,626 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.9m user_message=I don't know
+2026-01-22 01:00:47,987 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=48 llm_time=0.000s
+2026-01-22 01:00:47,987 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.9m
+2026-01-22 01:00:56,194 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m user_message=I don't know
+2026-01-22 01:00:56,710 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-22 01:00:56,710 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-22 01:01:08,274 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.2m user_message=I don't know I don't know that either
+2026-01-22 01:01:08,742 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=97 llm_time=0.000s
+2026-01-22 01:01:08,742 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.2m
+2026-01-22 01:01:23,646 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m user_message=no
+2026-01-22 01:01:24,167 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=53 llm_time=0.000s
+2026-01-22 01:01:24,167 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-22 01:01:36,152 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.7m user_message=I don't know
+2026-01-22 01:01:37,142 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=138 llm_time=0.000s
+2026-01-22 01:01:37,142 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.7m
+2026-01-22 01:01:49,367 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.9m user_message=I know Java
+2026-01-22 01:01:49,978 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=70 llm_time=0.000s
+2026-01-22 01:01:49,978 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.9m
+2026-01-22 01:01:59,794 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m user_message=nothing
+2026-01-22 01:02:00,390 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=128 llm_time=0.000s
+2026-01-22 01:02:00,391 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.1m
+2026-01-22 01:02:15,162 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.3m user_message=not much
+2026-01-22 01:02:15,676 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=40 llm_time=0.000s
+2026-01-22 01:02:15,676 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.3m
+2026-01-22 01:02:24,445 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.5m user_message=learn to code
+2026-01-22 01:02:25,108 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=149 llm_time=0.000s
+2026-01-22 01:02:25,108 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.5m
+2026-01-22 01:02:38,381 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m user_message=I don't have an accomplishment there
+2026-01-22 01:02:39,088 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-22 01:02:39,088 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-22 01:02:47,879 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m user_message=it is cool
+2026-01-22 01:02:48,423 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=49 llm_time=0.000s
+2026-01-22 01:02:48,423 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-22 01:02:57,782 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.0m user_message=I don't know what to tell you it is just pretty cool
+2026-01-22 01:02:58,247 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=91 llm_time=0.000s
+2026-01-22 01:02:58,247 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.0m
+2026-01-22 01:03:08,601 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.2m user_message=can we just do coding I want to move to coding
+2026-01-22 01:03:09,320 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=120 llm_time=0.000s
+2026-01-22 01:03:09,320 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.2m
+2026-01-22 01:03:20,368 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.4m user_message=decoding now
+2026-01-22 01:03:20,909 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=166 llm_time=0.000s
+2026-01-22 01:03:20,910 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.4m
+2026-01-22 01:03:41,730 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.8m user_message=yeah I don't know
+2026-01-22 01:03:42,164 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-22 01:03:42,165 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.8m
+2026-01-22 01:03:53,047 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.9m user_message=development AR referee
+2026-01-22 01:03:53,579 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-22 01:03:53,580 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.9m
+2026-01-22 01:04:01,522 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.1m user_message=develop an AI referee
+2026-01-22 01:04:02,103 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=80 llm_time=0.000s
+2026-01-22 01:04:02,103 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.1m
+2026-01-22 01:04:15,625 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.3m user_message=I don't know
+2026-01-22 01:04:16,270 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=142 llm_time=0.000s
+2026-01-22 01:04:16,271 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.3m
+2026-01-22 01:04:32,057 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.6m user_message=just building an AI building a good enough AI referee
+2026-01-22 01:04:32,721 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=196 llm_time=0.000s
+2026-01-22 01:04:32,722 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.6m
+2026-01-22 01:04:48,303 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m user_message=yeah
+2026-01-22 01:04:48,966 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-22 01:04:48,966 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-22 01:04:56,868 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.0m user_message=I publish a paper
+2026-01-22 01:04:57,692 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-22 01:04:57,692 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.0m
+2026-01-22 01:05:05,335 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m user_message=I wrote the words
+2026-01-22 01:05:06,057 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-22 01:05:06,057 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-22 01:05:16,441 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m user_message=nah
+2026-01-22 01:05:16,988 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=91 llm_time=0.000s
+2026-01-22 01:05:16,988 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=5.3m
+2026-01-22 01:05:16,988 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=False)
+2026-01-22 01:05:16,989 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-22 01:05:26,679 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:05:26,680 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.2m user_message=okay
+2026-01-22 01:05:27,604 [INFO] [MODEL RESPONSE] phase=coding reply_len=562 llm_time=0.000s
+2026-01-22 01:05:27,605 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.2m
+2026-01-22 01:05:27,605 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-22 01:05:37,279 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:05:37,280 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.3m user_message=hello
+2026-01-22 01:05:40,331 [INFO] [MODEL RESPONSE] phase=coding reply_len=1845 llm_time=0.000s
+2026-01-22 01:05:40,331 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.3m
+2026-01-22 01:05:49,845 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:05:49,846 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.5m user_message=can you just write me the answer
+2026-01-22 01:05:50,482 [INFO] [MODEL RESPONSE] phase=coding reply_len=118 llm_time=0.000s
+2026-01-22 01:05:50,482 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=0.5m
+2026-01-22 01:06:03,573 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:06:03,574 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.8m user_message=can you just you know can you can you out of the co-editor
+2026-01-22 01:06:04,108 [INFO] [MODEL RESPONSE] phase=coding reply_len=59 llm_time=0.000s
+2026-01-22 01:06:04,108 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.8m
+2026-01-22 01:06:14,415 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:06:14,415 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.0m user_message=can you edit like can you write codes in it
+2026-01-22 01:06:14,950 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-22 01:06:14,950 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.0m
+2026-01-22 01:06:22,708 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:06:22,708 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.1m user_message=show me write something show me
+2026-01-22 01:06:23,121 [INFO] [MODEL RESPONSE] phase=coding reply_len=117 llm_time=0.000s
+2026-01-22 01:06:23,121 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.1m
+2026-01-22 01:06:30,856 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:06:30,857 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.2m user_message=show me something more
+2026-01-22 01:06:31,270 [INFO] [MODEL RESPONSE] phase=coding reply_len=54 llm_time=0.000s
+2026-01-22 01:06:31,270 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=1.2m
+2026-01-22 01:06:40,922 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 01:06:40,922 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.4m user_message=show me if you can write like 10 lines of codes for instance
+2026-01-22 01:06:41,505 [INFO] [MODEL RESPONSE] phase=coding reply_len=272 llm_time=0.000s
+2026-01-22 01:06:41,505 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=1.4m
+2026-01-22 01:06:54,171 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 01:06:54,171 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 01:06:54,215 [INFO] [TEST RUN] phase=coding status=fail summary=Some test cases failed.
+2026-01-22 01:06:54,215 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.6m user_message=okay I think we're done with the problem
+2026-01-22 01:06:54,614 [INFO] [MODEL RESPONSE] phase=coding reply_len=58 llm_time=0.000s
+2026-01-22 01:06:54,614 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=1.6m
+2026-01-22 01:07:01,118 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:01,119 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.7m user_message=what do you think
+2026-01-22 01:07:01,528 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.000s
+2026-01-22 01:07:01,529 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.7m
+2026-01-22 01:07:09,604 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:09,604 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.9m user_message=can you
+2026-01-22 01:07:10,040 [INFO] [MODEL RESPONSE] phase=coding reply_len=27 llm_time=0.000s
+2026-01-22 01:07:10,040 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.9m
+2026-01-22 01:07:15,867 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:15,867 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.0m user_message=can you optimize it
+2026-01-22 01:07:16,450 [INFO] [MODEL RESPONSE] phase=coding reply_len=58 llm_time=0.000s
+2026-01-22 01:07:16,450 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.0m
+2026-01-22 01:07:24,372 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:24,372 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.1m user_message=you optimize it for
+2026-01-22 01:07:24,960 [INFO] [MODEL RESPONSE] phase=coding reply_len=74 llm_time=0.000s
+2026-01-22 01:07:24,960 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.1m
+2026-01-22 01:07:33,264 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:33,265 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.3m user_message=cannot
+2026-01-22 01:07:33,698 [INFO] [MODEL RESPONSE] phase=coding reply_len=26 llm_time=0.000s
+2026-01-22 01:07:33,699 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.3m
+2026-01-22 01:07:39,937 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:39,938 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.4m user_message=I cannot
+2026-01-22 01:07:40,326 [INFO] [MODEL RESPONSE] phase=coding reply_len=26 llm_time=0.000s
+2026-01-22 01:07:40,326 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.4m
+2026-01-22 01:07:47,005 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:07:47,005 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.5m user_message=I cannot optimize it
+2026-01-22 01:07:47,442 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.000s
+2026-01-22 01:07:47,443 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.5m
+2026-01-22 01:08:00,478 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:00,479 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.7m user_message=I cannot optimize it
+2026-01-22 01:08:01,040 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.000s
+2026-01-22 01:08:01,040 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-22 01:08:09,560 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:09,560 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.9m user_message=no I cannot
+2026-01-22 01:08:09,974 [INFO] [MODEL RESPONSE] phase=coding reply_len=55 llm_time=0.000s
+2026-01-22 01:08:09,974 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.9m
+2026-01-22 01:08:19,643 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:19,643 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.0m user_message=no
+2026-01-22 01:08:20,054 [INFO] [MODEL RESPONSE] phase=coding reply_len=55 llm_time=0.000s
+2026-01-22 01:08:20,054 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.0m
+2026-01-22 01:08:28,115 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:28,115 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.2m user_message=no I cannot optimize it
+2026-01-22 01:08:28,483 [INFO] [MODEL RESPONSE] phase=coding reply_len=67 llm_time=0.000s
+2026-01-22 01:08:28,483 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.2m
+2026-01-22 01:08:36,835 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 01:08:36,835 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 01:08:36,885 [INFO] [TEST RUN] phase=coding status=fail summary=Some test cases failed.
+2026-01-22 01:08:36,885 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.3m user_message=Owen Square
+2026-01-22 01:08:37,247 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.000s
+2026-01-22 01:08:37,247 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.3m
+2026-01-22 01:08:48,392 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:48,392 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.5m user_message=no no
+2026-01-22 01:08:48,826 [INFO] [MODEL RESPONSE] phase=coding reply_len=44 llm_time=0.000s
+2026-01-22 01:08:48,826 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.5m
+2026-01-22 01:08:56,633 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:08:56,634 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.7m user_message=why is it incorrect it is correct
+2026-01-22 01:08:57,267 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.000s
+2026-01-22 01:08:57,267 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.7m
+2026-01-22 01:09:05,477 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:09:05,477 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.8m user_message=it is still correct
+2026-01-22 01:09:06,572 [INFO] [MODEL RESPONSE] phase=coding reply_len=55 llm_time=0.000s
+2026-01-22 01:09:06,572 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.8m
+2026-01-22 01:09:30,992 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 01:09:30,992 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=4.2m user_message=I don't know
+2026-01-22 01:09:31,335 [INFO] [MODEL RESPONSE] phase=coding reply_len=43 llm_time=0.000s
+2026-01-22 01:09:31,335 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.2m
+2026-01-22 02:04:22,403 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m user_message=hello
+2026-01-22 02:04:22,911 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=111 llm_time=0.000s
+2026-01-22 02:04:22,911 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-22 02:04:36,228 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m user_message=sure
+2026-01-22 02:04:37,400 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=101 llm_time=0.000s
+2026-01-22 02:04:37,400 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-22 02:05:04,013 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.8m user_message=yeah so I I have to be a front action pipeline using machine learning algorithms you know including ...
+2026-01-22 02:05:04,559 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=95 llm_time=0.000s
+2026-01-22 02:05:04,560 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.8m
+2026-01-22 02:05:25,905 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m user_message=um so I facing handling large amount of data because we have over 100 million transactions in our da...
+2026-01-22 02:05:27,442 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-22 02:05:27,442 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-22 02:05:52,358 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.6m user_message=so I leverage to use spark on which is A2 for handling large amount of data that can use no gpus and...
+2026-01-22 02:05:52,879 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-22 02:05:52,880 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.6m
+2026-01-22 02:06:14,378 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.9m user_message=I'm so we in order to avoid overfitting we use stratifications as well as you know bootstrap and als...
+2026-01-22 02:06:14,983 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=101 llm_time=0.000s
+2026-01-22 02:06:14,983 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.9m
+2026-01-22 02:06:39,519 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.3m user_message=so we use tensorflow to over Over CD performances of the models and also even after we are deploying...
+2026-01-22 02:06:40,018 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-22 02:06:40,018 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.3m
+2026-01-22 02:06:55,886 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.6m user_message=um so we use terraform to build it and then we have a bunch of other you know like data dogs to moni...
+2026-01-22 02:06:56,473 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=91 llm_time=0.000s
+2026-01-22 02:06:56,473 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.6m
+2026-01-22 02:07:07,700 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.8m user_message=I'm very interested in Ai and I hope to dig into it
+2026-01-22 02:07:08,224 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=164 llm_time=0.000s
+2026-01-22 02:07:08,225 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=2.8m
+2026-01-22 02:07:22,643 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.1m user_message=okay
+2026-01-22 02:07:25,703 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=16 llm_time=0.000s
+2026-01-22 02:07:25,704 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=3.1m
+2026-01-22 02:07:25,704 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-22 02:07:32,960 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.2m user_message=hello
+2026-01-22 02:07:33,368 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=128 llm_time=0.000s
+2026-01-22 02:07:33,368 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=3.2m
+2026-01-22 03:30:40,528 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 03:30:40,529 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-22 03:30:42,510 [INFO] [MODEL RESPONSE] phase=coding reply_len=1394 llm_time=1.982s
+2026-01-22 03:30:42,511 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-22 03:30:49,581 [INFO] [PERF][coding_only] total=13.041s gate=3.989s test=0.000s llm=1.982s tts=7.067s
+2026-01-22 03:31:01,782 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=True
+2026-01-22 03:31:01,783 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:31:02,542 [INFO] [TEST RUN] phase=coding status=fail summary=Some test cases failed.
+2026-01-22 03:31:02,543 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.5m phase_signal=end_if_you_want user_message=I think I already have a solution
+2026-01-22 03:31:02,912 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.370s
+2026-01-22 03:31:02,913 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.5m
+2026-01-22 03:31:03,101 [INFO] [PERF][coding_only] total=1.995s gate=0.676s test=0.759s llm=0.370s tts=0.188s
+2026-01-22 03:31:16,274 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 03:31:16,274 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.7m phase_signal=end_if_you_want user_message=all right let's see
+2026-01-22 03:31:16,691 [INFO] [MODEL RESPONSE] phase=coding reply_len=65 llm_time=0.417s
+2026-01-22 03:31:16,691 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.7m
+2026-01-22 03:31:16,892 [INFO] [PERF][coding_only] total=1.153s gate=0.534s test=0.000s llm=0.417s tts=0.201s
+2026-01-22 03:33:05,296 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:33:05,296 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:33:06,159 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:33:06,159 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.6m phase_signal=end_if_you_want user_message=what about now
+2026-01-22 03:33:07,594 [INFO] [MODEL RESPONSE] phase=coding reply_len=59 llm_time=1.435s
+2026-01-22 03:33:07,595 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.6m
+2026-01-22 03:33:07,785 [INFO] [PERF][coding_only] total=2.980s gate=0.491s test=0.862s llm=1.435s tts=0.190s
+2026-01-22 03:33:15,807 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:33:15,807 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:33:16,614 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:33:16,614 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.7m phase_signal=end_if_you_want user_message=can you see my call right now
+2026-01-22 03:33:17,069 [INFO] [MODEL RESPONSE] phase=coding reply_len=71 llm_time=0.455s
+2026-01-22 03:33:17,070 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-22 03:33:17,411 [INFO] [PERF][coding_only] total=2.140s gate=0.536s test=0.806s llm=0.455s tts=0.341s
+2026-01-22 03:33:26,860 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:33:26,860 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:33:27,685 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:33:27,685 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.9m phase_signal=end_if_you_want user_message=it's my code correct though
+2026-01-22 03:33:28,175 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.490s
+2026-01-22 03:33:28,176 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.9m
+2026-01-22 03:33:28,370 [INFO] [PERF][coding_only] total=2.015s gate=0.505s test=0.825s llm=0.490s tts=0.194s
+2026-01-22 03:33:41,386 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:33:41,387 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.2m phase_signal=end_if_you_want user_message=no I mean if is my code correct
+2026-01-22 03:33:41,827 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.440s
+2026-01-22 03:33:41,827 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.2m
+2026-01-22 03:33:42,024 [INFO] [PERF][coding_only] total=1.217s gate=0.580s test=0.000s llm=0.440s tts=0.196s
+2026-01-22 03:33:53,183 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:33:53,183 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.3m phase_signal=end_if_you_want user_message=when you raise empty we still get the correct answer though
+2026-01-22 03:33:53,765 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.582s
+2026-01-22 03:33:53,765 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.3m
+2026-01-22 03:33:53,959 [INFO] [PERF][coding_only] total=1.430s gate=0.653s test=0.000s llm=0.582s tts=0.194s
+2026-01-22 03:34:04,998 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:34:04,998 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.5m phase_signal=end_if_you_want user_message=air confused anything
+2026-01-22 03:34:05,441 [INFO] [MODEL RESPONSE] phase=coding reply_len=43 llm_time=0.443s
+2026-01-22 03:34:05,442 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.5m
+2026-01-22 03:34:05,634 [INFO] [PERF][coding_only] total=1.299s gate=0.663s test=0.000s llm=0.443s tts=0.192s
+2026-01-22 03:34:13,141 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:34:13,141 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.7m phase_signal=end_if_you_want user_message=no I say we can freely choose anything
+2026-01-22 03:34:13,508 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.367s
+2026-01-22 03:34:13,509 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.7m
+2026-01-22 03:34:13,704 [INFO] [PERF][coding_only] total=0.982s gate=0.420s test=0.000s llm=0.367s tts=0.195s
+2026-01-22 03:34:25,249 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:34:25,249 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.9m phase_signal=end_if_you_want user_message=the minimum of BM the minimum t or B
+2026-01-22 03:34:25,714 [INFO] [MODEL RESPONSE] phase=coding reply_len=104 llm_time=0.464s
+2026-01-22 03:34:25,714 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.9m
+2026-01-22 03:34:25,932 [INFO] [PERF][coding_only] total=2.173s gate=1.490s test=0.000s llm=0.464s tts=0.217s
+2026-01-22 03:34:36,895 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:34:36,895 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:34:37,747 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:34:37,748 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.1m phase_signal=end_if_you_want user_message=that's right
+2026-01-22 03:34:38,241 [INFO] [MODEL RESPONSE] phase=coding reply_len=31 llm_time=0.493s
+2026-01-22 03:34:38,241 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.1m
+2026-01-22 03:34:38,427 [INFO] [PERF][coding_only] total=2.364s gate=0.832s test=0.852s llm=0.493s tts=0.185s
+2026-01-22 03:34:48,086 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:34:48,087 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:34:48,898 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:34:48,899 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.3m phase_signal=end_if_you_want user_message=on the town of the digits they're deleting
+2026-01-22 03:34:49,452 [INFO] [MODEL RESPONSE] phase=coding reply_len=113 llm_time=0.553s
+2026-01-22 03:34:49,452 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.3m
+2026-01-22 03:34:49,671 [INFO] [PERF][coding_only] total=3.142s gate=1.558s test=0.811s llm=0.553s tts=0.219s
+2026-01-22 03:35:00,908 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:35:00,909 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:35:01,743 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:35:01,743 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.5m phase_signal=end_if_you_want user_message=yes
+2026-01-22 03:35:02,300 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.557s
+2026-01-22 03:35:02,301 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.5m
+2026-01-22 03:35:02,499 [INFO] [PERF][coding_only] total=2.074s gate=0.483s test=0.834s llm=0.557s tts=0.198s
+2026-01-22 03:35:12,322 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:35:12,322 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:35:13,158 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:35:13,158 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.7m phase_signal=end_if_you_want user_message=it'll be on
+2026-01-22 03:35:13,824 [INFO] [MODEL RESPONSE] phase=coding reply_len=97 llm_time=0.666s
+2026-01-22 03:35:13,825 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.7m
+2026-01-22 03:35:14,040 [INFO] [PERF][coding_only] total=2.907s gate=1.188s test=0.835s llm=0.666s tts=0.215s
+2026-01-22 03:35:26,322 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:35:26,322 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:35:27,186 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:35:27,186 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.9m phase_signal=end_if_you_want user_message=yeah
+2026-01-22 03:35:27,762 [INFO] [MODEL RESPONSE] phase=coding reply_len=52 llm_time=0.576s
+2026-01-22 03:35:27,763 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.9m
+2026-01-22 03:35:27,956 [INFO] [PERF][coding_only] total=2.156s gate=0.522s test=0.864s llm=0.576s tts=0.193s
+2026-01-22 03:35:37,831 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:35:37,832 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:35:38,654 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:35:38,654 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.1m phase_signal=end_if_you_want user_message=it's the same as the time complexity
+2026-01-22 03:35:39,154 [INFO] [MODEL RESPONSE] phase=coding reply_len=131 llm_time=0.499s
+2026-01-22 03:35:39,154 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.1m
+2026-01-22 03:35:39,517 [INFO] [PERF][coding_only] total=2.172s gate=0.486s test=0.822s llm=0.499s tts=0.362s
+2026-01-22 03:35:52,044 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:35:52,044 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:35:52,839 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:35:52,839 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.3m phase_signal=end_if_you_want user_message=no I don't think so
+2026-01-22 03:35:53,266 [INFO] [MODEL RESPONSE] phase=coding reply_len=167 llm_time=0.426s
+2026-01-22 03:35:53,266 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.3m
+2026-01-22 03:35:53,830 [INFO] [PERF][coding_only] total=2.276s gate=0.490s test=0.795s llm=0.426s tts=0.564s
+2026-01-22 03:36:16,756 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:36:16,757 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.7m phase_signal=end_if_you_want user_message=I don't know
+2026-01-22 03:36:17,465 [INFO] [MODEL RESPONSE] phase=coding reply_len=108 llm_time=0.708s
+2026-01-22 03:36:17,465 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.7m
+2026-01-22 03:36:17,691 [INFO] [PERF][coding_only] total=1.402s gate=0.467s test=0.000s llm=0.708s tts=0.226s
+2026-01-22 03:36:29,344 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:36:29,344 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:36:30,174 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:36:30,175 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.0m phase_signal=end_if_you_want user_message=okay
+2026-01-22 03:36:30,584 [INFO] [MODEL RESPONSE] phase=coding reply_len=65 llm_time=0.409s
+2026-01-22 03:36:30,584 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.0m
+2026-01-22 03:36:30,782 [INFO] [PERF][coding_only] total=2.440s gate=1.002s test=0.830s llm=0.409s tts=0.197s
+2026-01-22 03:36:39,856 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:36:39,857 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:36:40,657 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:36:40,657 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.1m phase_signal=end_if_you_want user_message=what check again you should see my code
+2026-01-22 03:36:41,148 [INFO] [MODEL RESPONSE] phase=coding reply_len=67 llm_time=0.491s
+2026-01-22 03:36:41,149 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.1m
+2026-01-22 03:36:41,520 [INFO] [PERF][coding_only] total=2.167s gate=0.503s test=0.800s llm=0.491s tts=0.371s
+2026-01-22 03:36:50,722 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:36:50,722 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:36:51,561 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:36:51,561 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.3m phase_signal=end_if_you_want user_message=I saw you just discuss it
+2026-01-22 03:36:52,052 [INFO] [MODEL RESPONSE] phase=coding reply_len=71 llm_time=0.491s
+2026-01-22 03:36:52,052 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.3m
+2026-01-22 03:36:52,396 [INFO] [PERF][coding_only] total=2.309s gate=0.635s test=0.838s llm=0.491s tts=0.343s
+2026-01-22 03:37:01,701 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:37:01,702 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.5m phase_signal=end_if_you_want user_message=it is om + p
+2026-01-22 03:37:02,238 [INFO] [MODEL RESPONSE] phase=coding reply_len=97 llm_time=0.537s
+2026-01-22 03:37:02,239 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.5m
+2026-01-22 03:37:02,453 [INFO] [PERF][coding_only] total=1.486s gate=0.734s test=0.000s llm=0.537s tts=0.214s
+2026-01-22 03:37:16,046 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:37:16,046 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:37:16,863 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:37:16,863 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.7m phase_signal=end_if_you_want user_message=yes
+2026-01-22 03:37:17,307 [INFO] [MODEL RESPONSE] phase=coding reply_len=97 llm_time=0.444s
+2026-01-22 03:37:17,307 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.7m
+2026-01-22 03:37:17,520 [INFO] [PERF][coding_only] total=2.160s gate=0.685s test=0.817s llm=0.444s tts=0.212s
+2026-01-22 03:37:30,853 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:37:30,854 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:37:31,608 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:37:31,609 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.0m phase_signal=end_if_you_want user_message=yes yes I can
+2026-01-22 03:37:32,111 [INFO] [MODEL RESPONSE] phase=coding reply_len=46 llm_time=0.502s
+2026-01-22 03:37:32,111 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.0m
+2026-01-22 03:37:32,307 [INFO] [PERF][coding_only] total=1.920s gate=0.466s test=0.755s llm=0.502s tts=0.195s
+2026-01-22 03:37:39,827 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:37:39,827 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.1m phase_signal=end_if_you_want user_message=it should be on
+2026-01-22 03:37:40,197 [INFO] [MODEL RESPONSE] phase=coding reply_len=63 llm_time=0.370s
+2026-01-22 03:37:40,198 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.1m
+2026-01-22 03:37:40,401 [INFO] [PERF][coding_only] total=1.127s gate=0.552s test=0.000s llm=0.370s tts=0.203s
+2026-01-22 03:37:49,040 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:37:49,040 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:37:49,925 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:37:49,925 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.3m phase_signal=end_if_you_want user_message=yes that is correct
+2026-01-22 03:37:50,620 [INFO] [MODEL RESPONSE] phase=coding reply_len=160 llm_time=0.695s
+2026-01-22 03:37:50,621 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.3m
+2026-01-22 03:37:50,986 [INFO] [PERF][coding_only] total=2.423s gate=0.477s test=0.884s llm=0.695s tts=0.365s
+2026-01-22 03:38:09,155 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:38:09,155 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:38:09,920 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:38:09,920 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.6m phase_signal=end_if_you_want user_message=we already discussed this
+2026-01-22 03:38:10,548 [INFO] [MODEL RESPONSE] phase=coding reply_len=90 llm_time=0.627s
+2026-01-22 03:38:10,548 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.6m
+2026-01-22 03:38:10,897 [INFO] [PERF][coding_only] total=2.367s gate=0.625s test=0.765s llm=0.627s tts=0.349s
+2026-01-22 03:38:27,500 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:38:27,501 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:38:28,278 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:38:28,279 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.9m phase_signal=end_if_you_want user_message=we also have discuss this already
+2026-01-22 03:38:28,846 [INFO] [MODEL RESPONSE] phase=coding reply_len=146 llm_time=0.568s
+2026-01-22 03:38:28,847 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.9m
+2026-01-22 03:38:29,224 [INFO] [PERF][coding_only] total=2.279s gate=0.555s test=0.777s llm=0.568s tts=0.377s
+2026-01-22 03:38:45,450 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:38:45,450 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:38:46,222 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:38:46,222 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.2m phase_signal=end_if_you_want user_message=why are you discussing this if my code is correct
+2026-01-22 03:38:46,780 [INFO] [MODEL RESPONSE] phase=coding reply_len=135 llm_time=0.557s
+2026-01-22 03:38:46,780 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.2m
+2026-01-22 03:38:47,163 [INFO] [PERF][coding_only] total=2.332s gate=0.618s test=0.771s llm=0.557s tts=0.383s
+2026-01-22 03:39:02,520 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:39:02,520 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.5m phase_signal=end_if_you_want user_message=I cannot I cannot
+2026-01-22 03:39:03,031 [INFO] [MODEL RESPONSE] phase=coding reply_len=148 llm_time=0.511s
+2026-01-22 03:39:03,032 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.5m
+2026-01-22 03:39:03,292 [INFO] [PERF][coding_only] total=1.250s gate=0.477s test=0.000s llm=0.511s tts=0.260s
+2026-01-22 03:39:17,974 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:39:17,974 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.8m phase_signal=end_if_you_want user_message=I cannot
+2026-01-22 03:39:18,596 [INFO] [MODEL RESPONSE] phase=coding reply_len=169 llm_time=0.622s
+2026-01-22 03:39:18,596 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.8m
+2026-01-22 03:39:18,984 [INFO] [PERF][coding_only] total=1.432s gate=0.421s test=0.000s llm=0.622s tts=0.387s
+2026-01-22 03:39:36,387 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:39:36,388 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.1m phase_signal=end_if_you_want user_message=I don't know
+2026-01-22 03:39:37,192 [INFO] [MODEL RESPONSE] phase=coding reply_len=283 llm_time=0.804s
+2026-01-22 03:39:37,192 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.1m
+2026-01-22 03:39:37,750 [INFO] [PERF][coding_only] total=2.064s gate=0.701s test=0.000s llm=0.804s tts=0.558s
+2026-01-22 03:40:02,140 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:40:02,141 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.5m phase_signal=end_if_you_want user_message=I don't know
+2026-01-22 03:40:02,777 [INFO] [MODEL RESPONSE] phase=coding reply_len=186 llm_time=0.636s
+2026-01-22 03:40:02,777 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.5m
+2026-01-22 03:40:03,047 [INFO] [PERF][coding_only] total=1.479s gate=0.572s test=0.000s llm=0.636s tts=0.270s
+2026-01-22 03:40:18,139 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 03:40:18,140 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.8m phase_signal=end_if_you_want user_message=okay cool
+2026-01-22 03:40:18,653 [INFO] [MODEL RESPONSE] phase=coding reply_len=152 llm_time=0.513s
+2026-01-22 03:40:18,653 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.8m
+2026-01-22 03:40:19,002 [INFO] [PERF][coding_only] total=1.437s gate=0.575s test=0.000s llm=0.513s tts=0.348s
+2026-01-22 03:40:33,216 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:40:33,216 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:40:33,999 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:40:34,000 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=10.0m phase_signal=end_if_you_want user_message=we already discussed this before
+2026-01-22 03:40:34,782 [INFO] [MODEL RESPONSE] phase=coding reply_len=248 llm_time=0.782s
+2026-01-22 03:40:34,782 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=10.0m
+2026-01-22 03:40:35,465 [INFO] [PERF][coding_only] total=2.951s gate=0.701s test=0.783s llm=0.782s tts=0.683s
+2026-01-22 03:41:00,593 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:41:00,594 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:41:01,425 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:41:01,426 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=10.5m phase_signal=end_if_you_want user_message=we have also already discussed this
+2026-01-22 03:41:02,404 [INFO] [MODEL RESPONSE] phase=coding reply_len=228 llm_time=0.978s
+2026-01-22 03:41:02,404 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=10.5m
+2026-01-22 03:41:02,900 [INFO] [PERF][coding_only] total=2.826s gate=0.519s test=0.831s llm=0.978s tts=0.496s
+2026-01-22 03:41:22,607 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:41:22,607 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:41:23,484 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:41:23,484 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=10.9m phase_signal=end_if_you_want user_message=go ahead and explain
+2026-01-22 03:41:24,379 [INFO] [MODEL RESPONSE] phase=coding reply_len=449 llm_time=0.895s
+2026-01-22 03:41:24,380 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=10.9m
+2026-01-22 03:41:24,969 [INFO] [PERF][coding_only] total=2.852s gate=0.491s test=0.877s llm=0.895s tts=0.589s
+2026-01-22 03:41:56,265 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:41:56,266 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:41:57,033 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:41:57,034 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=11.4m phase_signal=end_if_you_want user_message=okay cool
+2026-01-22 03:41:57,971 [INFO] [MODEL RESPONSE] phase=coding reply_len=104 llm_time=0.937s
+2026-01-22 03:41:57,971 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=11.4m
+2026-01-22 03:41:58,323 [INFO] [PERF][coding_only] total=2.579s gate=0.521s test=0.768s llm=0.937s tts=0.352s
+2026-01-22 03:42:08,716 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:42:08,716 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:42:09,520 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:42:09,520 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=11.6m phase_signal=end_if_you_want user_message=no I don't think so
+2026-01-22 03:42:10,076 [INFO] [MODEL RESPONSE] phase=coding reply_len=193 llm_time=0.556s
+2026-01-22 03:42:10,076 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=11.6m
+2026-01-22 03:42:10,578 [INFO] [PERF][coding_only] total=2.411s gate=0.548s test=0.803s llm=0.556s tts=0.502s
+2026-01-22 03:42:26,389 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:42:26,390 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:42:27,239 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:42:27,240 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=11.9m phase_signal=end_if_you_want user_message=okay
+2026-01-22 03:42:27,723 [INFO] [MODEL RESPONSE] phase=coding reply_len=104 llm_time=0.483s
+2026-01-22 03:42:27,723 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=11.9m
+2026-01-22 03:42:28,067 [INFO] [PERF][coding_only] total=2.156s gate=0.478s test=0.850s llm=0.483s tts=0.343s
+2026-01-22 03:42:40,093 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:42:40,093 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:42:40,892 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:42:40,892 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.1m phase_signal=end_if_you_want user_message=no I don't like it said before
+2026-01-22 03:42:41,456 [INFO] [MODEL RESPONSE] phase=coding reply_len=168 llm_time=0.564s
+2026-01-22 03:42:41,456 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=12.1m
+2026-01-22 03:42:41,816 [INFO] [PERF][coding_only] total=3.244s gate=1.521s test=0.798s llm=0.564s tts=0.359s
+2026-01-22 03:42:56,678 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:42:56,678 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:42:57,473 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:42:57,474 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.4m phase_signal=end_if_you_want user_message=okay
+2026-01-22 03:42:57,996 [INFO] [MODEL RESPONSE] phase=coding reply_len=185 llm_time=0.522s
+2026-01-22 03:42:57,997 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=12.4m
+2026-01-22 03:42:58,357 [INFO] [PERF][coding_only] total=2.331s gate=0.652s test=0.795s llm=0.522s tts=0.360s
+2026-01-22 03:43:14,298 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:43:14,299 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:43:15,100 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:43:15,100 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.7m phase_signal=end_if_you_want user_message=okay
+2026-01-22 03:43:15,694 [INFO] [MODEL RESPONSE] phase=coding reply_len=185 llm_time=0.593s
+2026-01-22 03:43:15,694 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=12.7m
+2026-01-22 03:43:16,071 [INFO] [PERF][coding_only] total=2.393s gate=0.620s test=0.801s llm=0.593s tts=0.376s
+2026-01-22 03:43:31,552 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:43:31,553 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:43:32,382 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:43:32,382 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=13.0m phase_signal=end_if_you_want user_message=okay
+2026-01-22 03:43:32,943 [INFO] [MODEL RESPONSE] phase=coding reply_len=168 llm_time=0.560s
+2026-01-22 03:43:32,943 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=13.0m
+2026-01-22 03:43:33,319 [INFO] [PERF][coding_only] total=2.255s gate=0.488s test=0.829s llm=0.560s tts=0.376s
+2026-01-22 03:43:49,409 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 03:43:49,409 [INFO] [TEST RUN] phase=coding question=Maximize Subarrays After Removing One Conflicting Pair
+2026-01-22 03:43:50,205 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 03:43:50,206 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=13.3m phase_signal=end_if_you_want user_message=go ahead and end interview
+2026-01-22 03:43:50,724 [INFO] [MODEL RESPONSE] phase=coding reply_len=185 llm_time=0.518s
+2026-01-22 03:43:50,724 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=13.3m
+2026-01-22 03:43:51,086 [INFO] [PERF][coding_only] total=2.663s gate=0.986s test=0.796s llm=0.518s tts=0.361s
+2026-01-22 04:20:38,552 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:20:38,552 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-22 04:20:39,325 [INFO] [MODEL RESPONSE] phase=coding reply_len=493 llm_time=0.772s
+2026-01-22 04:20:39,325 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-22 04:20:43,189 [INFO] [PERF][coding_only] total=5.075s gate=0.438s test=0.000s llm=0.772s tts=3.862s
+2026-01-22 04:20:59,952 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:20:59,953 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.4m phase_signal=end_if_you_want user_message=no I'm going to use a sweet line to stop this
+2026-01-22 04:21:00,359 [INFO] [MODEL RESPONSE] phase=coding reply_len=27 llm_time=0.406s
+2026-01-22 04:21:00,359 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.4m
+2026-01-22 04:21:00,551 [INFO] [PERF][coding_only] total=4.112s gate=3.513s test=0.000s llm=0.406s tts=0.192s
+2026-01-22 04:21:15,563 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:21:15,563 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.7m phase_signal=end_if_you_want user_message=do you have access to edit the editor
+2026-01-22 04:21:15,939 [INFO] [MODEL RESPONSE] phase=coding reply_len=58 llm_time=0.376s
+2026-01-22 04:21:15,939 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.7m
+2026-01-22 04:21:16,134 [INFO] [PERF][coding_only] total=1.102s gate=0.530s test=0.000s llm=0.376s tts=0.195s
+2026-01-22 04:21:27,463 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:21:27,463 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.9m phase_signal=end_if_you_want user_message=you cannot access the editor
+2026-01-22 04:21:28,031 [INFO] [MODEL RESPONSE] phase=coding reply_len=67 llm_time=0.568s
+2026-01-22 04:21:28,032 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.9m
+2026-01-22 04:21:28,237 [INFO] [PERF][coding_only] total=1.141s gate=0.366s test=0.000s llm=0.568s tts=0.205s
+2026-01-22 04:21:44,310 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:21:44,310 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.2m phase_signal=end_if_you_want user_message=I'm going to use a sweep line
+2026-01-22 04:21:44,729 [INFO] [MODEL RESPONSE] phase=coding reply_len=39 llm_time=0.419s
+2026-01-22 04:21:44,729 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.2m
+2026-01-22 04:21:44,923 [INFO] [PERF][coding_only] total=3.783s gate=3.170s test=0.000s llm=0.419s tts=0.193s
+2026-01-22 04:22:15,813 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:22:15,813 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.7m phase_signal=end_if_you_want user_message=so I'm going to initialize two alerts to store the start time and end time off the intervals
+2026-01-22 04:22:16,223 [INFO] [MODEL RESPONSE] phase=coding reply_len=46 llm_time=0.410s
+2026-01-22 04:22:16,223 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.7m
+2026-01-22 04:22:16,417 [INFO] [PERF][coding_only] total=1.073s gate=0.469s test=0.000s llm=0.410s tts=0.193s
+2026-01-22 04:22:47,037 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:22:47,037 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.2m phase_signal=end_if_you_want user_message=can you see I'm written on the editor
+2026-01-22 04:22:47,415 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.377s
+2026-01-22 04:22:47,415 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.2m
+2026-01-22 04:22:47,610 [INFO] [PERF][coding_only] total=1.083s gate=0.510s test=0.000s llm=0.377s tts=0.195s
+2026-01-22 04:22:54,466 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:22:54,467 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.3m phase_signal=end_if_you_want user_message=can you see my code
+2026-01-22 04:22:55,539 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=1.073s
+2026-01-22 04:22:55,540 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.3m
+2026-01-22 04:22:55,732 [INFO] [PERF][coding_only] total=2.104s gate=0.838s test=0.000s llm=1.073s tts=0.192s
+2026-01-22 04:23:02,759 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:02,759 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.5m phase_signal=end_if_you_want user_message=I thought you can see my code
+2026-01-22 04:23:03,170 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.411s
+2026-01-22 04:23:03,170 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.5m
+2026-01-22 04:23:03,362 [INFO] [PERF][coding_only] total=1.086s gate=0.482s test=0.000s llm=0.411s tts=0.192s
+2026-01-22 04:23:10,781 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:10,782 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.6m phase_signal=end_if_you_want user_message=wait check again can you see my code
+2026-01-22 04:23:11,193 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.411s
+2026-01-22 04:23:11,193 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.6m
+2026-01-22 04:23:11,387 [INFO] [PERF][coding_only] total=1.030s gate=0.425s test=0.000s llm=0.411s tts=0.194s
+2026-01-22 04:23:19,518 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:19,518 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.8m phase_signal=end_if_you_want user_message=are you sure you cannot see my code
+2026-01-22 04:23:19,955 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.437s
+2026-01-22 04:23:19,955 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.8m
+2026-01-22 04:23:20,148 [INFO] [PERF][coding_only] total=1.120s gate=0.490s test=0.000s llm=0.437s tts=0.193s
+2026-01-22 04:23:27,408 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:27,409 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.9m phase_signal=end_if_you_want user_message=check the code editor
+2026-01-22 04:23:27,836 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.427s
+2026-01-22 04:23:27,836 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.9m
+2026-01-22 04:23:28,030 [INFO] [PERF][coding_only] total=1.506s gate=0.884s test=0.000s llm=0.427s tts=0.193s
+2026-01-22 04:23:36,034 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:36,034 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.0m phase_signal=end_if_you_want user_message=the next sweep line
+2026-01-22 04:23:36,355 [INFO] [MODEL RESPONSE] phase=coding reply_len=41 llm_time=0.321s
+2026-01-22 04:23:36,355 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.0m
+2026-01-22 04:23:36,511 [INFO] [PERF][coding_only] total=1.007s gate=0.530s test=0.000s llm=0.321s tts=0.155s
+2026-01-22 04:23:46,064 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:23:46,065 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.2m phase_signal=end_if_you_want user_message=but can you see my what I'm written on the code editor
+2026-01-22 04:23:46,403 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.338s
+2026-01-22 04:23:46,403 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.2m
+2026-01-22 04:23:46,595 [INFO] [PERF][coding_only] total=1.007s gate=0.476s test=0.000s llm=0.338s tts=0.192s
+2026-01-22 04:24:39,133 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:24:39,134 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-22 04:24:40,942 [INFO] [MODEL RESPONSE] phase=coding reply_len=1468 llm_time=1.808s
+2026-01-22 04:24:40,942 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-22 04:24:41,290 [INFO] [PERF][coding_only] total=3.855s gate=1.698s test=0.000s llm=1.808s tts=0.347s
+2026-01-22 04:24:53,049 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:24:53,049 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.3m phase_signal=end_if_you_want user_message=can you see the code editor
+2026-01-22 04:24:53,557 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.508s
+2026-01-22 04:24:53,558 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.3m
+2026-01-22 04:24:53,757 [INFO] [PERF][coding_only] total=1.345s gate=0.638s test=0.000s llm=0.508s tts=0.199s
+2026-01-22 04:25:02,559 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:25:02,559 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.5m phase_signal=end_if_you_want user_message=can you see I'm written on the code editor right here
+2026-01-22 04:25:02,950 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.391s
+2026-01-22 04:25:02,950 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.5m
+2026-01-22 04:25:03,146 [INFO] [PERF][coding_only] total=1.098s gate=0.510s test=0.000s llm=0.391s tts=0.196s
+2026-01-22 04:25:11,741 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:25:11,741 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.6m phase_signal=end_if_you_want user_message=but can you edit the code editor
+2026-01-22 04:25:12,180 [INFO] [MODEL RESPONSE] phase=coding reply_len=67 llm_time=0.439s
+2026-01-22 04:25:12,180 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.6m
+2026-01-22 04:25:12,384 [INFO] [PERF][coding_only] total=1.157s gate=0.515s test=0.000s llm=0.439s tts=0.203s
+2026-01-22 04:25:23,724 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:25:23,724 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:25:24,343 [INFO] [TEST RUN] phase=coding status=error summary=Solution.java:4: error: not a statement
+2026-01-22 04:25:24,343 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.8m phase_signal=end_if_you_want user_message=what did I just wrote
+2026-01-22 04:25:24,863 [INFO] [MODEL RESPONSE] phase=coding reply_len=59 llm_time=0.520s
+2026-01-22 04:25:24,863 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.8m
+2026-01-22 04:25:25,061 [INFO] [PERF][coding_only] total=1.767s gate=0.430s test=0.618s llm=0.520s tts=0.198s
+2026-01-22 04:25:37,291 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:25:37,292 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:25:38,094 [INFO] [TEST RUN] phase=coding status=fail summary=Some test cases failed.
+2026-01-22 04:25:38,094 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.1m phase_signal=end_if_you_want user_message=you just say you cannot see the code editor but you you just did and you saw I roll hello right
+2026-01-22 04:25:38,574 [INFO] [MODEL RESPONSE] phase=coding reply_len=92 llm_time=0.479s
+2026-01-22 04:25:38,574 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.1m
+2026-01-22 04:25:38,791 [INFO] [PERF][coding_only] total=2.190s gate=0.691s test=0.802s llm=0.479s tts=0.216s
+2026-01-22 04:26:12,286 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:26:12,286 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:26:13,032 [INFO] [TEST RUN] phase=coding status=error summary=Solution.java:38: error: cannot find symbol
+2026-01-22 04:26:13,032 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.7m phase_signal=end_if_you_want user_message=can you see my code now
+2026-01-22 04:26:13,574 [INFO] [MODEL RESPONSE] phase=coding reply_len=93 llm_time=0.542s
+2026-01-22 04:26:13,574 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.7m
+2026-01-22 04:26:13,930 [INFO] [PERF][coding_only] total=2.187s gate=0.543s test=0.745s llm=0.542s tts=0.356s
+2026-01-22 04:26:26,053 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:26:26,053 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.9m phase_signal=end_if_you_want user_message=Emily's Mom make sure that it's not out of range
+2026-01-22 04:26:26,552 [INFO] [MODEL RESPONSE] phase=coding reply_len=27 llm_time=0.499s
+2026-01-22 04:26:26,552 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.9m
+2026-01-22 04:26:26,754 [INFO] [PERF][coding_only] total=1.280s gate=0.579s test=0.000s llm=0.499s tts=0.202s
+2026-01-22 04:26:34,929 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:26:34,929 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:26:35,693 [INFO] [TEST RUN] phase=coding status=error summary=Solution.java:38: error: cannot find symbol
+2026-01-22 04:26:35,694 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.0m phase_signal=end_if_you_want user_message=yes that is right
+2026-01-22 04:26:36,109 [INFO] [MODEL RESPONSE] phase=coding reply_len=42 llm_time=0.415s
+2026-01-22 04:26:36,109 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.0m
+2026-01-22 04:26:36,304 [INFO] [PERF][coding_only] total=1.826s gate=0.451s test=0.764s llm=0.415s tts=0.195s
+2026-01-22 04:26:44,503 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:26:44,503 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:26:45,313 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:26:45,313 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.2m phase_signal=end_if_you_want user_message=is it good right now
+2026-01-22 04:26:45,678 [INFO] [MODEL RESPONSE] phase=coding reply_len=107 llm_time=0.365s
+2026-01-22 04:26:45,679 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.2m
+2026-01-22 04:26:46,023 [INFO] [PERF][coding_only] total=2.001s gate=0.481s test=0.810s llm=0.365s tts=0.344s
+2026-01-22 04:27:04,956 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:27:04,957 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:27:05,801 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:27:05,801 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.5m phase_signal=end_if_you_want user_message=it should be on
+2026-01-22 04:27:06,206 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.405s
+2026-01-22 04:27:06,207 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.5m
+2026-01-22 04:27:06,404 [INFO] [PERF][coding_only] total=2.061s gate=0.613s test=0.844s llm=0.405s tts=0.197s
+2026-01-22 04:27:16,782 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:27:16,782 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:27:17,554 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:27:17,554 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.7m phase_signal=end_if_you_want user_message=it should be in the length of the the array
+2026-01-22 04:27:18,528 [INFO] [MODEL RESPONSE] phase=coding reply_len=93 llm_time=0.974s
+2026-01-22 04:27:18,528 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-22 04:27:18,742 [INFO] [PERF][coding_only] total=2.682s gate=0.722s test=0.771s llm=0.974s tts=0.213s
+2026-01-22 04:27:29,917 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:27:29,918 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:27:30,709 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:27:30,709 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.9m phase_signal=end_if_you_want user_message=does the number of halftime is the number of people
+2026-01-22 04:27:31,447 [INFO] [MODEL RESPONSE] phase=coding reply_len=52 llm_time=0.738s
+2026-01-22 04:27:31,448 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.9m
+2026-01-22 04:27:31,645 [INFO] [PERF][coding_only] total=2.216s gate=0.489s test=0.791s llm=0.738s tts=0.197s
+2026-01-22 04:27:38,747 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:27:38,747 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.1m phase_signal=end_if_you_want user_message=those 40 yen
+2026-01-22 04:27:39,480 [INFO] [MODEL RESPONSE] phase=coding reply_len=240 llm_time=0.732s
+2026-01-22 04:27:39,480 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.1m
+2026-01-22 04:27:39,777 [INFO] [PERF][coding_only] total=1.594s gate=0.564s test=0.000s llm=0.732s tts=0.297s
+2026-01-22 04:27:59,487 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:27:59,488 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:28:00,320 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:28:00,320 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.4m phase_signal=end_if_you_want user_message=okay cool
+2026-01-22 04:28:00,830 [INFO] [MODEL RESPONSE] phase=coding reply_len=60 llm_time=0.510s
+2026-01-22 04:28:00,831 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.4m
+2026-01-22 04:28:01,029 [INFO] [PERF][coding_only] total=2.123s gate=0.582s test=0.832s llm=0.510s tts=0.197s
+2026-01-22 04:28:13,023 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:28:13,023 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:28:13,898 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:28:13,898 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.7m phase_signal=end_if_you_want user_message=it is like a DP it stores previous calculator Solutions
+2026-01-22 04:28:14,266 [INFO] [MODEL RESPONSE] phase=coding reply_len=102 llm_time=0.368s
+2026-01-22 04:28:14,267 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.7m
+2026-01-22 04:28:14,480 [INFO] [PERF][coding_only] total=2.080s gate=0.623s test=0.874s llm=0.368s tts=0.213s
+2026-01-22 04:28:24,403 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:28:24,403 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:28:25,236 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:28:25,237 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.9m phase_signal=end_if_you_want user_message=yes that is right
+2026-01-22 04:28:25,666 [INFO] [MODEL RESPONSE] phase=coding reply_len=60 llm_time=0.429s
+2026-01-22 04:28:25,666 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.9m
+2026-01-22 04:28:25,864 [INFO] [PERF][coding_only] total=2.005s gate=0.545s test=0.833s llm=0.429s tts=0.197s
+2026-01-22 04:28:39,467 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:28:39,467 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:28:40,233 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:28:40,233 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.1m phase_signal=end_if_you_want user_message=you just said it held map have to the people who can wear it and avoid iterating through all people ...
+2026-01-22 04:28:40,851 [INFO] [MODEL RESPONSE] phase=coding reply_len=209 llm_time=0.618s
+2026-01-22 04:28:40,851 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.1m
+2026-01-22 04:28:41,226 [INFO] [PERF][coding_only] total=2.381s gate=0.622s test=0.765s llm=0.618s tts=0.375s
+2026-01-22 04:28:59,414 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:28:59,414 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:29:00,354 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:29:00,354 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=4.4m phase_signal=end_if_you_want user_message=yeah sure so the DP array
+2026-01-22 04:29:01,444 [INFO] [MODEL RESPONSE] phase=coding reply_len=453 llm_time=1.088s
+2026-01-22 04:29:01,445 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.4m
+2026-01-22 04:29:01,920 [INFO] [PERF][coding_only] total=2.989s gate=0.482s test=0.940s llm=1.088s tts=0.475s
+2026-01-22 04:29:35,112 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:29:35,112 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:29:35,952 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:29:35,952 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.0m phase_signal=end_if_you_want user_message=okay cool
+2026-01-22 04:29:36,477 [INFO] [MODEL RESPONSE] phase=coding reply_len=71 llm_time=0.525s
+2026-01-22 04:29:36,477 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.0m
+2026-01-22 04:29:36,680 [INFO] [PERF][coding_only] total=2.260s gate=0.693s test=0.839s llm=0.525s tts=0.202s
+2026-01-22 04:29:47,185 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:29:47,186 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:29:47,975 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:29:47,975 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.2m phase_signal=end_if_you_want user_message=I returned all I returned like zero
+2026-01-22 04:29:48,597 [INFO] [MODEL RESPONSE] phase=coding reply_len=68 llm_time=0.622s
+2026-01-22 04:29:48,597 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.2m
+2026-01-22 04:29:48,804 [INFO] [PERF][coding_only] total=2.163s gate=0.544s test=0.789s llm=0.622s tts=0.207s
+2026-01-22 04:29:58,591 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:29:58,591 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:29:59,391 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:29:59,391 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.4m phase_signal=end_if_you_want user_message=I don't know what what did I return
+2026-01-22 04:29:59,910 [INFO] [MODEL RESPONSE] phase=coding reply_len=127 llm_time=0.519s
+2026-01-22 04:29:59,910 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.4m
+2026-01-22 04:30:00,271 [INFO] [PERF][coding_only] total=2.254s gate=0.573s test=0.800s llm=0.519s tts=0.360s
+2026-01-22 04:30:13,803 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:30:13,803 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:30:14,622 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:30:14,623 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=5.7m phase_signal=end_if_you_want user_message=and it is cool
+2026-01-22 04:30:15,306 [INFO] [MODEL RESPONSE] phase=coding reply_len=292 llm_time=0.683s
+2026-01-22 04:30:15,306 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.7m
+2026-01-22 04:30:15,742 [INFO] [PERF][coding_only] total=2.528s gate=0.588s test=0.819s llm=0.683s tts=0.435s
+2026-01-22 04:30:39,547 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:30:39,547 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:30:40,346 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:30:40,346 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.1m phase_signal=end_if_you_want user_message=it's to the power of n
+2026-01-22 04:30:40,865 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.519s
+2026-01-22 04:30:40,865 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.1m
+2026-01-22 04:30:41,072 [INFO] [PERF][coding_only] total=2.137s gate=0.611s test=0.799s llm=0.519s tts=0.207s
+2026-01-22 04:30:53,153 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:30:53,153 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:30:54,049 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:30:54,049 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.3m phase_signal=end_if_you_want user_message=so I can just already the best solution
+2026-01-22 04:30:54,963 [INFO] [MODEL RESPONSE] phase=coding reply_len=64 llm_time=0.914s
+2026-01-22 04:30:54,963 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.3m
+2026-01-22 04:30:55,166 [INFO] [PERF][coding_only] total=4.563s gate=2.549s test=0.896s llm=0.914s tts=0.203s
+2026-01-22 04:31:05,265 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:31:05,266 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:31:06,046 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:31:06,046 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.5m phase_signal=end_if_you_want user_message=no I said this is already the best solution
+2026-01-22 04:31:06,636 [INFO] [MODEL RESPONSE] phase=coding reply_len=78 llm_time=0.590s
+2026-01-22 04:31:06,637 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.5m
+2026-01-22 04:31:06,852 [INFO] [PERF][coding_only] total=2.086s gate=0.499s test=0.780s llm=0.590s tts=0.215s
+2026-01-22 04:31:18,077 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:31:18,077 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:31:18,846 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:31:18,847 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=6.7m phase_signal=end_if_you_want user_message=no I don't think so we need a DP array
+2026-01-22 04:31:19,503 [INFO] [MODEL RESPONSE] phase=coding reply_len=240 llm_time=0.656s
+2026-01-22 04:31:19,504 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.7m
+2026-01-22 04:31:19,897 [INFO] [PERF][coding_only] total=3.077s gate=1.257s test=0.769s llm=0.656s tts=0.393s
+2026-01-22 04:31:47,208 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:31:47,209 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:31:48,080 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:31:48,080 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.2m phase_signal=end_if_you_want user_message=I don't think I can I think this is already the best way
+2026-01-22 04:31:48,637 [INFO] [MODEL RESPONSE] phase=coding reply_len=157 llm_time=0.557s
+2026-01-22 04:31:48,637 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.2m
+2026-01-22 04:31:48,880 [INFO] [PERF][coding_only] total=2.337s gate=0.666s test=0.871s llm=0.557s tts=0.241s
+2026-01-22 04:32:05,208 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:32:05,208 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.5m phase_signal=end_if_you_want user_message=yeah but the space complexity will still be the same
+2026-01-22 04:32:05,865 [INFO] [MODEL RESPONSE] phase=coding reply_len=226 llm_time=0.656s
+2026-01-22 04:32:05,865 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.5m
+2026-01-22 04:32:06,252 [INFO] [PERF][coding_only] total=1.560s gate=0.516s test=0.000s llm=0.656s tts=0.387s
+2026-01-22 04:32:25,248 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:32:25,249 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=7.9m phase_signal=end_if_you_want user_message=okay then what will be the space complexity be then
+2026-01-22 04:32:25,830 [INFO] [MODEL RESPONSE] phase=coding reply_len=207 llm_time=0.581s
+2026-01-22 04:32:25,830 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.9m
+2026-01-22 04:32:26,102 [INFO] [PERF][coding_only] total=1.500s gate=0.646s test=0.000s llm=0.581s tts=0.272s
+2026-01-22 04:32:43,917 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:32:43,917 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.2m phase_signal=end_if_you_want user_message=okay yeah that sounds cool
+2026-01-22 04:32:44,534 [INFO] [MODEL RESPONSE] phase=coding reply_len=110 llm_time=0.617s
+2026-01-22 04:32:44,534 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.2m
+2026-01-22 04:32:44,749 [INFO] [PERF][coding_only] total=1.418s gate=0.586s test=0.000s llm=0.617s tts=0.215s
+2026-01-22 04:32:55,487 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:32:55,487 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.4m phase_signal=end_if_you_want user_message=they will return DP for
+2026-01-22 04:32:56,143 [INFO] [MODEL RESPONSE] phase=coding reply_len=275 llm_time=0.656s
+2026-01-22 04:32:56,144 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.4m
+2026-01-22 04:32:56,485 [INFO] [PERF][coding_only] total=1.620s gate=0.622s test=0.000s llm=0.656s tts=0.341s
+2026-01-22 04:33:20,284 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:33:20,284 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=8.8m phase_signal=end_if_you_want user_message=yeah that's cool
+2026-01-22 04:33:20,766 [INFO] [MODEL RESPONSE] phase=coding reply_len=151 llm_time=0.482s
+2026-01-22 04:33:20,767 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=8.8m
+2026-01-22 04:33:21,011 [INFO] [PERF][coding_only] total=1.275s gate=0.548s test=0.000s llm=0.482s tts=0.244s
+2026-01-22 04:33:35,285 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:33:35,285 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.0m phase_signal=end_if_you_want user_message=I can
+2026-01-22 04:33:35,694 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.409s
+2026-01-22 04:33:35,694 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.0m
+2026-01-22 04:33:35,885 [INFO] [PERF][coding_only] total=1.968s gate=1.368s test=0.000s llm=0.409s tts=0.191s
+2026-01-22 04:34:04,615 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-22 04:34:04,615 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:34:05,449 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:34:05,449 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.5m phase_signal=end_if_you_want user_message=what about this
+2026-01-22 04:34:05,964 [INFO] [MODEL RESPONSE] phase=coding reply_len=153 llm_time=0.515s
+2026-01-22 04:34:05,965 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.5m
+2026-01-22 04:34:06,200 [INFO] [PERF][coding_only] total=2.082s gate=0.497s test=0.833s llm=0.515s tts=0.235s
+2026-01-22 04:34:19,929 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:34:19,929 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:34:20,708 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:34:20,708 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=9.8m phase_signal=end_if_you_want user_message=nice
+2026-01-22 04:34:21,296 [INFO] [MODEL RESPONSE] phase=coding reply_len=45 llm_time=0.588s
+2026-01-22 04:34:21,297 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=9.8m
+2026-01-22 04:34:21,490 [INFO] [PERF][coding_only] total=3.051s gate=1.490s test=0.778s llm=0.588s tts=0.193s
+2026-01-22 04:34:30,903 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:34:30,903 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:34:31,777 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:34:31,777 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=10.0m phase_signal=end_if_you_want user_message=it's still the same it's 40 plus total edges
+2026-01-22 04:34:32,264 [INFO] [MODEL RESPONSE] phase=coding reply_len=221 llm_time=0.487s
+2026-01-22 04:34:32,265 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=10.0m
+2026-01-22 04:34:32,657 [INFO] [PERF][coding_only] total=2.308s gate=0.554s test=0.873s llm=0.487s tts=0.392s
+2026-01-22 04:34:50,272 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:34:50,272 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-22 04:34:51,144 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:34:51,145 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=10.3m phase_signal=end_if_you_want user_message=all right awesome
+2026-01-22 04:34:51,876 [INFO] [MODEL RESPONSE] phase=coding reply_len=184 llm_time=0.731s
+2026-01-22 04:34:51,876 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=10.3m
+2026-01-22 04:34:52,138 [INFO] [PERF][coding_only] total=2.450s gate=0.583s test=0.872s llm=0.731s tts=0.262s
+2026-01-22 04:42:48,781 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-22 04:42:49,244 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-22 04:42:49,244 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-22 04:42:57,714 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.2m phase_signal=keep_going user_message=I'm Thomas
+2026-01-22 04:42:58,304 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=160 llm_time=0.000s
+2026-01-22 04:42:58,305 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.2m
+2026-01-22 04:43:20,203 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.6m phase_signal=keep_going user_message=no I'm good
+2026-01-22 04:43:20,672 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=183 llm_time=0.000s
+2026-01-22 04:43:20,672 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.6m
+2026-01-22 04:43:35,953 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.9m phase_signal=keep_going user_message=I want to do coding question
+2026-01-22 04:43:36,493 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=117 llm_time=0.000s
+2026-01-22 04:43:36,493 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.9m
+2026-01-22 04:43:48,742 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=I want to do coding question
+2026-01-22 04:43:49,301 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=123 llm_time=0.000s
+2026-01-22 04:43:49,301 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-22 04:44:01,092 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=it is very challenging
+2026-01-22 04:44:01,591 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=71 llm_time=0.000s
+2026-01-22 04:44:01,592 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-22 04:44:09,707 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.4m phase_signal=keep_going user_message=okay
+2026-01-22 04:44:11,179 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=959 llm_time=0.000s
+2026-01-22 04:44:11,180 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.4m
+2026-01-22 04:44:22,298 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.6m phase_signal=keep_going user_message=I didn't see the problem
+2026-01-22 04:44:24,394 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=143 llm_time=0.000s
+2026-01-22 04:44:24,394 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.6m
+2026-01-22 04:44:39,536 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.9m phase_signal=keep_going user_message=yes but I do not
+2026-01-22 04:44:40,120 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=177 llm_time=0.000s
+2026-01-22 04:44:40,120 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.9m
+2026-01-22 04:44:53,893 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m phase_signal=keep_going user_message=wish I ride the code
+2026-01-22 04:44:54,461 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=168 llm_time=0.000s
+2026-01-22 04:44:54,461 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.1m
+2026-01-22 04:45:57,813 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-22 04:45:58,286 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-22 04:45:58,287 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-22 04:46:06,421 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.2m phase_signal=keep_going user_message=hey I'm Thomas
+2026-01-22 04:46:06,908 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=87 llm_time=0.000s
+2026-01-22 04:46:06,908 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.2m
+2026-01-22 04:46:24,781 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.5m phase_signal=keep_going user_message=yeah sure I'm so I graduated no I didn't graduate I am a junior from Chicago on majoring in Seattle ...
+2026-01-22 04:46:25,453 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=154 llm_time=0.000s
+2026-01-22 04:46:25,453 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.5m
+2026-01-22 04:46:46,938 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.9m phase_signal=keep_going user_message=yeah sure so I have entered in Q2 software I have interned in another Ai and also in career Village ...
+2026-01-22 04:46:47,349 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-22 04:46:47,349 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.9m
+2026-01-22 04:46:59,100 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=so I killed you software I was responsible for building a fraud detection pipeline
+2026-01-22 04:46:59,558 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=93 llm_time=0.000s
+2026-01-22 04:46:59,558 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-22 04:47:18,035 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.4m phase_signal=keep_going user_message=I I use tensorflows and machine learning algorithms
+2026-01-22 04:47:18,563 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=107 llm_time=0.000s
+2026-01-22 04:47:18,563 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.4m
+2026-01-22 04:47:32,922 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.6m phase_signal=keep_going user_message=I use AWS I use ek2 and Lambda
+2026-01-22 04:47:33,412 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-22 04:47:33,413 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.6m
+2026-01-22 04:47:48,556 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.9m phase_signal=keep_going user_message=on there's there's not my challenge AWS is very easy to work with
+2026-01-22 04:47:48,974 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=63 llm_time=0.000s
+2026-01-22 04:47:48,975 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.9m
+2026-01-22 04:48:07,847 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.2m phase_signal=keep_going user_message=I mean we have problems with like handling large amount of data because we have like over a hundred ...
+2026-01-22 04:48:08,350 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-22 04:48:08,350 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.2m
+2026-01-22 04:48:22,455 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.5m phase_signal=keep_going user_message=oh I use spark I use Snowflake and Spark
+2026-01-22 04:48:22,971 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-22 04:48:22,972 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.5m
+2026-01-22 04:48:34,672 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m phase_signal=keep_going user_message=and Nova AI I was responsible for viewing the back and off the video sharing platform
+2026-01-22 04:48:35,117 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=60 llm_time=0.000s
+2026-01-22 04:48:35,117 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-22 04:48:48,132 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=are you spring Boot and my Baptist
+2026-01-22 04:48:48,592 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-22 04:48:48,593 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-22 04:49:05,955 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.2m phase_signal=keep_going user_message=on so the major challenges are it's a steep learning curve cuz I have never write something so big u...
+2026-01-22 04:49:06,369 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=63 llm_time=0.000s
+2026-01-22 04:49:06,370 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.2m
+2026-01-22 04:49:31,574 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.6m phase_signal=keep_going user_message=mom so I majorly go seek help from my managers you know I consult them a lot and also from my peers ...
+2026-01-22 04:49:32,073 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=94 llm_time=0.000s
+2026-01-22 04:49:32,073 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.6m
+2026-01-22 04:49:44,403 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.8m phase_signal=keep_going user_message=I'm at there it was like a sidekick of my own
+2026-01-22 04:49:44,814 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-22 04:49:44,814 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.8m
+2026-01-22 04:49:56,593 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.0m phase_signal=keep_going user_message=so I development AI agent that can help you know facilitate tasks and do a bunch of stuff
+2026-01-22 04:49:57,142 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-22 04:49:57,142 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.0m
+2026-01-22 04:50:12,313 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.3m phase_signal=keep_going user_message=I use Ling Chang I use celery I used on go to you know make request and then I also use to handle mu...
+2026-01-22 04:50:12,877 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-22 04:50:12,877 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.3m
+2026-01-22 04:50:26,268 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=on salaries to handle async task so if I ask the agent to do multiple tasks salary can handle it
+2026-01-22 04:50:26,681 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-22 04:50:26,681 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-22 04:50:40,324 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.8m phase_signal=keep_going user_message=I use a no secret database I use the Dynamo DB from AWS
+2026-01-22 04:50:40,763 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-22 04:50:40,763 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.8m
+2026-01-22 04:50:58,452 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=so if first receives a message of the process that goes to Diamond DB transform into a vector link t...
+2026-01-22 04:51:01,007 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=79 llm_time=0.000s
+2026-01-22 04:51:01,007 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-22 04:51:12,447 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m phase_signal=end_if_you_want user_message=I actually don't know that much about it
+2026-01-22 04:51:12,992 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=112 llm_time=0.000s
+2026-01-22 04:51:12,992 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-22 04:51:28,346 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.6m phase_signal=end_if_you_want user_message=oh my sound problem I saw is through the post estimations in my own startup answers page
+2026-01-22 04:51:28,855 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=51 llm_time=0.000s
+2026-01-22 04:51:28,855 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.6m
+2026-01-22 04:51:52,684 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.0m phase_signal=end_if_you_want user_message=so we have problems detecting and tracking the same person across you know a long time in the video ...
+2026-01-22 04:51:53,203 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=77 llm_time=0.000s
+2026-01-22 04:51:53,203 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.0m
+2026-01-22 04:52:06,840 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.2m phase_signal=end_if_you_want user_message=what does like I said I use Sam to find their positions the approximate positions and then yellow to...
+2026-01-22 04:52:07,341 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=71 llm_time=0.000s
+2026-01-22 04:52:07,341 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.2m
+2026-01-22 04:52:27,310 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.5m phase_signal=end_if_you_want user_message=so I have there X and Y coordinates and then I use to attract their x and y coordinate movements thr...
+2026-01-22 04:52:27,832 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=79 llm_time=0.000s
+2026-01-22 04:52:27,832 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.5m
+2026-01-22 04:52:38,807 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.7m phase_signal=end_if_you_want user_message=I overlay the key points on the videos and then I manually check them
+2026-01-22 04:52:39,376 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-22 04:52:39,376 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.7m
+2026-01-22 04:52:52,229 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.0m phase_signal=end_if_you_want user_message=I just look at it and see if the key points are actually on their correct positions
+2026-01-22 04:52:52,776 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=91 llm_time=0.000s
+2026-01-22 04:52:52,776 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.0m
+2026-01-22 04:53:06,090 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.2m phase_signal=end_if_you_want user_message=for Yolo's really high cuz YOLO is well established on a couple data set
+2026-01-22 04:53:07,691 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=101 llm_time=0.000s
+2026-01-22 04:53:07,692 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.2m
+2026-01-22 04:53:20,773 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.4m phase_signal=end_if_you_want user_message=are you are you asking the accuracy of YOLO or for my AI referee
+2026-01-22 04:53:21,125 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-22 04:53:21,125 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.4m
+2026-01-22 04:53:34,529 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.7m phase_signal=end_if_you_want user_message=oh okay so the accuracy will be around 87% we collect over a thousand fencing videos we train and te...
+2026-01-22 04:53:34,986 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=68 llm_time=0.000s
+2026-01-22 04:53:34,986 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.7m
+2026-01-22 04:53:51,768 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.0m phase_signal=end_if_you_want user_message=the video collections is through myself and my colleagues so we feel real time fencing videos and th...
+2026-01-22 04:53:52,262 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-22 04:53:52,262 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.0m
+2026-01-22 04:54:14,249 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.3m phase_signal=end_if_you_want user_message=so I basically feed a data into the AI and be like you know and it is like a supervised learning rig...
+2026-01-22 04:54:14,804 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=118 llm_time=0.000s
+2026-01-22 04:54:14,804 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.3m
+2026-01-22 04:54:31,095 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.6m phase_signal=end_if_you_want user_message=on so you know we have accuracy with F1 score AUC you know and a bunch of other benchmarks
+2026-01-22 04:54:31,636 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=81 llm_time=0.000s
+2026-01-22 04:54:31,636 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.6m
+2026-01-22 04:54:42,555 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.8m phase_signal=end_if_you_want user_message=I don't have a number in line but I remember it's high enough
+2026-01-22 04:54:43,128 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=116 llm_time=0.000s
+2026-01-22 04:54:43,128 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.8m
+2026-01-22 04:54:53,923 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.0m phase_signal=end_if_you_want user_message=I already did tell you
+2026-01-22 04:54:54,381 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=126 llm_time=0.000s
+2026-01-22 04:54:54,382 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.0m
+2026-01-22 04:55:12,211 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.3m phase_signal=end_if_you_want user_message=the primary goal is to basically own predict what transactions are suspicious
+2026-01-22 04:55:12,620 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=49 llm_time=0.000s
+2026-01-22 04:55:12,620 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.3m
+2026-01-22 04:55:20,337 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.4m phase_signal=end_if_you_want user_message=through the machine learning algorithm is my train
+2026-01-22 04:55:20,893 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=72 llm_time=0.000s
+2026-01-22 04:55:20,893 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.4m
+2026-01-22 04:55:31,724 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.6m phase_signal=end_if_you_want user_message=so it combine a bunch of different algorithms including
+2026-01-22 04:55:32,223 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-22 04:55:32,223 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.6m
+2026-01-22 04:55:42,789 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.8m phase_signal=end_if_you_want user_message=so it includes random Forest tensorflows neural networks and Ensemble models
+2026-01-22 04:55:43,848 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=68 llm_time=0.000s
+2026-01-22 04:55:43,848 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.8m
+2026-01-22 04:55:58,358 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=10.1m phase_signal=must_end_now user_message=so I check which algorithms or Which models outperform in some benchmarks and then I choose to combi...
+2026-01-22 04:55:58,823 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=95 llm_time=0.000s
+2026-01-22 04:55:58,823 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=10.1m
+2026-01-22 04:55:58,823 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=False force_end=True)
+2026-01-22 04:55:58,824 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-22 04:56:14,833 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:56:14,834 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.3m phase_signal=end_if_you_want user_message=it's pretty good
+2026-01-22 04:56:16,130 [INFO] [MODEL RESPONSE] phase=coding reply_len=417 llm_time=0.000s
+2026-01-22 04:56:16,131 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.3m
+2026-01-22 04:56:16,131 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-22 04:56:25,818 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:56:25,818 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.4m phase_signal=end_if_you_want user_message=hello
+2026-01-22 04:56:27,257 [INFO] [MODEL RESPONSE] phase=coding reply_len=439 llm_time=0.000s
+2026-01-22 04:56:27,257 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.4m
+2026-01-22 04:56:55,885 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:56:55,886 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.0m phase_signal=end_if_you_want user_message=no I think I already got it
+2026-01-22 04:56:56,415 [INFO] [MODEL RESPONSE] phase=coding reply_len=36 llm_time=0.000s
+2026-01-22 04:56:56,415 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.0m
+2026-01-22 04:57:04,769 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-22 04:57:04,770 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.1m phase_signal=end_if_you_want user_message=do you see what I'm writing on the code editor yet
+2026-01-22 04:57:05,335 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.000s
+2026-01-22 04:57:05,335 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.1m
+2026-01-22 04:57:12,726 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:57:12,726 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:57:14,216 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:57:14,217 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.3m phase_signal=end_if_you_want user_message=can you see it now
+2026-01-22 04:57:14,739 [INFO] [MODEL RESPONSE] phase=coding reply_len=54 llm_time=0.000s
+2026-01-22 04:57:14,739 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.3m
+2026-01-22 04:57:22,912 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:57:22,912 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:57:24,397 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:57:24,397 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.4m phase_signal=end_if_you_want user_message=I just roll my code in the code editor
+2026-01-22 04:57:24,789 [INFO] [MODEL RESPONSE] phase=coding reply_len=68 llm_time=0.000s
+2026-01-22 04:57:24,789 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.4m
+2026-01-22 04:57:35,985 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:57:35,986 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:57:37,453 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:57:37,453 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.6m phase_signal=end_if_you_want user_message=it will be on it's a two pointer
+2026-01-22 04:57:37,969 [INFO] [MODEL RESPONSE] phase=coding reply_len=47 llm_time=0.000s
+2026-01-22 04:57:37,969 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.6m
+2026-01-22 04:57:45,036 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:57:45,037 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:57:46,450 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:57:46,450 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.8m phase_signal=end_if_you_want user_message=it's in
+2026-01-22 04:57:46,852 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-22 04:57:46,853 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.8m
+2026-01-22 04:57:56,878 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:57:56,878 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:57:58,384 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:57:58,384 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.0m phase_signal=end_if_you_want user_message=it's end it's the number of the the length of the input
+2026-01-22 04:57:58,752 [INFO] [MODEL RESPONSE] phase=coding reply_len=88 llm_time=0.000s
+2026-01-22 04:57:58,752 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.0m
+2026-01-22 04:58:11,015 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:58:11,016 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:58:12,484 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:58:12,484 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.2m phase_signal=end_if_you_want user_message=the time complexity of the approach is the length of the input array
+2026-01-22 04:58:13,035 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-22 04:58:13,036 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.2m
+2026-01-22 04:58:20,955 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:58:20,956 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:58:22,433 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:58:22,434 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.4m phase_signal=end_if_you_want user_message=space complexity is constant
+2026-01-22 04:58:22,760 [INFO] [MODEL RESPONSE] phase=coding reply_len=41 llm_time=0.000s
+2026-01-22 04:58:22,760 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.4m
+2026-01-22 04:58:30,845 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:58:30,845 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:58:32,304 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:58:32,305 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.6m phase_signal=end_if_you_want user_message=we are only using pointers nothing else
+2026-01-22 04:58:32,912 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.000s
+2026-01-22 04:58:32,912 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.6m
+2026-01-22 04:58:45,317 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:58:45,317 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:58:46,801 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:58:46,801 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.8m phase_signal=end_if_you_want user_message=like I said the time complexity is the length of the input and space complexity is constant
+2026-01-22 04:58:47,299 [INFO] [MODEL RESPONSE] phase=coding reply_len=59 llm_time=0.000s
+2026-01-22 04:58:47,300 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.8m
+2026-01-22 04:58:57,822 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:58:57,822 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:58:59,303 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:58:59,304 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.0m phase_signal=end_if_you_want user_message=cuz we are only using like constant pointers and variables
+2026-01-22 04:58:59,620 [INFO] [MODEL RESPONSE] phase=coding reply_len=28 llm_time=0.000s
+2026-01-22 04:58:59,620 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.0m
+2026-01-22 04:59:06,457 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:59:06,457 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:59:07,939 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:59:07,939 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.2m phase_signal=end_if_you_want user_message=is the length off the input array
+2026-01-22 04:59:08,646 [INFO] [MODEL RESPONSE] phase=coding reply_len=51 llm_time=0.000s
+2026-01-22 04:59:08,646 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.2m
+2026-01-22 04:59:17,436 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:59:17,436 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:59:18,928 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:59:18,928 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.3m phase_signal=end_if_you_want user_message=the time complexity is the length of the input
+2026-01-22 04:59:20,311 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-22 04:59:20,311 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.3m
+2026-01-22 04:59:29,244 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:59:29,245 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:59:30,743 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:59:30,743 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.5m phase_signal=end_if_you_want user_message=today's complaces constant I already told you before
+2026-01-22 04:59:31,316 [INFO] [MODEL RESPONSE] phase=coding reply_len=64 llm_time=0.000s
+2026-01-22 04:59:31,316 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.5m
+2026-01-22 04:59:41,895 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 04:59:41,895 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 04:59:43,367 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 04:59:43,368 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.7m phase_signal=end_if_you_want user_message=yes we are only using variables I have also told you
+2026-01-22 04:59:44,236 [INFO] [MODEL RESPONSE] phase=coding reply_len=55 llm_time=0.000s
+2026-01-22 04:59:44,236 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.7m
+2026-01-22 05:02:13,493 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:02:13,493 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:02:14,984 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:02:14,984 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.3m phase_signal=end_if_you_want user_message=the time complexity is the length of the input the space complexity is constant
+2026-01-22 05:02:15,385 [INFO] [MODEL RESPONSE] phase=coding reply_len=53 llm_time=0.000s
+2026-01-22 05:02:15,385 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.3m
+2026-01-22 05:02:25,100 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:02:25,100 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:02:26,576 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:02:26,576 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.5m phase_signal=end_if_you_want user_message=if you look at the code we are only using variables
+2026-01-22 05:02:27,048 [INFO] [MODEL RESPONSE] phase=coding reply_len=64 llm_time=0.000s
+2026-01-22 05:02:27,048 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.5m
+2026-01-22 05:02:38,241 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:02:38,242 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:02:39,711 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:02:39,711 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.7m phase_signal=end_if_you_want user_message=it handles edge cases there's there's not much edge cases
+2026-01-22 05:02:40,150 [INFO] [MODEL RESPONSE] phase=coding reply_len=43 llm_time=0.000s
+2026-01-22 05:02:40,150 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.7m
+2026-01-22 05:02:50,064 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:02:50,064 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:02:51,522 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:02:51,522 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.9m phase_signal=end_if_you_want user_message=well we have if Andy goes zero returns zero at line 3
+2026-01-22 05:02:51,937 [INFO] [MODEL RESPONSE] phase=coding reply_len=57 llm_time=0.000s
+2026-01-22 05:02:51,937 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.9m
+2026-01-22 05:03:00,998 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:03:00,998 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:03:02,492 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:03:02,493 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=7.1m phase_signal=end_if_you_want user_message=there's nowhere to go we're done
+2026-01-22 05:03:02,836 [INFO] [MODEL RESPONSE] phase=coding reply_len=16 llm_time=0.000s
+2026-01-22 05:03:02,837 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=7.1m
+2026-01-22 05:03:02,837 [INFO] [PHASE SHIFT] full mode coding -> questions (phase_complete=True force_end=False)
+2026-01-22 05:03:02,837 [INFO] [PHASE TRANSITION] coding -> questions
+2026-01-22 05:03:02,838 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-22 05:03:31,617 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:03:31,618 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:03:33,088 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:03:33,088 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=7.6m phase_signal=end_if_you_want user_message=hello
+2026-01-22 05:03:34,100 [INFO] [MODEL RESPONSE] phase=coding reply_len=336 llm_time=0.000s
+2026-01-22 05:03:34,101 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=7.6m
+2026-01-22 05:03:46,001 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-22 05:03:46,002 [INFO] [TEST RUN] phase=coding question=Trapping Rain Water
+2026-01-22 05:03:47,469 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-22 05:03:47,469 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=7.8m phase_signal=end_if_you_want user_message=I thought we already done with the problem
+2026-01-22 05:03:47,862 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.000s
+2026-01-22 05:03:47,862 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=7.8m
+2026-01-22 05:03:47,863 [INFO] [PHASE SHIFT] full mode coding -> questions (phase_complete=True force_end=False)
+2026-01-22 05:03:47,863 [INFO] [PHASE TRANSITION] coding -> questions
+2026-01-22 05:03:58,250 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.2m phase_signal=end_if_you_want user_message=okay cool
+2026-01-22 05:03:58,648 [INFO] [MODEL RESPONSE] phase=questions reply_len=34 llm_time=0.000s
+2026-01-22 05:03:58,649 [INFO] [PHASE CHECK] phase=questions phase_complete=False time_in_phase=0.2m
+2026-01-22 05:04:04,445 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.3m phase_signal=end_if_you_want user_message=I have any questions for you
+2026-01-22 05:04:04,852 [INFO] [MODEL RESPONSE] phase=questions reply_len=34 llm_time=0.000s
+2026-01-22 05:04:04,853 [INFO] [PHASE CHECK] phase=questions phase_complete=False time_in_phase=0.3m
+2026-01-22 05:04:10,891 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.4m phase_signal=end_if_you_want user_message=not have any questions for you
+2026-01-22 05:04:11,300 [INFO] [MODEL RESPONSE] phase=questions reply_len=60 llm_time=0.000s
+2026-01-22 05:04:11,300 [INFO] [PHASE CHECK] phase=questions phase_complete=True time_in_phase=0.4m
+2026-01-22 05:04:11,300 [INFO] [PHASE SHIFT] full mode questions -> ended
