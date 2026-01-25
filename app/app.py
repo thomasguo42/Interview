@@ -1375,28 +1375,28 @@ def create_app() -> Flask:
                 logger.error("[MODEL ERROR] %s", exc)
                 return jsonify({"error": str(exc)}), 500
 
-                reply_text = _apply_resume_prompt_guards(
-                    interview,
-                    reply_text,
-                    user_message,
-                    time_in_phase,
-                )
-                reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
-                reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))
-                if (
-                    interview.current_phase == PHASE_CODING
-                    and interview.mode == "full"
-                    and phase_signal == "must_end_now"
-                    and PHASE_COMPLETE_TOKEN not in reply_text
-                ):
-                    reply_text = _build_coding_wrap_message(interview)
-                if (
-                    interview.current_phase == PHASE_INTRO_RESUME
-                    and interview.mode == "full"
-                    and phase_signal == "must_end_now"
-                    and PHASE_COMPLETE_TOKEN not in reply_text
-                ):
-                    reply_text = _build_resume_wrap_message()
+            reply_text = _apply_resume_prompt_guards(
+                interview,
+                reply_text,
+                user_message,
+                time_in_phase,
+            )
+            reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
+            reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))
+            if (
+                interview.current_phase == PHASE_CODING
+                and interview.mode == "full"
+                and phase_signal == "must_end_now"
+                and PHASE_COMPLETE_TOKEN not in reply_text
+            ):
+                reply_text = _build_coding_wrap_message(interview)
+            if (
+                interview.current_phase == PHASE_INTRO_RESUME
+                and interview.mode == "full"
+                and phase_signal == "must_end_now"
+                and PHASE_COMPLETE_TOKEN not in reply_text
+            ):
+                reply_text = _build_resume_wrap_message()
 
             phase_complete = False
             phase_before_transition = interview.current_phase
