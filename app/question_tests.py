@@ -108,9 +108,9 @@ def format_signatures_for_prompt(test_spec: Dict[str, Any]) -> Dict[str, str]:
         elif language == "java":
             method = signature.get("method_name")
             params = signature.get("parameters", [])
-            ret = signature.get("return_type", "void")
+            ret = _normalize_java_type(signature.get("return_type", "void"))
             args = ", ".join(
-                f"{param.get('type', 'Object')} {param.get('name', 'arg')}"
+                f"{_normalize_java_type(param.get('type', 'Object'))} {param.get('name', 'arg')}"
                 for param in params
                 if isinstance(param, dict)
             )
@@ -130,17 +130,102 @@ def format_signatures_for_prompt(test_spec: Dict[str, Any]) -> Dict[str, str]:
     return formatted
 
 
+def _normalize_java_type(type_name: str) -> str:
+    """Normalize internal schema types to valid Java type names."""
+    raw = str(type_name or "").strip()
+    if not raw:
+        return raw
+    mapping = {
+        "string": "String",
+        "bool": "boolean",
+    }
+    if raw in mapping:
+        return mapping[raw]
+    if raw.endswith("[][]"):
+        base = raw[:-4]
+        if base in mapping:
+            return mapping[base] + "[][]"
+    if raw.endswith("[]"):
+        base = raw[:-2]
+        if base in mapping:
+            return mapping[base] + "[]"
+    return raw
+
+
+def _java_needs_support_types(test_spec: Dict[str, Any]) -> tuple[bool, bool]:
+    signatures = test_spec.get("function_signatures", {})
+    signature = signatures.get("java", {}) if isinstance(signatures, dict) else {}
+    if not isinstance(signature, dict):
+        return False, False
+    ret = str(signature.get("return_type") or "")
+    params = signature.get("parameters", [])
+    types = [ret] + [str(p.get("type") or "") for p in params if isinstance(p, dict)]
+    needs_listnode = any(t == "ListNode" for t in types)
+    needs_sea = any(t == "Sea" for t in types)
+    return needs_listnode, needs_sea
+
+
+def _java_support_prefix(needs_listnode: bool, needs_sea: bool) -> str:
+    blocks: list[str] = []
+    if needs_listnode:
+        blocks.append(
+            "\n".join(
+                [
+                    "class ListNode {",
+                    "    int val;",
+                    "    ListNode next;",
+                    "    ListNode(int val) { this.val = val; }",
+                    "    ListNode(int val, ListNode next) { this.val = val; this.next = next; }",
+                    "}",
+                ]
+            )
+        )
+    if needs_sea:
+        blocks.append(
+            "\n".join(
+                [
+                    "interface Sea {",
+                    "    boolean hasShips(int[] topRight, int[] bottomLeft);",
+                    "}",
+                ]
+            )
+        )
+    return ("\n\n".join(blocks).strip() + "\n\n") if blocks else ""
+
+
+def _cpp_support_prefix(test_spec: Dict[str, Any]) -> str:
+    signatures = test_spec.get("function_signatures", {})
+    signature = signatures.get("cpp", {}) if isinstance(signatures, dict) else {}
+    if not isinstance(signature, dict):
+        return ""
+    ret = str(signature.get("return_type") or "")
+    params = signature.get("parameters", [])
+    types = [ret] + [str(p.get("type") or "") for p in params if isinstance(p, dict)]
+    needs_listnode = any(t == "ListNode*" for t in types)
+    if not needs_listnode:
+        return ""
+    return (
+        "struct ListNode {\n"
+        "    int val;\n"
+        "    ListNode* next;\n"
+        "    ListNode(int x) : val(x), next(nullptr) {}\n"
+        "    ListNode(int x, ListNode* n) : val(x), next(n) {}\n"
+        "};\n\n"
+    )
+
+
 def _starter_return_line(language: str, return_type: str) -> str:
     if language == "python":
         return "    return None"
     if language == "java":
-        if return_type == "void":
+        normalized = _normalize_java_type(return_type)
+        if normalized == "void":
             return ""
-        if return_type in {"int", "long", "double"}:
+        if normalized in {"int", "long", "double"}:
             return "        return 0;"
-        if return_type == "bool":
+        if normalized == "boolean":
             return "        return false;"
-        if return_type == "string":
+        if normalized == "String":
             return "        return \"\";"
         return "        return null;"
     if language == "cpp":
@@ -191,7 +276,7 @@ def build_starter_code(test_spec: Dict[str, Any], language: str) -> str:
             lines = [f"public class {class_name} {{"]
             ctor_params = constructor.get("parameters", []) if isinstance(constructor, dict) else []
             ctor_args = ", ".join(
-                f"{param.get('type', 'int')} {param.get('name', 'arg')}"
+                f"{_normalize_java_type(param.get('type', 'int'))} {param.get('name', 'arg')}"
                 for param in ctor_params
                 if isinstance(param, dict)
             )
@@ -203,9 +288,9 @@ def build_starter_code(test_spec: Dict[str, Any], language: str) -> str:
                     continue
                 name = method.get("name")
                 params = method.get("parameters", [])
-                ret = method.get("return_type", "void")
+                ret = _normalize_java_type(method.get("return_type", "void"))
                 args = ", ".join(
-                    f"{param.get('type', 'int')} {param.get('name', 'arg')}"
+                    f"{_normalize_java_type(param.get('type', 'int'))} {param.get('name', 'arg')}"
                     for param in params
                     if isinstance(param, dict)
                 )
@@ -266,10 +351,12 @@ def build_starter_code(test_spec: Dict[str, Any], language: str) -> str:
         return f"def {func_name}({args}):\n    pass\n"
 
     if language == "java":
+        needs_listnode, needs_sea = _java_needs_support_types(test_spec)
+        prefix = _java_support_prefix(needs_listnode, needs_sea)
         method = signature.get("method_name", func_name)
-        ret = signature.get("return_type", "void")
+        ret = _normalize_java_type(signature.get("return_type", "void"))
         args = ", ".join(
-            f"{param.get('type', 'int')} {param.get('name', 'arg')}"
+            f"{_normalize_java_type(param.get('type', 'int'))} {param.get('name', 'arg')}"
             for param in params
             if isinstance(param, dict)
         )
@@ -280,7 +367,7 @@ def build_starter_code(test_spec: Dict[str, Any], language: str) -> str:
             lines.append(return_line)
         lines.append("    }")
         lines.append("}")
-        return "\n".join(lines).strip() + "\n"
+        return (prefix + "\n".join(lines)).strip() + "\n"
 
     if language == "cpp":
         ret = signature.get("return_type", "void")
@@ -289,11 +376,12 @@ def build_starter_code(test_spec: Dict[str, Any], language: str) -> str:
             for param in params
             if isinstance(param, dict)
         )
+        prefix = _cpp_support_prefix(test_spec)
         lines = [f"{ret} {func_name}({args}) {{", "    // TODO"]
         return_line = _starter_return_line(language, ret)
         if return_line:
             lines.append(return_line)
         lines.append("}")
-        return "\n".join(lines).strip() + "\n"
+        return (prefix + "\n".join(lines)).strip() + "\n"
 
     return ""

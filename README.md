@@ -8,6 +8,7 @@ A Flask-based prototype for practicing technical interviews with a voice-first w
 - Voice input powered by the browser's SpeechRecognition API.
 - Instant Kokoro-powered speech synthesis for lifelike interviewer tone (no browser fallback).
 - Session-aware Gemini prompts that incorporate resume context (resume + history kept server-side per session).
+- Optional OpenAI Realtime WebSocket support for text generation (audio still handled by Kokoro).
 
 ## Project layout
 
@@ -21,6 +22,7 @@ A Flask-based prototype for practicing technical interviews with a voice-first w
 - Python 3.10+
 - A modern Chromium-based browser (Chrome, Edge) for the voice APIs.
 - Google AI Studio API access to Gemini 2.5 Flash Lite.
+- OpenAI API access if you want to use OpenAI models (optional).
 - NVIDIA GPU with CUDA drivers (Kokoro will automatically use it when available).
 
 ## Setup
@@ -39,6 +41,7 @@ A Flask-based prototype for practicing technical interviews with a voice-first w
    echo "GEMINI_API_KEY=YOUR_API_KEY_HERE" >> .env
    echo "GEMINI_MODEL=gemini-2.5-flash-lite" >> .env
    echo "GEMINI_PHASE_MODEL=gemini-1.5-pro-latest" >> .env
+   echo "OPENAI_API_KEY=YOUR_OPENAI_KEY_HERE" >> .env
    ```
 
 3. Run the development server on the requested port:
@@ -75,6 +78,7 @@ A Flask-based prototype for practicing technical interviews with a voice-first w
 ## Next Ideas
 
 - Add WebRTC support for full-duplex streaming with Gemini Realtime.
+- Explore OpenAI Realtime voice sessions for end-to-end audio when you want lower latency than the current STT/TTS loop.
 - Swap the browser STT with a low-latency server-side model (Whisper V3, Deepgram, etc.) and voice-activity detection for true barge-in support.
 - Persist sessions and resumes in a database for multi-user support.
 - Integrate code execution challenges during the interview.

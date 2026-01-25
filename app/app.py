@@ -27,8 +27,8 @@ from werkzeug.utils import secure_filename
 from .auth import login_required, get_current_user
 from .config import config
 from .db import init_db, SessionLocal
-from .gemini_client import GeminiError
-from .openai_client import OpenAIError
+from .gemini_client import GeminiClient, GeminiError
+from .openai_client import OpenAIClient, OpenAIError
 from .llm_client import get_llm_client
 from .models import User, Resume, CompanyProfile, Interview
 from .ood_questions import get_stock_match_engine_question
@@ -53,7 +53,7 @@ from .state import (
 )
 
 
-PHASE_COMPLETE_TOKEN = "[PHASE_COMPLETE]"
+PHASE_COMPLETE_TOKEN = "[SECTION_COMPLETE]"
 
 FULL_PHASE_RULES = {
     PHASE_INTRO_RESUME: {"min": 5.0, "max": 10.0, "next": PHASE_CODING},
@@ -198,6 +198,311 @@ def create_app() -> Flask:
         cleaned = cleaned.strip()
         return _strip_markdown_symbols(cleaned)
 
+    def _detect_resume_topics(text: str) -> list[str]:
+        if not text:
+            return []
+        lowered = text.lower()
+        topics: list[str] = []
+        if "project" in lowered or "most recent" in lowered or "recent work" in lowered:
+            topics.append("recent_project")
+        if "challenge" in lowered or "difficult" in lowered or "problem" in lowered:
+            topics.append("challenge")
+        if "skill" in lowered or "technology" in lowered or "tech stack" in lowered or "tools" in lowered:
+            topics.append("skills")
+        if "role" in lowered or "responsib" in lowered or "contribut" in lowered:
+            topics.append("role")
+        if "impact" in lowered or "result" in lowered or "outcome" in lowered:
+            topics.append("impact")
+        if "team" in lowered or "collaborat" in lowered or "stakeholder" in lowered:
+            topics.append("collaboration")
+        if "next" in lowered or "excited" in lowered or "interested" in lowered:
+            topics.append("next")
+        return topics
+
+    def _select_resume_followup(asked: Dict[str, int]) -> str:
+        followups = [
+            ("recent_project", "What was your most recent project about?"),
+            ("role", "What was your role and scope on that work?"),
+            ("challenge", "What was a tough technical challenge you faced there?"),
+            ("skills", "What technologies did you use most?"),
+            ("impact", "What was the impact or outcome of that work?"),
+            ("collaboration", "How did you work with others on that project?"),
+            ("next", "What kind of work are you excited to do next?"),
+        ]
+        for key, prompt in followups:
+            if asked.get(key, 0) == 0:
+                return prompt
+        return "Anything else from your background you want to highlight?"
+
+    def _apply_resume_prompt_guards(
+        interview: Interview,
+        reply_text: str,
+        user_message: str,
+        time_in_phase: float,
+    ) -> str:
+        if interview.mode != "full" or interview.current_phase != PHASE_INTRO_RESUME:
+            return reply_text
+        if not reply_text:
+            return reply_text
+        if PHASE_COMPLETE_TOKEN in reply_text:
+            return reply_text
+
+        meta = interview.report.setdefault("_phase_meta", {}).setdefault("intro_resume", {})
+        asked: Dict[str, int] = meta.setdefault("asked", {})
+        answered: Dict[str, int] = meta.setdefault("answered", {})
+
+        for topic in _detect_resume_topics(user_message):
+            answered[topic] = answered.get(topic, 0) + 1
+
+        prompt_topics = _detect_resume_topics(reply_text)
+        for topic in prompt_topics:
+            asked[topic] = asked.get(topic, 0) + 1
+        if prompt_topics:
+            meta["last_topic"] = prompt_topics[0]
+
+        repeated = any(asked.get(topic, 0) > 1 for topic in prompt_topics)
+        already_answered = any(answered.get(topic, 0) > 0 for topic in prompt_topics)
+
+        # Hard stop after 10 minutes regardless of model behavior
+        if time_in_phase >= 10.0:
+            return _build_resume_wrap_message()
+
+        if repeated or already_answered:
+            return _select_resume_followup(asked)
+
+        return reply_text
+
+    def _detect_coding_topics(text: str) -> list[str]:
+        if not text:
+            return []
+        import re
+        lowered = text.lower()
+        topics: list[str] = []
+        # Time complexity / runtime
+        time_patterns = [
+            r"\btime complexity\b",
+            r"\bruntime complexity\b",
+            r"\basymptotic (?:time|runtime)\b",
+            r"\bbig[- ]o\b",
+            r"\bo\(\s*[a-z0-9_+\-*/\s]+\s*\)",
+            r"\blinear time\b",
+            r"\bquadratic time\b",
+            r"\blogarithmic time\b",
+            r"\bconstant time\b",
+            r"\bo\(n\)\b",
+            r"\bo\(m\)\b",
+            r"\bo\(k\)\b",
+            r"\bo\(m\s*\+\s*n\)\b",
+            r"\bo\(n\s*\+\s*m\)\b",
+            r"\bo\(n\s*log\s*n\)\b",
+            r"\bo\(log\s*n\)\b",
+            r"\bo\(n\^2\)\b",
+            r"\bo\(n\s*\*\s*n\)\b",
+        ]
+        if any(re.search(pat, lowered) for pat in time_patterns) or (
+            "complexity" in lowered and ("time" in lowered or "runtime" in lowered)
+        ):
+            topics.append("time_complexity")
+
+        # Space complexity / memory
+        space_patterns = [
+            r"\bspace complexity\b",
+            r"\bmemory complexity\b",
+            r"\basymptotic (?:space|memory)\b",
+            r"\bauxiliary space\b",
+            r"\bextra space\b",
+            r"\bin[- ]place\b",
+            r"\bconstant space\b",
+            r"\bo\(\s*1\s*\)\s*(?:space|memory)\b",
+            r"\bo\(\s*[a-z0-9_+\-*/\s]+\s*\)\s*(?:space|memory)\b",
+        ]
+        if any(re.search(pat, lowered) for pat in space_patterns) or (
+            "complexity" in lowered and ("space" in lowered or "memory" in lowered)
+        ):
+            topics.append("space_complexity")
+        if "edge case" in lowered or "edge-case" in lowered:
+            topics.append("edge_cases")
+        if "optimiz" in lowered or "improve" in lowered or "tradeoff" in lowered or "trade-off" in lowered:
+            topics.append("optimizations")
+        if "readability" in lowered or "structure" in lowered or "clean" in lowered:
+            topics.append("readability")
+        if "test" in lowered or "unit test" in lowered or "test case" in lowered:
+            topics.append("tests")
+        if "next step" in lowered or "next steps" in lowered:
+            topics.append("next_steps")
+        return topics
+
+    def _detect_acknowledgements(text: str) -> bool:
+        """Heuristic: did the interviewer acknowledge the candidate's prior answer as correct/accepted?"""
+        if not text:
+            return False
+        lowered = text.lower()
+        positive = [
+            "right",
+            "exactly",
+            "correct",
+            "that's correct",
+            "that is correct",
+            "yes",
+            "yeah",
+            "yep",
+            "makes sense",
+            "agreed",
+            "good",
+            "sounds good",
+        ]
+        negative = [
+            "are you sure",
+            "is it",
+            "is that",
+            "not quite",
+            "that's not",
+            "actually",
+            "however",
+            "but",
+            "though",
+            "incorrect",
+            "i don't think",
+            "does it",
+            "what about",
+        ]
+        if not any(token in lowered for token in positive):
+            return False
+        if any(token in lowered for token in negative):
+            return False
+        return True
+
+    def _maybe_update_optimization(
+        interview: Interview,
+        current_code: str,
+        conversation_len: int,
+    ) -> None:
+        if interview.current_phase != PHASE_CODING:
+            return
+        evaluation = interview.code_evaluation or {}
+        if str(evaluation.get("status", "")).strip() != "pass":
+            return
+        code_hash = evaluation.get("code_hash")
+        if not code_hash:
+            return
+        meta = _get_coding_meta(interview)
+        optimization = meta.get("optimization", {})
+        if optimization.get("code_hash") == code_hash and optimization.get("status") in {"optimized", "needs_improvement"}:
+            return
+
+        try:
+            evaluator = OpenAIClient(model="gpt-5.2")
+            result = evaluator.evaluate_code_optimization(
+                question=interview.coding_question or {},
+                language=interview.language,
+                code=current_code,
+            )
+        except Exception as exc:
+            logger.warning("[OPTIMIZATION EVAL] failed: %s", exc)
+            return
+
+        optimized = bool(result.get("optimized"))
+        status = "optimized" if optimized else "needs_improvement"
+        feedback = str(result.get("feedback") or "").strip()
+
+        meta["optimization"] = {
+            "status": status,
+            "feedback": feedback,
+            "code_hash": code_hash,
+        }
+        meta["allowed_turns_after_pass"] = 10 if optimized else 20
+        meta["pass_turn_count"] = evaluation.get("pass_turn_count") or conversation_len
+        if optimized:
+            meta.pop("improvement_window_start_turn", None)
+        else:
+            meta["improvement_window_start_turn"] = meta["pass_turn_count"]
+
+    def _select_coding_followup(asked: Dict[str, int]) -> str | None:
+        followups = [
+            ("edge_cases", "Any edge cases you'd call out?"),
+            ("optimizations", "Any optimizations or tradeoffs you'd consider?"),
+            ("readability", "How would you improve readability or structure?"),
+            ("tests", "What tests would you add first?"),
+            ("next_steps", "What would you do next if you had more time?"),
+        ]
+        for key, prompt in followups:
+            if asked.get(key, 0) == 0:
+                return prompt
+        return "Any other considerations you'd mention before we move on?"
+
+    def _apply_coding_prompt_guards(
+        interview: Interview,
+        reply_text: str,
+        user_message: str,
+    ) -> str:
+        if interview.mode not in {"full", "coding_only"} or interview.current_phase != PHASE_CODING:
+            return reply_text
+        if not reply_text:
+            return reply_text
+        if PHASE_COMPLETE_TOKEN in reply_text:
+            return reply_text
+
+        meta = interview.report.setdefault("_phase_meta", {}).setdefault("coding", {})
+        asked: Dict[str, int] = meta.setdefault("asked", {})
+        acknowledged: Dict[str, int] = meta.setdefault("acknowledged", {})
+        asked_cap: Dict[str, int] = meta.setdefault("asked_cap", {})
+
+        user_topics = _detect_coding_topics(user_message)
+        prompt_topics = _detect_coding_topics(reply_text)
+
+        # If the candidate addressed a topic and the interviewer acknowledged it, mark it as acknowledged.
+        if user_topics and _detect_acknowledgements(reply_text):
+            for topic in user_topics:
+                acknowledged[topic] = acknowledged.get(topic, 0) + 1
+
+        for topic in prompt_topics:
+            asked[topic] = asked.get(topic, 0) + 1
+            if topic in {"time_complexity", "space_complexity"}:
+                asked_cap[topic] = asked_cap.get(topic, 0) + 1
+        if prompt_topics:
+            meta["last_topic"] = prompt_topics[0]
+
+        evaluation = interview.code_evaluation or {}
+        tests_passing = str(evaluation.get("status", "")).strip() == "pass"
+
+        repeated = any(asked.get(topic, 0) > 1 for topic in prompt_topics)
+        was_acknowledged = any(acknowledged.get(topic, 0) > 0 for topic in prompt_topics)
+
+        # Hard cap: ask time/space complexity at most twice, regardless of correctness.
+        if (
+            asked_cap.get("time_complexity", 0) > 2
+            or asked_cap.get("space_complexity", 0) > 2
+        ):
+            if tests_passing:
+                return _build_coding_wrap_message(interview)
+            return _select_coding_followup(asked)
+
+        # Only block/close repetition once the topic has been acknowledged as answered correctly.
+        if tests_passing and prompt_topics and repeated and was_acknowledged:
+            return _build_coding_wrap_message(interview)
+
+        # If they're repeating but haven't acknowledged an answer yet, let it continue.
+        if repeated and prompt_topics and was_acknowledged:
+            return _select_coding_followup(asked)
+
+        return reply_text
+
+    def _maybe_force_coding_wrap(
+        interview: Interview,
+        reply_text: str,
+        conversation_len: int,
+    ) -> str:
+        if interview.current_phase != PHASE_CODING:
+            return reply_text
+        allowed_turns = _get_coding_allowed_turns(interview)
+        turns_since_pass = _get_coding_turns_since_pass(interview, conversation_len)
+        if turns_since_pass is not None and turns_since_pass >= allowed_turns:
+            return _build_coding_wrap_message(interview)
+        turns_since_window = _get_coding_turns_since_window(interview, conversation_len)
+        if turns_since_window is not None and turns_since_window >= allowed_turns:
+            return _build_coding_wrap_message(interview)
+        return reply_text
+
     def _detect_interview_close(reply_text: str) -> bool:
         if not reply_text:
             return False
@@ -269,7 +574,7 @@ def create_app() -> Flask:
     def _calculate_phase_signal(interview: Interview, time_in_phase: float) -> str:
         """
         Calculate phase signal based on time constraints.
-        Returns: "keep_going", "end_if_you_want", or "must_end_now"
+        Returns: "keep_going", "wrap_up_soon", "end_if_you_want", or "must_end_now"
         """
         if interview.mode != "full":
             return "end_if_you_want"
@@ -289,12 +594,117 @@ def create_app() -> Flask:
         if max_minutes > 0.0 and time_in_phase >= max_minutes:
             return "must_end_now"
 
+        # Encourage wrap-up in resume after ~8 minutes
+        if interview.mode == "full" and current_phase == PHASE_INTRO_RESUME and time_in_phase >= 8.0:
+            return "wrap_up_soon"
+
         # Must continue if we haven't hit the minimum time
         if min_minutes > 0.0 and time_in_phase < min_minutes:
             return "keep_going"
 
         # In the allowed window - model can decide
         return "end_if_you_want"
+
+    def _get_coding_meta(interview: Interview) -> Dict[str, Any]:
+        return interview.report.setdefault("_phase_meta", {}).setdefault("coding", {})
+
+    def _get_coding_allowed_turns(interview: Interview) -> int:
+        meta = _get_coding_meta(interview)
+        allowed = meta.get("allowed_turns_after_pass")
+        if isinstance(allowed, int) and allowed > 0:
+            return allowed
+        return 10
+
+    def _get_coding_turns_since_pass(interview: Interview, conversation_len: int) -> Optional[int]:
+        evaluation = interview.code_evaluation or {}
+        if str(evaluation.get("status", "")).strip() != "pass":
+            return None
+        meta = _get_coding_meta(interview)
+        pass_turn_count = meta.get("pass_turn_count")
+        if not isinstance(pass_turn_count, int):
+            pass_turn_count = evaluation.get("pass_turn_count")
+        if not isinstance(pass_turn_count, int):
+            return None
+        projected_turns = (conversation_len // 2) + 1
+        return projected_turns - pass_turn_count
+
+    def _get_coding_turns_since_window(interview: Interview, conversation_len: int) -> Optional[int]:
+        meta = _get_coding_meta(interview)
+        start_turn = meta.get("improvement_window_start_turn")
+        if not isinstance(start_turn, int):
+            return None
+        projected_turns = (conversation_len // 2) + 1
+        return projected_turns - start_turn
+
+    def _should_allow_coding_end(interview: Interview, conversation_len: int) -> bool:
+        evaluation = interview.code_evaluation or {}
+        meta = _get_coding_meta(interview)
+        optimization = meta.get("optimization", {})
+        allowed_turns = _get_coding_allowed_turns(interview)
+        if optimization.get("status") == "needs_improvement":
+            turns_since_window = _get_coding_turns_since_window(interview, conversation_len)
+            if turns_since_window is not None and turns_since_window >= allowed_turns:
+                return True
+            turns_since_pass = _get_coding_turns_since_pass(interview, conversation_len)
+            if turns_since_pass is None or turns_since_pass < allowed_turns:
+                return False
+        if str(evaluation.get("status", "")).strip() != "pass":
+            return False
+        return True
+
+    def _should_allow_coding_end(interview: Interview, conversation_len: int) -> bool:
+        evaluation = interview.code_evaluation or {}
+        if str(evaluation.get("status", "")).strip() != "pass":
+            return False
+        meta = _get_coding_meta(interview)
+        optimization = meta.get("optimization", {})
+        if optimization.get("status") == "needs_improvement":
+            turns_since_pass = _get_coding_turns_since_pass(interview, conversation_len)
+            if turns_since_pass is None:
+                return False
+            if turns_since_pass < _get_coding_allowed_turns(interview):
+                return False
+        return True
+
+    def _build_coding_wrap_message(interview: Interview) -> str:
+        if interview.mode == "coding_only":
+            return f"Great work today. Thanks for your time.\n{PHASE_COMPLETE_TOKEN}"
+        return f"Great work on that problem. Let's move to your questions.\n{PHASE_COMPLETE_TOKEN}"
+
+    def _build_resume_wrap_message() -> str:
+        return f"Thanks for sharing your background. Let's move to a technical problem.\n{PHASE_COMPLETE_TOKEN}"
+
+    def _generate_report_with_fallback(interview: Interview) -> Dict[str, Any]:
+        client = get_llm_client(interview.model)
+        return client.generate_interview_report(
+            mode=interview.mode,
+            language=interview.language,
+            conversation=interview.conversation or [],
+            current_code=interview.current_code or "",
+            code_snapshots=interview.code_snapshots or [],
+            problem_presented=bool(interview.problem_presented),
+        )
+
+    def _has_final_report(report: Dict[str, Any]) -> bool:
+        if not isinstance(report, dict):
+            return False
+        required_keys = {
+            "overall_score",
+            "recommendation",
+            "summary",
+            "category_scores",
+            "strengths",
+            "improvements",
+            "notable_moments",
+        }
+        return any(key in report for key in required_keys)
+
+    def _report_payload(report: Dict[str, Any]) -> Dict[str, Any]:
+        if not _has_final_report(report):
+            return {}
+        payload = dict(report)
+        payload.pop("_phase_meta", None)
+        return payload
 
     def _apply_phase_completion(interview: Interview, phase_complete: bool) -> None:
         if interview.mode != "full":
@@ -641,6 +1051,37 @@ def create_app() -> Flask:
                 "interviewEnded": interview.status == "ended",
             })
 
+    @app.route("/api/interviews/<int:interview_id>/snapshot", methods=["GET"])
+    @login_required
+    def interview_snapshot(interview_id: int):
+        def _flatten_conversation(conversation: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+            flattened: List[Dict[str, str]] = []
+            for turn in conversation or []:
+                role = turn.get("role", "")
+                parts = turn.get("parts", [])
+                text = " ".join(
+                    part.get("text", "")
+                    for part in parts
+                    if isinstance(part, dict) and part.get("text")
+                ).strip()
+                if not text:
+                    continue
+                flattened.append({"role": role, "text": text})
+            return flattened
+
+        with _db() as db:
+            user = _ensure_logged_in(db)
+            interview = _load_interview(db, interview_id, user.id)
+            return jsonify({
+                "status": interview.status,
+                "mode": interview.mode,
+                "phase": interview.current_phase,
+                "language": interview.language,
+                "currentCode": interview.current_code or "",
+                "conversation": _flatten_conversation(list(interview.conversation or [])),
+                "report": _report_payload(interview.report or {}),
+            })
+
     @app.route("/api/interviews/<int:interview_id>/start", methods=["POST"])
     @login_required
     def start_interview(interview_id: int):
@@ -791,6 +1232,7 @@ def create_app() -> Flask:
                 "coding_question": interview.coding_question,
                 "code_evaluation": interview.code_evaluation,
                 "coding_summary": interview.coding_summary,
+                "optimization": (interview.report.get("_phase_meta", {}).get("coding", {}).get("optimization", {})),
                 "company_context": interview.company_context,
                 "ood_question": interview.ood_question,
                 "candidate_name": interview.candidate_name,
@@ -848,8 +1290,11 @@ def create_app() -> Flask:
                         )
                         should_run = fallback_hit or complete_hit or model_hit
                         should_rerun = fallback_hit or model_hit
+                        already_passing = str(existing_eval.get("status", "")).strip() == "pass"
                         can_run = should_run and (
-                            existing_eval.get("code_hash") != code_hash or not existing_eval or should_rerun
+                            existing_eval.get("code_hash") != code_hash
+                            or not existing_eval
+                            or (should_rerun and not already_passing)
                         )
                         if can_run:
                             test_spec = get_cached_tests(question_title)
@@ -865,12 +1310,22 @@ def create_app() -> Flask:
                                     test_run_time = time.perf_counter() - test_run_start
                                 if str(evaluation.get("status", "")).strip() == "pass":
                                     pass_turn_count = existing_eval.get("pass_turn_count")
-                                    if pass_turn_count is None:
+                                    if (
+                                        pass_turn_count is None
+                                        or existing_eval.get("code_hash") != code_hash
+                                        or str(existing_eval.get("status", "")).strip() != "pass"
+                                    ):
                                         pass_turn_count = len(conversation) // 2
                                     evaluation["pass_turn_count"] = pass_turn_count
                                 evaluation["code_hash"] = code_hash
                                 interview.code_evaluation = evaluation
                                 interview_state["code_evaluation"] = evaluation
+                                if str(evaluation.get("status", "")).strip() == "pass":
+                                    _maybe_update_optimization(
+                                        interview,
+                                        current_code,
+                                        len(conversation) // 2,
+                                    )
                                 logger.info(
                                     "[TEST RUN] phase=%s status=%s summary=%s",
                                     interview.current_phase,
@@ -920,18 +1375,35 @@ def create_app() -> Flask:
                 logger.error("[MODEL ERROR] %s", exc)
                 return jsonify({"error": str(exc)}), 500
 
+                reply_text = _apply_resume_prompt_guards(
+                    interview,
+                    reply_text,
+                    user_message,
+                    time_in_phase,
+                )
+                reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
+                reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))
+                if (
+                    interview.current_phase == PHASE_CODING
+                    and interview.mode == "full"
+                    and phase_signal == "must_end_now"
+                    and PHASE_COMPLETE_TOKEN not in reply_text
+                ):
+                    reply_text = _build_coding_wrap_message(interview)
+                if (
+                    interview.current_phase == PHASE_INTRO_RESUME
+                    and interview.mode == "full"
+                    and phase_signal == "must_end_now"
+                    and PHASE_COMPLETE_TOKEN not in reply_text
+                ):
+                    reply_text = _build_resume_wrap_message()
+
             phase_complete = False
             phase_before_transition = interview.current_phase
             phase_complete, reply_text = _extract_phase_complete(reply_text)
-            if interview.mode == "full" and interview.current_phase == PHASE_CODING:
-                evaluation = interview.code_evaluation or {}
-                if str(evaluation.get("status", "")).strip() == "pass":
-                    pass_turn_count = evaluation.get("pass_turn_count")
-                    if isinstance(pass_turn_count, int):
-                        projected_turns = (len(conversation) // 2) + 1
-                        turns_since_pass = projected_turns - pass_turn_count
-                        if turns_since_pass >= 10:
-                            phase_complete = True
+            if interview.current_phase == PHASE_CODING and phase_complete:
+                if not _should_allow_coding_end(interview, len(conversation)):
+                    phase_complete = False
             logger.info(
                 "[PHASE CHECK] phase=%s phase_complete=%s time_in_phase=%.1fm",
                 phase_before_transition,
@@ -968,19 +1440,10 @@ def create_app() -> Flask:
             if interview.mode in {"coding_only", "ood"}:
                 total_time = _calculate_total_time(interview)
                 if interview.mode == "coding_only":
-                    evaluation = interview.code_evaluation or {}
-                    if str(evaluation.get("status", "")).strip() == "pass":
-                        pass_turn_count = evaluation.get("pass_turn_count")
-                        if isinstance(pass_turn_count, int):
-                            projected_turns = (len(interview.conversation or []) // 2)
-                            turns_since_pass = projected_turns - pass_turn_count
-                            if turns_since_pass >= 10:
-                                interview.status = "ended"
-                                interview.ended_at = _now()
-                if interview.mode == "coding_only" and phase_complete:
-                    evaluation = interview.code_evaluation or {}
-                    if str(evaluation.get("status", "")).strip() == "pass":
-                        interview.status = "ended"
+                    if interview.mode == "coding_only" and phase_complete:
+                        evaluation = interview.code_evaluation or {}
+                        if str(evaluation.get("status", "")).strip() == "pass":
+                            interview.status = "ended"
                         interview.ended_at = _now()
                 if total_time >= 40.0:
                     interview.status = "ended"
@@ -1035,31 +1498,70 @@ def create_app() -> Flask:
             user = _ensure_logged_in(db)
             interview = _load_interview(db, interview_id, user.id)
 
+            logger.info("[REPORT] end_interview start interview_id=%s mode=%s status=%s", interview.id, interview.mode, interview.status)
             interview.status = "ended"
             interview.ended_at = _now()
 
             if interview.report:
+                if _has_final_report(interview.report):
+                    logger.info("[REPORT] end_interview using cached report interview_id=%s", interview.id)
+                    _set_updated(interview)
+                    db.commit()
+                    return jsonify({"report": _report_payload(interview.report), "cached": True})
+                logger.info("[REPORT] end_interview cached meta only interview_id=%s", interview.id)
                 _set_updated(interview)
                 db.commit()
-                return jsonify({"report": interview.report, "cached": True})
+                return jsonify({"report": _report_payload(interview.report), "cached": True})
 
             try:
-                client = get_llm_client(interview.model)
-                report = client.generate_interview_report(
-                    mode=interview.mode,
-                    language=interview.language,
-                    conversation=interview.conversation or [],
-                    current_code=interview.current_code or "",
-                    code_snapshots=interview.code_snapshots or [],
-                    problem_presented=bool(interview.problem_presented),
-                )
+                logger.info("[REPORT] end_interview generating report model=%s", interview.model)
+                report = _generate_report_with_fallback(interview)
+                logger.info("[REPORT] end_interview generated report keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
             except (ValueError, GeminiError, OpenAIError) as exc:
-                return jsonify({"error": str(exc)}), 500
+                logger.warning("[REPORT] primary generation failed model=%s err=%s", interview.model, exc)
+                report = None
+                if config.OPENAI_API_KEY:
+                    try:
+                        logger.info("[REPORT] end_interview fallback openai model=gpt-5.2")
+                        fallback = OpenAIClient(model="gpt-5.2")
+                        report = fallback.generate_interview_report(
+                            mode=interview.mode,
+                            language=interview.language,
+                            conversation=interview.conversation or [],
+                            current_code=interview.current_code or "",
+                            code_snapshots=interview.code_snapshots or [],
+                            problem_presented=bool(interview.problem_presented),
+                        )
+                        logger.info("[REPORT] end_interview openai fallback ok keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
+                    except Exception as fallback_exc:
+                        logger.warning("[REPORT] openai fallback failed err=%s", fallback_exc)
+                if report is None and config.GEMINI_API_KEY:
+                    try:
+                        logger.info("[REPORT] end_interview fallback gemini model=%s", config.GEMINI_MODEL)
+                        fallback = GeminiClient(model=config.GEMINI_MODEL)
+                        report = fallback.generate_interview_report(
+                            mode=interview.mode,
+                            language=interview.language,
+                            conversation=interview.conversation or [],
+                            current_code=interview.current_code or "",
+                            code_snapshots=interview.code_snapshots or [],
+                            problem_presented=bool(interview.problem_presented),
+                        )
+                        logger.info("[REPORT] end_interview gemini fallback ok keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
+                    except Exception as fallback_exc:
+                        logger.warning("[REPORT] gemini fallback failed err=%s", fallback_exc)
+                if report is None:
+                    return jsonify({"error": str(exc)}), 500
 
+            meta = {}
+            if isinstance(interview.report, dict):
+                meta = dict(interview.report.get("_phase_meta") or {})
+            if isinstance(report, dict) and meta:
+                report["_phase_meta"] = meta
             interview.report = report
             _set_updated(interview)
             db.commit()
-            return jsonify({"report": report, "cached": False})
+            return jsonify({"report": _report_payload(report), "cached": False})
 
     @app.route("/api/interviews/<int:interview_id>/report", methods=["POST"])
     @login_required
@@ -1069,25 +1571,60 @@ def create_app() -> Flask:
             interview = _load_interview(db, interview_id, user.id)
 
             if interview.report:
-                return jsonify({"report": interview.report, "cached": True})
+                if _has_final_report(interview.report):
+                    logger.info("[REPORT] interview_report cached interview_id=%s", interview.id)
+                    return jsonify({"report": _report_payload(interview.report), "cached": True})
+                logger.info("[REPORT] interview_report cached meta only interview_id=%s", interview.id)
 
             try:
-                client = get_llm_client(interview.model)
-                report = client.generate_interview_report(
-                    mode=interview.mode,
-                    language=interview.language,
-                    conversation=interview.conversation or [],
-                    current_code=interview.current_code or "",
-                    code_snapshots=interview.code_snapshots or [],
-                    problem_presented=bool(interview.problem_presented),
-                )
+                logger.info("[REPORT] interview_report generating model=%s interview_id=%s", interview.model, interview.id)
+                report = _generate_report_with_fallback(interview)
+                logger.info("[REPORT] interview_report generated keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
             except (ValueError, GeminiError, OpenAIError) as exc:
-                return jsonify({"error": str(exc)}), 500
+                logger.warning("[REPORT] primary generation failed model=%s err=%s", interview.model, exc)
+                report = None
+                if config.OPENAI_API_KEY:
+                    try:
+                        logger.info("[REPORT] interview_report fallback openai model=gpt-5.2 interview_id=%s", interview.id)
+                        fallback = OpenAIClient(model="gpt-5.2")
+                        report = fallback.generate_interview_report(
+                            mode=interview.mode,
+                            language=interview.language,
+                            conversation=interview.conversation or [],
+                            current_code=interview.current_code or "",
+                            code_snapshots=interview.code_snapshots or [],
+                            problem_presented=bool(interview.problem_presented),
+                        )
+                        logger.info("[REPORT] interview_report openai fallback ok keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
+                    except Exception as fallback_exc:
+                        logger.warning("[REPORT] openai fallback failed err=%s", fallback_exc)
+                if report is None and config.GEMINI_API_KEY:
+                    try:
+                        logger.info("[REPORT] interview_report fallback gemini model=%s interview_id=%s", config.GEMINI_MODEL, interview.id)
+                        fallback = GeminiClient(model=config.GEMINI_MODEL)
+                        report = fallback.generate_interview_report(
+                            mode=interview.mode,
+                            language=interview.language,
+                            conversation=interview.conversation or [],
+                            current_code=interview.current_code or "",
+                            code_snapshots=interview.code_snapshots or [],
+                            problem_presented=bool(interview.problem_presented),
+                        )
+                        logger.info("[REPORT] interview_report gemini fallback ok keys=%s", list(report.keys()) if isinstance(report, dict) else "invalid")
+                    except Exception as fallback_exc:
+                        logger.warning("[REPORT] gemini fallback failed err=%s", fallback_exc)
+                if report is None:
+                    return jsonify({"error": str(exc)}), 500
 
+            meta = {}
+            if isinstance(interview.report, dict):
+                meta = dict(interview.report.get("_phase_meta") or {})
+            if isinstance(report, dict) and meta:
+                report["_phase_meta"] = meta
             interview.report = report
             _set_updated(interview)
             db.commit()
-            return jsonify({"report": report, "cached": False})
+            return jsonify({"report": _report_payload(report), "cached": False})
 
     @app.route("/api/transition_phase", methods=["POST"])
     @login_required

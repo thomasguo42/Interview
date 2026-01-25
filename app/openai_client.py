@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+import time
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from requests import RequestException
@@ -233,6 +234,51 @@ class OpenAIClient:
         report["rubric_details"] = rubric_details
         return report
 
+    def evaluate_code_optimization(
+        self,
+        question: Dict[str, Any],
+        language: str,
+        code: str,
+    ) -> Dict[str, Any]:
+        system_prompt = (
+            "You are a senior software engineer reviewing a candidate solution. "
+            "Determine whether the solution is asymptotically optimal for the problem. "
+            "Return STRICT JSON only."
+        )
+
+        question_title = str(question.get("title", "") or "").strip()
+        difficulty = str(question.get("difficulty", "") or "").strip()
+        signature = ""
+        signatures = question.get("signatures") if isinstance(question, dict) else None
+        if isinstance(signatures, dict):
+            signature = str(signatures.get(language, "") or "").strip()
+
+        prompt = (
+            "Evaluate the solution's optimality.\n\n"
+            f"Problem title: {question_title or 'Unknown'}\n"
+            f"Difficulty: {difficulty or 'Unknown'}\n"
+            f"Required signature: {signature or 'Unknown'}\n"
+            f"Language: {language}\n\n"
+            "Candidate code:\n"
+            f"```{language}\n{code}\n```\n\n"
+            "Return JSON with EXACTLY this structure:\n"
+            '{\n  "optimized": true | false,\n  "feedback": "1-2 sentences, concrete and actionable"\n}\n'
+            "Rules:\n"
+            "- optimized=true only if time/space complexity is asymptotically optimal\n"
+            "- If constraints are unclear, use standard interview expectations\n"
+            "- Do NOT include any extra fields or commentary\n"
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        response_text = self._post_messages(messages, max_tokens=300, temperature=0.1, top_p=1.0)
+        parsed = self._builder._parse_json_from_text(response_text)
+        if not isinstance(parsed, dict) or "optimized" not in parsed:
+            raise OpenAIError(f"Invalid optimization payload: {response_text}")
+        return parsed
+
     def _post_for_text(
         self,
         gemini_payload: Dict[str, Any],
@@ -270,13 +316,18 @@ class OpenAIClient:
         temperature: float,
         top_p: float,
     ) -> str:
-        payload = {
+        payload: Dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "max_tokens": max_tokens,
             "temperature": temperature,
             "top_p": top_p,
         }
+
+        model_name = str(self.model or "")
+        if model_name.startswith("gpt-5"):
+            payload["max_completion_tokens"] = max_tokens
+        else:
+            payload["max_tokens"] = max_tokens
 
         try:
             response = requests.post(
@@ -303,3 +354,113 @@ class OpenAIClient:
             logging.error("Unexpected OpenAI API payload: %s", data)
             raise OpenAIError("OpenAI API returned an unexpected payload") from exc
         return (content or "").strip()
+
+
+class OpenAIRealtimeClient(OpenAIClient):
+    WS_URL_TEMPLATE = "wss://api.openai.com/v1/realtime?model={model}"
+
+    def _post_messages(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        instructions, input_items = self._messages_to_realtime_input(messages)
+        if not input_items:
+            raise OpenAIError("Realtime request requires at least one user message.")
+
+        response_event = {
+            "type": "response.create",
+            "response": {
+                "conversation": "none",
+                "output_modalities": ["text"],
+                "instructions": instructions,
+                "input": input_items,
+                "max_output_tokens": max_tokens,
+            },
+        }
+
+        try:
+            import websocket  # type: ignore
+        except ImportError as exc:
+            raise OpenAIError(
+                "websocket-client is required for OpenAI Realtime API support. "
+                "Install it with `pip install websocket-client`."
+            ) from exc
+
+        url = self.WS_URL_TEMPLATE.format(model=self.model)
+        headers = [f"Authorization: Bearer {self.api_key}"]
+
+        try:
+            ws = websocket.create_connection(url, header=headers, timeout=30)
+        except Exception as exc:
+            raise OpenAIError(f"Failed to connect to OpenAI Realtime API: {exc}") from exc
+
+        collected: List[str] = []
+        last_event_time = time.time()
+        try:
+            ws.send(json.dumps({"type": "session.update", "session": {"type": "realtime"}}))
+            ws.send(json.dumps(response_event))
+
+            while True:
+                raw = ws.recv()
+                if not raw:
+                    if time.time() - last_event_time > 10:
+                        break
+                    continue
+                last_event_time = time.time()
+                try:
+                    event = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+
+                event_type = event.get("type")
+                if event_type == "response.output_text.delta":
+                    delta = event.get("delta") or ""
+                    if delta:
+                        collected.append(delta)
+                elif event_type == "response.output_text.done":
+                    break
+                elif event_type == "response.done":
+                    if collected:
+                        break
+                elif event_type == "error":
+                    error_payload = event.get("error") or {}
+                    message = error_payload.get("message") or str(error_payload) or "Unknown error"
+                    raise OpenAIError(f"OpenAI Realtime error: {message}")
+        except Exception as exc:
+            raise OpenAIError(f"OpenAI Realtime request failed: {exc}") from exc
+        finally:
+            try:
+                ws.close()
+            except Exception:
+                pass
+
+        return "".join(collected).strip()
+
+    @staticmethod
+    def _messages_to_realtime_input(
+        messages: List[Dict[str, str]],
+    ) -> Tuple[str, List[Dict[str, Any]]]:
+        instructions = ""
+        input_items: List[Dict[str, Any]] = []
+        for message in messages:
+            role = message.get("role")
+            content = (message.get("content") or "").strip()
+            if not content:
+                continue
+            if role == "system":
+                instructions = content
+                continue
+            if role not in {"user", "assistant"}:
+                continue
+            content_type = "input_text" if role == "user" else "output_text"
+            input_items.append(
+                {
+                    "type": "message",
+                    "role": role,
+                    "content": [{"type": content_type, "text": content}],
+                }
+            )
+        return instructions, input_items

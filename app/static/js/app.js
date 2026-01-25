@@ -458,6 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastSyncedCode = "";
   let lastSpeechTime = Date.now();
   let problemStatementSet = false; // Track if initial problem is set
+  let pendingSnapshotCode = "";
   let problemUpdatesCount = 0; // Track number of updates
   let starterCode = "";
   let starterCodeApplied = false;
@@ -864,6 +865,37 @@ async function fetchStatus() {
   }
 }
 
+async function loadInterviewSnapshot() {
+  if (!interviewId) return;
+  try {
+    const response = await fetch(`/api/interviews/${interviewId}/snapshot`, {
+      method: "GET",
+      credentials: "same-origin",
+    });
+    if (!response.ok) throw new Error("Failed to fetch interview snapshot");
+    const data = await response.json();
+
+    if (Array.isArray(data.conversation) && data.conversation.length) {
+      elements.conversationLog.innerHTML = "";
+      data.conversation.forEach(entry => {
+        const role = entry.role === "model" ? "model" : "user";
+        const speaker = role === "model" ? "Interviewer" : "You";
+        appendMessage(speaker, entry.text, role);
+      });
+    }
+
+    if (data.report && Object.keys(data.report).length) {
+      renderInterviewReport(data.report);
+    }
+
+    if (typeof data.currentCode === "string" && data.currentCode.trim()) {
+      pendingSnapshotCode = data.currentCode;
+    }
+  } catch (error) {
+    console.warn("Snapshot load failed:", error);
+  }
+}
+
 // Enable start button for coding-only mode even without resume
 function updateStartButtonForMode() {
   const modeRadio = document.querySelector('input[name="interview-mode"]:checked');
@@ -1038,6 +1070,9 @@ elements.startButton?.addEventListener("click", async () => {
     if (data.mode === "ood") {
       console.log("OOD MODE - initializing unified OOD code editor");
       await initializeOodCodeEditor(data.language);
+      if (pendingSnapshotCode && oodMonacoEditor) {
+        oodMonacoEditor.setValue(pendingSnapshotCode);
+      }
       // Show OOD workspace
       elements.oodWorkspace.style.display = "block";
       // Hide regular code editor and problem panel
@@ -1047,6 +1082,9 @@ elements.startButton?.addEventListener("click", async () => {
       // Initialize Monaco Editor FIRST (before updatePhaseUI)
       await initializeMonacoEditor(data.language);
       console.log("Monaco Editor initialized");
+      if (pendingSnapshotCode && monacoEditor) {
+        monacoEditor.setValue(pendingSnapshotCode);
+      }
       applyStarterCodeIfEmpty();
 
       // Hide OOD workspace
@@ -1809,10 +1847,15 @@ async function fetchInterviewReport() {
       credentials: "same-origin",
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Failed to fetch report");
+    if (!response.ok) {
+      const err = (data && data.error) ? data.error : "Failed to fetch report";
+      appendSystemMessage(`Failed to fetch report: ${err}`);
+      throw new Error(err);
+    }
     renderInterviewReport(data.report);
   } catch (error) {
     console.error("Report error:", error);
+    setStatus("Failed to fetch interview report. Check server logs.", "error");
   }
 }
 
@@ -2130,6 +2173,6 @@ async function initializeOodCodeEditor(language) {
 }
 
 // Initialize app
-fetchStatus();
+loadInterviewSnapshot().finally(fetchStatus);
 
 }); // End of DOMContentLoaded event listener

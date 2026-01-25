@@ -437,6 +437,7 @@ class GeminiClient:
         coding_question = interview_state.get("coding_question")
         code_evaluation = interview_state.get("code_evaluation") or {}
         coding_summary = interview_state.get("coding_summary") or {}
+        optimization = interview_state.get("optimization") or {}
         candidate_name = str(interview_state.get("candidate_name") or "")
 
         normalized_code = self._normalize_editor_code(current_code)
@@ -461,6 +462,7 @@ class GeminiClient:
             coding_question,
             code_evaluation,
             coding_summary,
+            optimization,
         )
 
         # Build conversation payload (limit to current phase turns)
@@ -811,13 +813,14 @@ class GeminiClient:
         coding_question: Optional[Dict[str, Any]] = None,
         code_evaluation: Optional[Dict[str, Any]] = None,
         coding_summary: Optional[Dict[str, Any]] = None,
+        optimization: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build phase-specific system prompt"""
 
         # Base prompt - applies to all phases
         if mode == "coding_only":
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE coding interview.
-This is a CODING-ONLY session (35-40 minutes) - no intro, no resume discussion, just pure technical problem-solving.
+This is a CODING-ONLY session (35-40 minutes). Jump straight into the problem.
 
 🎯 SPEECH OUTPUT - THIS IS CRITICAL:
 Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
@@ -845,11 +848,13 @@ Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
 - Vary your phrasing - avoid repetitive patterns
 - Never do long step-by-step simulations or traces out loud
 - If you must reference a case, summarize in 1-2 sentences
+- Do NOT repeat the same question over and over; rephrase once, then move on
+- Do NOT get stuck on one question or one experience for too long
 
 """
         else:
             base_prompt = """You are a senior software engineer conducting a LIVE VOICE technical interview.
-This is a single-phase session. You ONLY handle the current phase and do NOT know later phases.
+This is a single-context session. You ONLY handle the current context and do NOT assume anything beyond it.
 
 🎯 SPEECH OUTPUT - THIS IS CRITICAL:
 Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
@@ -877,13 +882,15 @@ Your responses will be SPOKEN ALOUD by a text-to-speech system to the candidate.
 - Vary your phrasing - avoid repetitive patterns
 - Never do long step-by-step simulations or traces out loud
 - If you must reference a case, summarize in 1-2 sentences
+- Do NOT repeat the same question over and over; rephrase once, then move on
+- Do NOT get stuck on one question or one experience for too long
 
 """
 
         # Interview structure context
         if mode == "coding_only":
             structure = f"""SESSION TYPE: CODING-ONLY MODE (35-40 minutes)
-You skip all intro and resume discussion. Jump STRAIGHT to presenting a coding problem.
+Present a coding problem immediately and keep the conversation focused on solving it.
 
 CURRENT STATE:
 - Time elapsed: {total_time:.1f} minutes
@@ -905,11 +912,10 @@ CURRENT STATE:
             min_minutes = phase_min.get(current_phase, 0.0)
             max_minutes = phase_max.get(current_phase, 0.0)
             remaining = max(0.0, max_minutes - time_in_phase) if max_minutes else 0.0
-            structure = f"""CURRENT PHASE CONTEXT:
-- Phase: {current_phase.upper()}
-- Minutes elapsed in this phase: {time_in_phase:.1f}
-- Minutes remaining in this phase: {remaining:.1f}
-- Minimum minutes before ending this phase: {min_minutes:.1f}
+            structure = f"""CURRENT CONTEXT:
+- Minutes elapsed in this segment: {time_in_phase:.1f}
+- Minutes remaining in this segment: {remaining:.1f}
+- Minimum minutes before ending this segment: {min_minutes:.1f}
 - Seconds since candidate spoke: {silence_duration:.0f}s
 - Seconds since code changed: {code_idle_duration:.0f}s
 
@@ -918,8 +924,7 @@ CURRENT STATE:
             structure = f"""SESSION TYPE: OOD MODE (40 minutes total)
 
 CURRENT STATE:
-- Phase: {current_phase.upper()}
-- Time in this phase: {time_in_phase:.1f} minutes
+- Time in this segment: {time_in_phase:.1f} minutes
 - Total interview time: {total_time:.1f} minutes
 - Seconds since candidate spoke: {silence_duration:.0f}s
 - Seconds since code changed: {code_idle_duration:.0f}s
@@ -957,11 +962,11 @@ CURRENT STATE:
             if phase_signal == "keep_going":
                 ending_instructions = """
 ═══════════════════════════════════════════════════════════════════
-PHASE CONTINUATION - DO NOT END YET
+CONTINUE THE DISCUSSION - DO NOT END YET
 ═══════════════════════════════════════════════════════════════════
-The current phase signal is: "keep_going"
+The current signal is: "keep_going"
 
-This means you MUST continue the resume discussion. DO NOT end this phase yet.
+This means you MUST continue the resume discussion. DO NOT end this discussion yet.
 
 WHAT YOU MUST DO:
 ✓ Continue asking questions about their resume and experience
@@ -970,23 +975,46 @@ WHAT YOU MUST DO:
 ✓ Stay engaged and curious about their background
 
 WHAT YOU MUST NOT DO:
-✗ Do NOT say anything about moving to the next phase
-✗ Do NOT say "let's move on to coding"
-✗ Do NOT append [PHASE_COMPLETE] token
+✗ Do NOT mention any upcoming activities
+✗ Do NOT say "let's move on"
+✗ Do NOT append [SECTION_COMPLETE]
 ✗ Do NOT wrap up or conclude the conversation
-✗ Do NOT present any coding problems
+✗ Do NOT present any programming problems
 
 CONTINUE THE CONVERSATION by asking another relevant question about their experience.
+═══════════════════════════════════════════════════════════════════
+"""
+            elif phase_signal == "wrap_up_soon":
+                ending_instructions = """
+═══════════════════════════════════════════════════════════════════
+WRAP UP SOON - PLAN TO END
+═══════════════════════════════════════════════════════════════════
+The current signal is: "wrap_up_soon"
+
+This means you should START WRAPPING UP within the next 2-3 turns.
+
+WHAT YOU MUST DO:
+✓ Ask at most one more focused question
+✓ Avoid starting new long topics
+✓ Prepare to end the discussion naturally
+
+WHAT YOU MUST NOT DO:
+✗ Do NOT repeat prior questions
+✗ Do NOT introduce new deep topics
+✗ Do NOT append [SECTION_COMPLETE] in this response unless it already feels complete
+
+NEXT STEP:
+- If their answer is sufficient, end the discussion on your next turn with [SECTION_COMPLETE]
 ═══════════════════════════════════════════════════════════════════
 """
             elif phase_signal == "must_end_now":
                 ending_instructions = """
 ═══════════════════════════════════════════════════════════════════
-PHASE ENDING - YOU MUST END NOW
+ENDING NOW - YOU MUST END
 ═══════════════════════════════════════════════════════════════════
-The current phase signal is: "must_end_now"
+The current signal is: "must_end_now"
 
-This means you MUST end this phase immediately in your next response.
+This means you MUST end this discussion immediately in your next response.
 
 WHAT YOU MUST DO RIGHT NOW:
 1. Provide a brief transition sentence (OPTIONAL, one sentence max):
@@ -994,47 +1022,47 @@ WHAT YOU MUST DO RIGHT NOW:
    Example: "Great, I have a good sense of your experience."
 
 2. IMMEDIATELY append this exact token on a NEW line:
-   [PHASE_COMPLETE]
+   [SECTION_COMPLETE]
 
 EXAMPLE RESPONSE FORMAT:
 "Thanks for walking me through your experience.
-[PHASE_COMPLETE]"
+[SECTION_COMPLETE]"
 
 OR simply:
-"[PHASE_COMPLETE]"
+"[SECTION_COMPLETE]"
 
 CRITICAL RULES:
-✓ The [PHASE_COMPLETE] token MUST be on its own line
-✓ You MUST include [PHASE_COMPLETE] in this response
+✓ The [SECTION_COMPLETE] token MUST be on its own line
+✓ You MUST include [SECTION_COMPLETE] in this response
 ✓ Do NOT ask any more questions
 ✓ Do NOT continue the resume discussion
 ✓ Keep any transition text to ONE sentence maximum
 
-DO THIS NOW - END THE PHASE.
+DO THIS NOW - END THE DISCUSSION.
 ═══════════════════════════════════════════════════════════════════
 """
             else:  # end_if_you_want
                 ending_instructions = """
 ═══════════════════════════════════════════════════════════════════
-PHASE ENDING - OPTIONAL (YOUR CHOICE)
+ENDING - OPTIONAL (YOUR CHOICE)
 ═══════════════════════════════════════════════════════════════════
-The current phase signal is: "end_if_you_want"
+The current signal is: "end_if_you_want"
 
-This means you have the CHOICE to either continue OR end this phase based on the conversation flow.
+This means you have the CHOICE to either continue OR end this discussion based on the conversation flow.
 
-OPTION 1: CONTINUE THE PHASE
+OPTION 1: CONTINUE THE DISCUSSION
 If you feel there are still important topics to cover about their resume:
 ✓ Ask another question about their experience
 ✓ Follow up on something they mentioned
 ✓ Explore their technical background more deeply
-✓ Do NOT append [PHASE_COMPLETE]
+✓ Do NOT append [SECTION_COMPLETE]
 
-OPTION 2: END THE PHASE
+OPTION 2: END THE DISCUSSION
 If you feel you've adequately covered their background and experience:
 1. Optionally say a brief transition (one sentence max):
    Example: "Thanks, I have a good sense of your background."
 2. APPEND this exact token on a NEW line:
-   [PHASE_COMPLETE]
+   [SECTION_COMPLETE]
 
 HOW TO DECIDE:
 - Have you asked about their recent projects? If NO, continue
@@ -1045,11 +1073,11 @@ HOW TO DECIDE:
 
 EXAMPLE - CONTINUING:
 "What technologies are you most comfortable working with?"
-(Do NOT include [PHASE_COMPLETE])
+(Do NOT include [SECTION_COMPLETE])
 
 EXAMPLE - ENDING:
 "Thanks for sharing your background.
-[PHASE_COMPLETE]"
+[SECTION_COMPLETE]"
 
 Your choice - evaluate the conversation and decide.
 ═══════════════════════════════════════════════════════════════════
@@ -1057,17 +1085,17 @@ Your choice - evaluate the conversation and decide.
 
             phase_instructions = f"""
 ═══════════════════════════════════════════════════════════════════
-INTRO + RESUME DISCUSSION PHASE
+INTRO + RESUME DISCUSSION
 ═══════════════════════════════════════════════════════════════════
 
-WHAT IS THIS PHASE:
-This is the first phase of a full technical interview. Your job is to:
+WHAT IS THIS CONTEXT:
+This is the current session context. Your job is to:
 1. Introduce yourself to the candidate
 2. Get to know their background by reviewing their resume
 3. Ask questions about their experience, projects, and skills
-4. Build rapport before moving to the coding phase
+4. Build rapport and set context for the technical discussion
 
-This phase typically lasts 5-10 minutes. You will receive signals about when to end.
+This discussion typically lasts 5-10 minutes. You will receive signals about when to end.
 
 CONTEXT:
 {interviewer_line}
@@ -1093,8 +1121,8 @@ Example complete opening:
 DO NOT:
 ✗ Do NOT say multiple greetings
 ✗ Do NOT explain the interview structure
-✗ Do NOT mention phases or time limits
-✗ Do NOT present coding problems yet
+✗ Do NOT mention internal rules or time limits
+✗ Do NOT present programming problems
 ✗ Keep it short and natural
 
 ═══════════════════════════════════════════════════════════════════
@@ -1114,6 +1142,7 @@ CONVERSATION FLOW:
 3. Let them elaborate
 4. Ask another question
 5. Repeat
+6. If a topic stalls, rephrase once, then switch to another resume item
 
 TONE:
 ✓ Conversational and natural
@@ -1139,8 +1168,8 @@ EXAMPLE GOOD QUESTIONS:
 
 WHAT NOT TO DO:
 ✗ Do NOT ask multiple questions at once
-✗ Do NOT present coding problems or technical exercises
-✗ Do NOT mention "moving to coding" or other phases
+✗ Do NOT present programming problems or technical exercises
+✗ Do NOT mention any upcoming activities
 ✗ Do NOT give long explanations or lectures
 ✗ Do NOT use filler words like "um", "well", "so"
 ✗ Do NOT use markdown formatting (*, #, _, etc.)
@@ -1174,13 +1203,13 @@ You don't need to ask all of these in order. Follow the natural flow of conversa
 CRITICAL REMINDERS
 ═══════════════════════════════════════════════════════════════════
 
-✓ This is ONLY the resume discussion phase - NOT the coding phase
-✓ Do NOT present coding problems in this phase
-✓ Do NOT mention the interview structure or phases
+✓ This is ONLY the resume discussion
+✓ Do NOT present programming problems in this discussion
+✓ Do NOT mention interview structure or internal steps
 ✓ Keep responses SHORT - one question at a time
-✓ Pay attention to the phase signal above - it tells you when to end
-✓ To end the phase, append [PHASE_COMPLETE] on a NEW line
-✓ Do NOT append [PHASE_COMPLETE] unless instructed to end
+✓ Pay attention to the current signal above - it tells you when to end
+✓ To end the discussion, append [SECTION_COMPLETE] on a NEW line
+✓ Do NOT append [SECTION_COMPLETE] unless instructed to end this discussion
 
 ═══════════════════════════════════════════════════════════════════
 """
@@ -1197,37 +1226,25 @@ CRITICAL REMINDERS
             else:
                 name_line = f"Candidate name: {candidate_name}" if candidate_name else "Candidate name: [unknown]"
 
-            # Only show code editor in final 2 minutes when tests are failing
+            # Always show code; write access only in final 2 minutes if tests are failing
             max_phase_time = 30.0
             time_remaining = max(0.0, max_phase_time - time_in_phase)
             tests_passing = (code_evaluation and str(code_evaluation.get("status", "")).strip() == "pass")
-            show_code_editor = (time_remaining <= 2.0 and not tests_passing)
+            can_write_code = (time_remaining <= 2.0 and not tests_passing)
 
-            if show_code_editor:
-                # Show code without markdown formatting (model should not output markdown)
-                if current_code.strip():
-                    code_display = f"\n=== CURRENT CODE IN EDITOR ===\n{current_code}\n=== END OF CODE ===\n"
-                else:
-                    code_display = "\n=== CURRENT CODE IN EDITOR ===\n[No code written yet]\n=== END OF CODE ===\n"
+            # Show code without markdown formatting (model should not output markdown)
+            if current_code.strip():
+                code_display = f"\n=== CURRENT CODE IN EDITOR ===\n{current_code}\n=== END OF CODE ===\n"
+            else:
+                code_display = "\n=== CURRENT CODE IN EDITOR ===\n[No code written yet]\n=== END OF CODE ===\n"
 
-                visibility_instructions = f"""CODE VISIBILITY & EDITOR ACCESS (EMERGENCY MODE):
+            visibility_instructions = f"""CODE VISIBILITY & EDITOR ACCESS:
 - Time remaining: {time_remaining:.1f} minutes
 - Tests status: {"PASSING" if tests_passing else "FAILING"}
-- You now have access to their code editor because time is almost up and they haven't solved it
-- The snapshot between the 'CURRENT CODE IN EDITOR' markers above is EXACTLY what the candidate has typed.
-- Since time is running out, you MAY write code to help them finish
-- To write code, use: [CODE_START]...code...[CODE_END]
-
-"""
-            else:
-                code_display = ""
-                visibility_instructions = f"""CODE EDITOR ACCESS:
-- You do NOT have access to the candidate's code editor
-- Time remaining: {time_remaining:.1f} minutes (Editor access unlocks at 2 minutes remaining if tests failing)
-- NEVER say things like "I can see your code" or "Looking at your editor" - you CANNOT see it
-- When they ask about their code, say: "Walk me through what you have so far" or "Describe your approach"
-- Guide them with questions and conceptual hints only
-- You CANNOT write code to their editor at this time
+- You can SEE the code at all times, but you CANNOT write or edit it
+- The snapshot between the 'CURRENT CODE IN EDITOR' markers above is EXACTLY what the candidate has typed
+- Only if time remaining <= 2 minutes AND tests are failing, you MAY write code to help
+- To write code (only when allowed), use: [CODE_START]...code...[CODE_END]
 
 """
 
@@ -1253,18 +1270,39 @@ CRITICAL REMINDERS
                         )
                     evaluation_block += "Use this only to guide your feedback.\n\n"
 
+            optimization_block = ""
+            if optimization:
+                opt_status = str(optimization.get("status", "")).strip()
+                opt_feedback = str(optimization.get("feedback", "")).strip()
+                if opt_status:
+                    optimization_block = (
+                        "OPTIMIZATION REVIEW (DO NOT MENTION THIS LABEL):\n"
+                        f"- Status: {opt_status}\n"
+                    )
+                    if opt_feedback:
+                        optimization_block += f"- Feedback: {opt_feedback}\n"
+                    if opt_status == "needs_improvement":
+                        optimization_block += (
+                            "Guidance: Ask for improvements and tradeoffs. Push them to optimize.\n"
+                        )
+                    elif opt_status == "optimized":
+                        optimization_block += (
+                            "Guidance: The solution is optimized. Wrap up in a few turns.\n"
+                        )
+                    optimization_block += "Use this only to guide your feedback.\n\n"
+
             # Build phase ending instructions based on signal
             if phase_signal == "must_end_now":
-                timing_block = """PHASE ENDING - TIME IS UP:
-- You MUST end this phase now
+                timing_block = """ENDING NOW - TIME IS UP:
+- You MUST end now
 - Provide brief closing remarks if needed
-- Append this token on a NEW line: [PHASE_COMPLETE]
+- Append this token on a NEW line: [SECTION_COMPLETE]
 
 """
             else:  # end_if_you_want (coding has no minimum time)
-                timing_block = """PHASE ENDING:
+                timing_block = """ENDING:
 - You can end when the coding problem is complete and tests pass
-- To end, append this token on a NEW line: [PHASE_COMPLETE]
+- To end, append this token on a NEW line: [SECTION_COMPLETE]
 - Do NOT end if tests are still failing (unless time runs out)
 
 """
@@ -1273,14 +1311,14 @@ CRITICAL REMINDERS
                 completion_window = """AFTER TESTS PASS:
 - End the interview within 10 turns
 - Ask at most 1-2 brief wrap-up questions
-- Then append [PHASE_COMPLETE] on a NEW line
+- Then append [SECTION_COMPLETE] on a NEW line
 
 """
             elif mode == "full":
                 completion_window = """AFTER TESTS PASS:
-- End this phase within 10 turns
+- Wrap up within 10 turns
 - Ask at most 1-2 brief wrap-up questions
-- Then append [PHASE_COMPLETE] on a NEW line
+- Then append [SECTION_COMPLETE] on a NEW line
 
 """
 
@@ -1308,7 +1346,7 @@ CRITICAL REMINDERS
                     phase_instructions = f"""CODING-ONLY MODE - PRESENT PROBLEM IMMEDIATELY:
 
 LANGUAGE: {language_display}
-{completion_window}{code_display}{visibility_instructions}{evaluation_block}
+{completion_window}{code_display}{visibility_instructions}{evaluation_block}{optimization_block}
 {selected_question_block}
 
 WHEN CANDIDATE GREETS YOU:
@@ -1325,6 +1363,7 @@ WHEN CANDIDATE GREETS YOU:
 AFTER THEY UNDERSTAND:
 - Guide approach discussion BEFORE coding
 - Short prompts: "What's your approach?" "What about edge cases?" "Time complexity?"
+- Do NOT repeat the same question; rephrase once, then switch to a different probe
 
 ═══════════════════════════════════════════════════════════════════
 STRICT NO-SOLUTION POLICY - READ CAREFULLY:
@@ -1337,7 +1376,7 @@ ABSOLUTELY FORBIDDEN - DO NOT:
 ❌ Suggest data structures: "What about using a heap?" "Maybe try a set?"
 ❌ Give complexity hints: "This needs to be O(n)" "You need O(1) lookup"
 ❌ Explain solutions: "The trick is to..." "The key insight is..." "You should..."
-❌ Write ANY code (you don't have editor access anyway)
+❌ Write ANY code (you do not have write access)
 ❌ Say "good idea" or validate their approach (unless it's actually correct)
 
 WHAT YOU CAN DO:
@@ -1361,11 +1400,11 @@ REMEMBER: Struggling IS the interview. Let them struggle.
 
 DEFAULT: 1-2 sentence responses. Let them work."""
                 else:
-                    phase_instructions = f"""CODING PHASE - PROBLEM PRESENTATION STAGE:
+                    phase_instructions = f"""CODING SESSION - PROBLEM PRESENTATION:
 
 {name_line}
 LANGUAGE: {language_display}
-{timing_block}{completion_window}{code_display}{visibility_instructions}{evaluation_block}
+{timing_block}{completion_window}{code_display}{visibility_instructions}{evaluation_block}{optimization_block}
 {selected_question_block}
 
 YOUR TASK NOW:
@@ -1388,6 +1427,7 @@ YOUR TASK NOW:
    - Make them explain their approach
    - Ask about edge cases
    - Discuss time/space complexity
+   - Do NOT repeat the same question; rephrase once, then switch to a different probe
 
 ═══════════════════════════════════════════════════════════════════
 STRICT NO-SOLUTION POLICY - READ CAREFULLY:
@@ -1400,7 +1440,7 @@ ABSOLUTELY FORBIDDEN - DO NOT:
 ❌ Suggest data structures: "What about using a heap?" "Maybe try a set?"
 ❌ Give complexity hints: "This needs to be O(n)" "You need O(1) lookup"
 ❌ Explain solutions: "The trick is to..." "The key insight is..." "You should..."
-❌ Write ANY code unless you have editor access (see editor access policy above)
+❌ Write ANY code unless you have write access (see editor access policy above)
 ❌ Say "good idea" or validate their approach (unless it's actually correct)
 
 WHAT YOU CAN DO:
@@ -1421,8 +1461,8 @@ IF THEY BEG FOR THE ANSWER:
 - "Let's think through it together - where would you start?"
 
 IF THEY ASK YOU TO WRITE CODE:
-- Before 28 minutes: "I can't write code for you - keep working on it"
-- After 28 minutes with failing tests: You'll gain editor access and can write code
+- "I can see your code, but I can't write for you"
+- Only in the last 2 minutes with failing tests can you write code
 
 REMEMBER: Struggling IS the interview. Let them struggle. Silence is okay.
 ═══════════════════════════════════════════════════════════════════
@@ -1430,11 +1470,11 @@ REMEMBER: Struggling IS the interview. Let them struggle. Silence is okay.
 REMEMBER: After presenting, I will mark problem as presented."""
 
             else:
-                phase_instructions = f"""CODING PHASE - ACTIVE SOLVING:
+                phase_instructions = f"""CODING SESSION - ACTIVE SOLVING:
 
 {name_line}
 LANGUAGE: {language_display}
-{timing_block}{completion_window}{code_display}{visibility_instructions}{evaluation_block}
+{timing_block}{completion_window}{code_display}{visibility_instructions}{evaluation_block}{optimization_block}
 
 ═══════════════════════════════════════════════════════════════════
 STRICT NO-SOLUTION POLICY - READ CAREFULLY:
@@ -1456,6 +1496,7 @@ WHAT YOU CAN DO:
 ✅ Listen: Stay quiet and let them code
 ✅ Acknowledge: "Okay" "I see" "Keep going"
 ✅ Check in: "How's it going?" (every 2-3 minutes)
+✅ Vary your questions; rephrase once if needed, then move on
 
 CODE EDITOR ACCESS:
 {visibility_instructions.strip()}
@@ -1476,17 +1517,17 @@ IF THEY'RE SILENT/STUCK:
 - Don't rescue them immediately
 
 IF TIME REMAINING <= 2 MINUTES AND TESTS FAILING:
-- You now have editor access (see above)
+- You now have write access (see above)
 - You MAY write code using [CODE_START]...[CODE_END]
 - Format: "Let me show you. [CODE_START]...code...[CODE_END] This uses..."
 
 PROBLEM SWITCH REQUESTS:
 - "We need to finish this problem" or "Let's stick with this one"
-- Do NOT end the phase when they ask to switch
+- Do NOT end when they ask to switch
 
-ENDING THIS PHASE:
+ENDING NOW:
 - ONLY end if: (1) Tests pass, OR (2) Time is up (30 minutes)
-- Append [PHASE_COMPLETE] on a NEW line when ending
+- Append [SECTION_COMPLETE] on a NEW line when ending
 
 REMEMBER: Struggling IS the interview. Silence is okay. Let them work.
 ═══════════════════════════════════════════════════════════════════
@@ -1494,48 +1535,21 @@ REMEMBER: Struggling IS the interview. Silence is okay. Let them work.
 
         elif current_phase == state.PHASE_QUESTIONS:
             resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
-            summary_lines: List[str] = []
-            if coding_question:
-                title = str(coding_question.get("title", "")).strip()
-                if title:
-                    summary_lines.append(f"- Coding question: {title}")
-                difficulty = str(coding_question.get("difficulty", "")).strip()
-                if difficulty:
-                    summary_lines.append(f"- Difficulty: {difficulty}")
-            if coding_summary:
-                status = str(coding_summary.get("status", "")).strip()
-                summary = str(coding_summary.get("summary", "")).strip()
-                if status:
-                    summary_lines.append(f"- Coding result status: {status}")
-                if summary:
-                    summary_lines.append(f"- Coding summary: {summary}")
-            if code_evaluation and not coding_summary:
-                status = str(code_evaluation.get("status", "")).strip()
-                summary = str(code_evaluation.get("summary", "")).strip()
-                if status:
-                    summary_lines.append(f"- Latest code evaluation: {status}")
-                if summary:
-                    summary_lines.append(f"- Latest code eval summary: {summary}")
-            summary_block = "\n".join(summary_lines) if summary_lines else "- Coding summary: [unavailable]"
-
             # Build phase ending instructions based on signal
             if phase_signal == "must_end_now":
-                questions_ending = """PHASE ENDING - TIME IS UP:
-- You MUST end this phase now
+                questions_ending = """ENDING NOW - TIME IS UP:
+- You MUST end now
 - Wrap up politely: "Thanks for your questions."
-- Append this token on a NEW line: [PHASE_COMPLETE]"""
+- Append this token on a NEW line: [SECTION_COMPLETE]"""
             else:  # end_if_you_want
-                questions_ending = """PHASE ENDING:
+                questions_ending = """ENDING:
 - You can end when they have no more questions
 - Ask: "Any other questions?" to check if they're done
-- To end, append this token on a NEW line: [PHASE_COMPLETE]"""
+- To end, append this token on a NEW line: [SECTION_COMPLETE]"""
 
-            phase_instructions = f"""QUESTIONS PHASE - THEIR TURN:
-You only answer their questions and then end. You do NOT resume coding.
+            phase_instructions = f"""QUESTIONS SESSION - THEIR TURN:
+You only answer their questions and then end.
 {resume_context}
-
-CODING CONTEXT:
-{summary_block}
 
 STYLE:
 - Keep answers conversational and genuine (2-3 sentences each)
@@ -1584,14 +1598,14 @@ OPENING: "What questions do you have for me?"
 
 """
 
-            phase_instructions = f"""OBJECT-ORIENTED DESIGN PHASE - DESIGN DISCUSSION (20 minutes):
+            phase_instructions = f"""OBJECT-ORIENTED DESIGN SESSION - DESIGN DISCUSSION (20 minutes):
 
 LANGUAGE: {language_display}
 {code_display}
 TIME MANAGEMENT:
 - Total OOD interview: 40 minutes
-- Design phase: 20 minutes (current time: {time_in_phase:.1f} minutes)
-- Implementation phase: 20 minutes (auto-transition at 20 min mark)
+- Design discussion window: 20 minutes (current time: {time_in_phase:.1f} minutes)
+- Focus on architecture, tradeoffs, and interfaces
 
 YOUR ROLE - STRICT AND CHALLENGING:
 You are a SENIOR ARCHITECT conducting a rigorous OOD interview. Be SMART, STRICT, and CRITICAL.
@@ -1638,8 +1652,8 @@ WRITING TO EDITOR:
 Use [CODE_START]...design...[CODE_END] only when needed
 Keep it minimal - let them drive
 
-{question_details}TRANSITION at ~18-20min:
-"Let's move to implementing your design. You have 20 minutes."
+{question_details}WRAP UP at ~18-20min:
+"Let's pause and summarize the core design decisions."
 
 Be tough but fair. This is a HARD interview."""
 
@@ -1672,14 +1686,14 @@ Be tough but fair. This is a HARD interview."""
                     "- Challenge them on throughput (millions of orders/sec), determinism, and how they'd simulate the engine for correctness + latency testing.\n"
                 )
 
-            phase_instructions = f"""OBJECT-ORIENTED DESIGN PHASE - IMPLEMENTATION (20 minutes):
+            phase_instructions = f"""OBJECT-ORIENTED DESIGN SESSION - IMPLEMENTATION (20 minutes):
 
 LANGUAGE: {language_display}
 {code_display}
 
 TIME MANAGEMENT:
-- Design phase complete (spent ~20 minutes)
-- Implementation phase: 20 minutes (current time: {time_in_phase:.1f} minutes)
+- Implementation focus: translate the design into code
+- Implementation window: 20 minutes (current time: {time_in_phase:.1f} minutes)
 - Total time: {total_time:.1f} minutes
 
 YOUR ROLE - CODE REVIEW AND CRITIQUE:
@@ -1722,7 +1736,7 @@ Then provide critical feedback on their implementation, highlighting both streng
 Remember: Be HONEST about code quality. Don't praise poor code."""
 
         else:
-            phase_instructions = "Unknown phase - continue interview naturally."
+            phase_instructions = "Unknown context - continue interview naturally."
 
         # Add examples of good vs bad responses
         response_examples = """

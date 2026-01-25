@@ -483,6 +483,8 @@ def _run_java(code: str, test_spec: Dict[str, Any]) -> Dict[str, str]:
         isinstance(param, dict) and param.get("type") == "ListNode" for param in params
     )
     needs_sea = any(isinstance(param, dict) and param.get("type") == "Sea" for param in params)
+    candidate_defines_sea_class = "class Sea" in code
+    candidate_defines_sea_interface = "interface Sea" in code
     helper_code, compare_call = _java_compare_code(return_type, comparison)
     support_classes = []
     if needs_listnode and "class ListNode" not in code:
@@ -491,15 +493,19 @@ def _run_java(code: str, test_spec: Dict[str, Any]) -> Dict[str, str]:
             "ListNode(int val) { this.val = val; } "
             "ListNode(int val, ListNode next) { this.val = val; this.next = next; } }"
         )
-    if needs_sea and "class Sea" not in code:
+    if needs_sea and not (candidate_defines_sea_class or candidate_defines_sea_interface):
         support_classes.append(
-            "class Sea { "
+            "interface Sea { boolean hasShips(int[] topRight, int[] bottomLeft); }"
+        )
+    if needs_sea and not candidate_defines_sea_class:
+        support_classes.append(
+            "class SeaImpl implements Sea { "
             "private final java.util.Set<String> ships = new java.util.HashSet<>();"
-            "Sea(int[][] shipsArr) { "
+            "SeaImpl(int[][] shipsArr) { "
             "if (shipsArr != null) {"
             "for (int[] s : shipsArr) { ships.add(s[0] + \",\" + s[1]); }"
             "}}"
-            "boolean hasShips(int[] topRight, int[] bottomLeft) {"
+            "public boolean hasShips(int[] topRight, int[] bottomLeft) {"
             "int x1 = bottomLeft[0], y1 = bottomLeft[1];"
             "int x2 = topRight[0], y2 = topRight[1];"
             "for (String key : ships) {"
@@ -524,7 +530,10 @@ def _run_java(code: str, test_spec: Dict[str, Any]) -> Dict[str, str]:
             if type_name == "Sea":
                 ships_literal = _java_literal(test_input.get("ships"), "int[][]")
                 assignments.append(f"int[][] ships = {ships_literal};")
-                assignments.append(f"{decl_type} sea = new Sea(ships);")
+                if candidate_defines_sea_class:
+                    assignments.append(f"{decl_type} sea = new Sea(ships);")
+                else:
+                    assignments.append(f"{decl_type} sea = new SeaImpl(ships);")
                 args.append("sea")
             elif type_name == "ListNode":
                 literal = _java_literal(test_input.get(name), "ListNode")

@@ -4,7 +4,7 @@ from typing import Optional
 
 from .config import config
 from .gemini_client import GeminiClient
-from .openai_client import OpenAIClient
+from .openai_client import OpenAIClient, OpenAIRealtimeClient
 
 
 def _normalize_model_name(model_name: Optional[str]) -> Optional[str]:
@@ -17,6 +17,8 @@ def get_llm_client(model_name: Optional[str]) -> GeminiClient | OpenAIClient:
     normalized = _normalize_model_name(model_name)
     provider = config.SUPPORTED_MODELS.get(normalized) if normalized else None
     if provider == "openai":
+        if normalized in config.OPENAI_REALTIME_MODELS:
+            return OpenAIRealtimeClient(model=normalized)
         return OpenAIClient(model=normalized)
     if provider == "gemini":
         return GeminiClient(model=normalized)
