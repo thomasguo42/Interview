@@ -4045,3 +4045,1040 @@
 2026-01-25 21:01:52,213 [INFO] [REPORT] interview_report cached meta only interview_id=36
 2026-01-25 21:01:52,213 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=36
 2026-01-25 21:01:54,452 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-25 21:24:58,351 [INFO] [REPORT] interview_report cached interview_id=36
+2026-01-25 21:25:04,192 [INFO] [REPORT] interview_report cached interview_id=35
+2026-01-26 23:09:57,246 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:09:57,246 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-26 23:10:01,548 [INFO] [MODEL RESPONSE] phase=coding reply_len=2666 llm_time=4.302s
+2026-01-26 23:10:01,554 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-26 23:10:10,791 [INFO] [PERF][coding_only] total=14.051s gate=0.506s test=0.000s llm=4.302s tts=9.235s
+2026-01-26 23:10:49,298 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:10:49,299 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-26 23:10:50,714 [INFO] [MODEL RESPONSE] phase=coding reply_len=739 llm_time=1.415s
+2026-01-26 23:10:50,715 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-26 23:10:51,078 [INFO] [PERF][coding_only] total=2.458s gate=0.678s test=0.000s llm=1.415s tts=0.363s
+2026-01-26 23:11:27,210 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:11:27,211 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.7m phase_signal=end_if_you_want user_message=no I think I got it
+2026-01-26 23:11:27,697 [INFO] [MODEL RESPONSE] phase=coding reply_len=46 llm_time=0.486s
+2026-01-26 23:11:27,698 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.7m
+2026-01-26 23:11:27,909 [INFO] [PERF][coding_only] total=1.255s gate=0.557s test=0.000s llm=0.486s tts=0.211s
+2026-01-26 23:11:58,945 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:11:58,945 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-26 23:12:02,162 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-26 23:12:02,162 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.3m phase_signal=end_if_you_want user_message=all right here's my solution
+2026-01-26 23:12:02,566 [INFO] [MODEL RESPONSE] phase=coding reply_len=69 llm_time=0.404s
+2026-01-26 23:12:02,567 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.3m
+2026-01-26 23:12:02,924 [INFO] [PERF][coding_only] total=4.476s gate=0.496s test=0.775s llm=0.404s tts=0.357s
+2026-01-26 23:12:12,746 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:12:12,747 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.5m phase_signal=end_if_you_want user_message=it is o n * m
+2026-01-26 23:12:13,183 [INFO] [MODEL RESPONSE] phase=coding reply_len=20 llm_time=0.436s
+2026-01-26 23:12:13,183 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.5m
+2026-01-26 23:12:13,365 [INFO] [PERF][coding_only] total=1.404s gate=0.785s test=0.000s llm=0.436s tts=0.182s
+2026-01-26 23:12:25,899 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:12:25,900 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.7m phase_signal=end_if_you_want user_message=because we are basically exploring each position of the grid once
+2026-01-26 23:12:26,306 [INFO] [MODEL RESPONSE] phase=coding reply_len=84 llm_time=0.407s
+2026-01-26 23:12:26,307 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.7m
+2026-01-26 23:12:26,670 [INFO] [PERF][coding_only] total=1.529s gate=0.758s test=0.000s llm=0.407s tts=0.362s
+2026-01-26 23:12:39,923 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:12:39,923 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.9m phase_signal=end_if_you_want user_message=the space complexity is constant because we do not use any extra space
+2026-01-26 23:12:40,500 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.576s
+2026-01-26 23:12:40,501 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.9m
+2026-01-26 23:12:40,700 [INFO] [PERF][coding_only] total=1.634s gate=0.857s test=0.000s llm=0.576s tts=0.199s
+2026-01-26 23:12:52,723 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-26 23:12:52,723 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.1m phase_signal=end_if_you_want user_message=Okay then if you're kind of Stack then the then the space complexity the same as a Time complexity
+2026-01-26 23:12:53,357 [INFO] [MODEL RESPONSE] phase=coding reply_len=84 llm_time=0.634s
+2026-01-26 23:12:53,358 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.1m
+2026-01-26 23:12:53,528 [INFO] [PERF][coding_only] total=2.169s gate=1.364s test=0.000s llm=0.634s tts=0.170s
+2026-01-26 23:13:06,914 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:13:06,914 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.4m phase_signal=end_if_you_want user_message=yeah so that makes space complexity also oh and times m
+2026-01-26 23:13:07,466 [INFO] [MODEL RESPONSE] phase=coding reply_len=158 llm_time=0.551s
+2026-01-26 23:13:07,466 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=2.4m
+2026-01-26 23:13:07,662 [INFO] [PERF][coding_only] total=2.227s gate=1.479s test=0.000s llm=0.551s tts=0.195s
+2026-01-26 23:13:10,519 [INFO] [REPORT] interview_report cached meta only interview_id=38
+2026-01-26 23:13:10,520 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=38
+2026-01-26 23:13:12,319 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-26 23:13:44,321 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-26 23:13:44,695 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-26 23:13:44,695 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-26 23:13:57,953 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m phase_signal=keep_going user_message=hey I'm also Thomas and I am a CS student from uchicago
+2026-01-26 23:13:58,537 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=146 llm_time=0.000s
+2026-01-26 23:13:58,538 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-26 23:14:14,690 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.6m phase_signal=keep_going user_message=I've done multiple internships and I also have my own startup call offenses page
+2026-01-26 23:14:15,822 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=79 llm_time=0.000s
+2026-01-26 23:14:15,823 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.6m
+2026-01-26 23:14:33,358 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.9m phase_signal=keep_going user_message=yeah sure so I am responsible for the Technology and Engineering side offenses page
+2026-01-26 23:14:33,820 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=40 llm_time=0.000s
+2026-01-26 23:14:33,820 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.9m
+2026-01-26 23:14:46,100 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=oh my most recent project is about doing an AI fencing referee and analytic system
+2026-01-26 23:14:46,725 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=108 llm_time=0.000s
+2026-01-26 23:14:46,726 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-26 23:15:00,314 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=I think the biggest challenge is performing accurate pose estimations
+2026-01-26 23:15:00,679 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=59 llm_time=0.000s
+2026-01-26 23:15:00,679 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-26 23:15:11,442 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=like I said doing the post estimations and building a fencing referee
+2026-01-26 23:15:12,069 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=59 llm_time=0.000s
+2026-01-26 23:15:12,069 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-26 23:15:23,176 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.7m phase_signal=keep_going user_message=building a AI fencing referee
+2026-01-26 23:15:23,713 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-26 23:15:23,714 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.7m
+2026-01-26 23:15:38,020 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.0m phase_signal=keep_going user_message=I'm specifically using track anything in Yolo
+2026-01-26 23:15:38,547 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=72 llm_time=0.000s
+2026-01-26 23:15:38,547 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.0m
+2026-01-26 23:15:47,153 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m phase_signal=keep_going user_message=I just told you it's about building an AI fencing referee
+2026-01-26 23:15:47,848 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=90 llm_time=0.000s
+2026-01-26 23:15:47,848 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.1m
+2026-01-26 23:15:58,879 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.3m phase_signal=keep_going user_message=oh I was working on a fraud detection pipeline
+2026-01-26 23:15:59,518 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-26 23:15:59,518 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.3m
+2026-01-26 23:16:11,611 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.5m phase_signal=keep_going user_message=yeah sure so I leverage to use machine learning models to train and detect fraud transactions
+2026-01-26 23:16:12,102 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=49 llm_time=0.000s
+2026-01-26 23:16:12,103 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.5m
+2026-01-26 23:16:26,898 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.8m phase_signal=keep_going user_message=so I was mainly using you know tensorflows I also use you know knowing that will explain them Forest
+2026-01-26 23:16:27,542 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-26 23:16:27,543 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.8m
+2026-01-26 23:16:40,405 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.0m phase_signal=keep_going user_message=so basically those models can predict if a transaction is suspicious or not
+2026-01-26 23:16:41,645 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-26 23:16:41,645 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.0m
+2026-01-26 23:16:59,346 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.3m phase_signal=keep_going user_message=I'm so basically have some label data sets that have you know the past transactions that we have man...
+2026-01-26 23:17:00,110 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=78 llm_time=0.000s
+2026-01-26 23:17:00,111 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.3m
+2026-01-26 23:17:12,978 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.5m phase_signal=keep_going user_message=call the performance is pretty good it was 23% higher than the previous pipeline
+2026-01-26 23:17:13,532 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=96 llm_time=0.000s
+2026-01-26 23:17:13,532 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.5m
+2026-01-26 23:17:25,847 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.8m phase_signal=keep_going user_message=so I integrate these models through a cicd pipeline basically
+2026-01-26 23:17:26,348 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=72 llm_time=0.000s
+2026-01-26 23:17:26,348 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.8m
+2026-01-26 23:17:45,328 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.1m phase_signal=keep_going user_message=so I use cicd pipeline 2 you know run on Union testing low testings and also turn it into soccer con...
+2026-01-26 23:17:45,793 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=42 llm_time=0.000s
+2026-01-26 23:17:45,793 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.1m
+2026-01-26 23:18:02,483 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.4m phase_signal=keep_going user_message=so I Implement unit test to ensure that all the anomalies detections are running smoothly and also c...
+2026-01-26 23:18:02,967 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=48 llm_time=0.000s
+2026-01-26 23:18:02,967 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.4m
+2026-01-26 23:18:13,032 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=basically tell me that it's off you know normal transactions and suspicious transactions
+2026-01-26 23:18:13,615 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-26 23:18:13,616 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-26 23:18:26,905 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.8m phase_signal=keep_going user_message=I just I cuz I created the dummy data set so I know which ones you know are suspicious and which one...
+2026-01-26 23:18:28,263 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-26 23:18:28,264 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.8m
+2026-01-26 23:18:35,275 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m phase_signal=keep_going user_message=no I didn't
+2026-01-26 23:18:36,171 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=87 llm_time=0.000s
+2026-01-26 23:18:36,172 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-26 23:18:43,670 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.0m phase_signal=end_if_you_want user_message=why why are you keep asking the same question
+2026-01-26 23:18:44,241 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-26 23:18:44,242 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.0m
+2026-01-26 23:19:07,493 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.4m phase_signal=end_if_you_want user_message=yeah sure so my experience with spring boo is regarding doing Innova AI so in a way I use spring boo...
+2026-01-26 23:19:09,133 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=57 llm_time=0.000s
+2026-01-26 23:19:09,133 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.4m
+2026-01-26 23:19:18,097 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.6m phase_signal=end_if_you_want user_message=I use MVC architecture and also spring boot
+2026-01-26 23:19:19,833 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=54 llm_time=0.000s
+2026-01-26 23:19:19,833 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.6m
+2026-01-26 23:19:27,857 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.8m phase_signal=end_if_you_want user_message=why do you repeat the question over and over again
+2026-01-26 23:19:28,309 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-26 23:19:28,309 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.8m
+2026-01-26 23:19:39,115 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.0m phase_signal=end_if_you_want user_message=I already answered a question
+2026-01-26 23:19:39,826 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-26 23:19:39,827 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.0m
+2026-01-26 23:19:53,628 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.2m phase_signal=end_if_you_want user_message=well like I said I view spring boot using you know video sharing platform
+2026-01-26 23:19:54,205 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-26 23:19:54,206 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.2m
+2026-01-26 23:20:05,823 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.4m phase_signal=end_if_you_want user_message=it is to basically allow people to subscribe to videos and post comments
+2026-01-26 23:20:06,349 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=63 llm_time=0.000s
+2026-01-26 23:20:06,350 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.4m
+2026-01-26 23:20:13,168 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.5m phase_signal=end_if_you_want user_message=spring boot
+2026-01-26 23:20:13,666 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-26 23:20:13,667 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.5m
+2026-01-26 23:20:23,206 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.7m phase_signal=end_if_you_want user_message=oh I also use xmls I use graphql
+2026-01-26 23:20:23,827 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=48 llm_time=0.000s
+2026-01-26 23:20:23,828 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.7m
+2026-01-26 23:31:44,990 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-26 23:31:45,630 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-26 23:31:45,630 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-26 23:31:59,225 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m phase_signal=keep_going user_message=I'm also Thomas and I'm from Chicago major NCS
+2026-01-26 23:31:59,867 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=158 llm_time=0.000s
+2026-01-26 23:31:59,868 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-26 23:32:16,536 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.6m phase_signal=keep_going user_message=so I started a startup a long time ago and that's the first time I've done
+2026-01-26 23:32:17,239 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-26 23:32:17,240 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.6m
+2026-01-26 23:32:33,176 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.9m phase_signal=keep_going user_message=so I view an AI fencing referee and analytics system
+2026-01-26 23:32:33,724 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=124 llm_time=0.000s
+2026-01-26 23:32:33,724 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.9m
+2026-01-26 23:32:48,234 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=so my specific row is to develop the
+2026-01-26 23:32:48,761 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=85 llm_time=0.000s
+2026-01-26 23:32:48,762 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-26 23:33:07,139 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.4m phase_signal=keep_going user_message=so the biggest challenge I have is to develop a you know reliable post estimation and key Point extr...
+2026-01-26 23:33:07,770 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=85 llm_time=0.000s
+2026-01-26 23:33:07,771 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.4m
+2026-01-26 23:33:19,188 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.6m phase_signal=keep_going user_message=um so I think technology I use Moses using track anything and YOLO
+2026-01-26 23:33:19,917 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=125 llm_time=0.000s
+2026-01-26 23:33:19,918 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.6m
+2026-01-26 23:33:30,682 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=so we have a very reliable video tracking system
+2026-01-26 23:33:31,226 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-26 23:33:31,227 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-26 23:33:43,018 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.0m phase_signal=keep_going user_message=yeah sure so track anything in yellow actually I use Python for both of them
+2026-01-26 23:33:43,447 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=47 llm_time=0.000s
+2026-01-26 23:33:43,447 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.0m
+2026-01-26 23:33:54,010 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.2m phase_signal=keep_going user_message=silly B A AI fencing referee that is around 85% accuracy in charging
+2026-01-26 23:33:54,582 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=61 llm_time=0.000s
+2026-01-26 23:33:54,583 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.2m
+2026-01-26 23:34:06,721 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.4m phase_signal=keep_going user_message=that's what we observe when we have the AR referee referring a real video
+2026-01-26 23:34:07,236 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=57 llm_time=0.000s
+2026-01-26 23:34:07,237 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.4m
+2026-01-26 23:34:27,734 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.8m phase_signal=keep_going user_message=oh so basically we have the AR referee a video and at a start it is not much better than pure guessi...
+2026-01-26 23:34:28,370 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-26 23:34:28,370 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.8m
+2026-01-26 23:34:35,535 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=fencing videos basically
+2026-01-26 23:34:36,010 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=49 llm_time=0.000s
+2026-01-26 23:34:36,010 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-26 23:34:44,145 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.0m phase_signal=keep_going user_message=we have over 3,000 visiting videos
+2026-01-26 23:34:44,830 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=48 llm_time=0.000s
+2026-01-26 23:34:44,831 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.0m
+2026-01-26 23:34:59,074 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.3m phase_signal=keep_going user_message=yeah sure so I use Java in Spring boot in Innova AI when I'm developing that video sharing platform
+2026-01-26 23:34:59,523 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=42 llm_time=0.000s
+2026-01-26 23:34:59,524 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.3m
+2026-01-26 23:35:05,874 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.4m phase_signal=keep_going user_message=the video sharing platform
+2026-01-26 23:35:06,362 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=47 llm_time=0.000s
+2026-01-26 23:35:06,363 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.4m
+2026-01-26 23:35:22,722 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.7m phase_signal=keep_going user_message=I'm so basically on the impact won't mean physically what we do is that the video sharing platform a...
+2026-01-26 23:35:23,244 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=73 llm_time=0.000s
+2026-01-26 23:35:23,244 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.7m
+2026-01-26 23:35:32,486 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.8m phase_signal=keep_going user_message=that our platform can support over 100,000 people
+2026-01-26 23:35:32,907 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=94 llm_time=0.000s
+2026-01-26 23:35:32,908 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.8m
+2026-01-26 23:35:47,227 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.1m phase_signal=keep_going user_message=yeah sure I use AWS at Q2 when I'm developing that fraud detection pipeline
+2026-01-26 23:35:47,737 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=35 llm_time=0.000s
+2026-01-26 23:35:47,738 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.1m
+2026-01-26 23:35:57,878 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.3m phase_signal=keep_going user_message=the front detection pipeline that we used to basically detect suspicious transactions
+2026-01-26 23:35:58,388 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-26 23:35:58,389 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.3m
+2026-01-26 23:36:14,261 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=yeah sure so I use machine learning models to identify you know suspicious transactions and then we ...
+2026-01-26 23:36:17,325 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=41 llm_time=0.000s
+2026-01-26 23:36:17,326 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-26 23:36:35,233 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m phase_signal=keep_going user_message=so we use Ensemble models so it's in combination of a lot of machine learning models include but not...
+2026-01-26 23:36:35,809 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=98 llm_time=0.000s
+2026-01-26 23:36:35,809 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-26 23:36:48,558 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=so we built a pipeline that is 23% higher in terms of accuracy than the previous pipeline
+2026-01-26 23:36:49,439 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=71 llm_time=0.000s
+2026-01-26 23:36:49,440 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-26 23:36:58,127 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m phase_signal=end_if_you_want user_message=we've got a pipeline that's 23% higher in terms of accuracy
+2026-01-26 23:36:58,589 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-26 23:36:58,590 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-26 23:37:08,035 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.4m phase_signal=end_if_you_want user_message=oh we deploy the pipeline through a cicd pipeline
+2026-01-26 23:37:08,633 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=47 llm_time=0.000s
+2026-01-26 23:37:08,634 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.4m
+2026-01-26 23:37:16,129 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.6m phase_signal=end_if_you_want user_message=that we deploy it
+2026-01-26 23:37:16,601 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=47 llm_time=0.000s
+2026-01-26 23:37:16,601 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.6m
+2026-01-26 23:37:36,744 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.9m phase_signal=end_if_you_want user_message=oh yeah sure so the Seattle City pipeline we use including a bunch of you know unit testings meter t...
+2026-01-26 23:37:37,421 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=44 llm_time=0.000s
+2026-01-26 23:37:37,421 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.9m
+2026-01-26 23:37:48,640 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.1m phase_signal=end_if_you_want user_message=so I work actively with others through you know daily standups meetings and sprints
+2026-01-26 23:37:49,124 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=41 llm_time=0.000s
+2026-01-26 23:37:49,125 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.1m
+2026-01-26 23:38:04,610 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.4m phase_signal=end_if_you_want user_message=well I'm very excited to you know proceed with software engineering and whatever that is related to ...
+2026-01-26 23:38:05,060 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-26 23:38:05,060 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.4m
+2026-01-26 23:38:16,322 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.6m phase_signal=end_if_you_want user_message=I'm very interested in computer missions but also you know maybe large language modeling
+2026-01-26 23:38:16,902 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=41 llm_time=0.000s
+2026-01-26 23:38:16,902 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.6m
+2026-01-26 23:38:28,644 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.8m phase_signal=end_if_you_want user_message=you know I've done computer vision in the AI fencing referee project and on really interested in tha...
+2026-01-26 23:38:29,270 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=81 llm_time=0.000s
+2026-01-26 23:38:29,271 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.8m
+2026-01-26 23:38:36,682 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.9m phase_signal=end_if_you_want user_message=I already answered the question
+2026-01-26 23:38:37,422 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-26 23:38:37,422 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=6.9m
+2026-01-26 23:38:37,422 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=False)
+2026-01-26 23:38:37,423 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-26 23:38:44,658 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:38:44,658 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.1m phase_signal=end_if_you_want user_message=okay
+2026-01-26 23:38:46,773 [INFO] [MODEL RESPONSE] phase=coding reply_len=1076 llm_time=0.000s
+2026-01-26 23:38:46,778 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-26 23:38:46,778 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-26 23:38:51,789 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:38:51,789 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.2m phase_signal=end_if_you_want user_message=hello
+2026-01-26 23:38:53,789 [INFO] [MODEL RESPONSE] phase=coding reply_len=1054 llm_time=0.000s
+2026-01-26 23:38:53,791 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.2m
+2026-01-26 23:39:05,853 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:39:05,853 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.5m phase_signal=end_if_you_want user_message=no I'm good
+2026-01-26 23:39:07,413 [INFO] [MODEL RESPONSE] phase=coding reply_len=1122 llm_time=0.000s
+2026-01-26 23:39:07,415 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.5m
+2026-01-26 23:39:20,395 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-26 23:39:20,395 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.7m phase_signal=end_if_you_want user_message=I'm going to use a DP over half with a bit mask to assign people
+2026-01-26 23:39:20,771 [INFO] [MODEL RESPONSE] phase=coding reply_len=39 llm_time=0.000s
+2026-01-26 23:39:20,772 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.7m
+2026-01-26 23:39:33,756 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:39:33,757 [INFO] [TEST RUN] phase=coding question=Number of Ways to Wear Different Hats to Each Other
+2026-01-26 23:39:39,095 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-26 23:39:39,096 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.0m phase_signal=end_if_you_want user_message=here's my code
+2026-01-26 23:39:39,533 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.000s
+2026-01-26 23:39:39,534 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.0m
+2026-01-26 23:40:05,478 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:40:05,478 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.5m phase_signal=end_if_you_want user_message=so basically we have the half IDs from 1 to 40 and then n is the number of people and DP mask basica...
+2026-01-26 23:40:05,972 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.000s
+2026-01-26 23:40:05,972 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.5m
+2026-01-26 23:40:16,480 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-26 23:40:16,480 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.7m phase_signal=end_if_you_want user_message=it is 40 * 2 ^ n * m
+2026-01-26 23:40:16,980 [INFO] [MODEL RESPONSE] phase=coding reply_len=44 llm_time=0.000s
+2026-01-26 23:40:16,980 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.7m
+2026-01-26 23:40:26,398 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:40:26,399 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.8m phase_signal=end_if_you_want user_message=no I don't think so I think that's the optimal choice
+2026-01-26 23:40:26,881 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-26 23:40:26,881 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.8m
+2026-01-26 23:40:34,268 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:40:34,268 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.9m phase_signal=end_if_you_want user_message=already answered
+2026-01-26 23:40:34,872 [INFO] [MODEL RESPONSE] phase=coding reply_len=94 llm_time=0.000s
+2026-01-26 23:40:34,873 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.9m
+2026-01-26 23:40:50,821 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:40:50,821 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.2m phase_signal=end_if_you_want user_message=yeah sure the space complexity I think it should be two to the power of n
+2026-01-26 23:40:51,191 [INFO] [MODEL RESPONSE] phase=coding reply_len=16 llm_time=0.000s
+2026-01-26 23:40:51,191 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.2m
+2026-01-26 23:40:57,872 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-26 23:40:57,872 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.3m phase_signal=end_if_you_want user_message=because of the DP
+2026-01-26 23:40:58,640 [INFO] [MODEL RESPONSE] phase=coding reply_len=68 llm_time=0.000s
+2026-01-26 23:40:58,641 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=2.3m
+2026-01-26 23:40:58,641 [INFO] [PHASE SHIFT] full mode coding -> questions (phase_complete=True force_end=False)
+2026-01-26 23:40:58,641 [INFO] [PHASE TRANSITION] coding -> questions
+2026-01-26 23:41:06,694 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.1m phase_signal=end_if_you_want user_message=well I don't have any questions
+2026-01-26 23:41:07,090 [INFO] [MODEL RESPONSE] phase=questions reply_len=39 llm_time=0.000s
+2026-01-26 23:41:07,090 [INFO] [PHASE CHECK] phase=questions phase_complete=True time_in_phase=0.1m
+2026-01-26 23:41:07,090 [INFO] [PHASE SHIFT] full mode questions -> ended
+2026-01-26 23:41:09,176 [INFO] [REPORT] interview_report cached meta only interview_id=40
+2026-01-26 23:41:09,177 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=40
+2026-01-26 23:41:10,570 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-26 23:55:38,577 [INFO] [REPORT] interview_report cached interview_id=40
+2026-01-27 03:00:28,937 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-27 03:00:29,367 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-27 03:00:29,367 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-27 03:00:50,851 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.4m phase_signal=keep_going user_message=hey I'm all Thomas I am a junior study in CS from the University of Chicago and I'm very interested ...
+2026-01-27 03:00:51,642 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=174 llm_time=0.000s
+2026-01-27 03:00:51,643 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.4m
+2026-01-27 03:01:11,435 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.8m phase_signal=keep_going user_message=well I'm very interested because I've done multiple internships regarding this Feud and I also have ...
+2026-01-27 03:01:12,137 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=182 llm_time=0.000s
+2026-01-27 03:01:12,139 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.8m
+2026-01-27 03:01:32,980 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=yeah sure so I was responsible for detecting for developing a fraud detection pipeline
+2026-01-27 03:01:33,515 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=107 llm_time=0.000s
+2026-01-27 03:01:33,517 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-27 03:01:52,890 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=so we pulled data from Snowflake which is our primary data warehouse and we use the data to train ma...
+2026-01-27 03:01:53,630 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=102 llm_time=0.000s
+2026-01-27 03:01:53,633 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-27 03:02:10,400 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=so I was primarily using your networks random forest and extra boost and also in symbol models
+2026-01-27 03:02:11,045 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=123 llm_time=0.000s
+2026-01-27 03:02:11,050 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-27 03:02:32,666 [INFO] [REPORT] interview_report cached interview_id=40
+2026-01-27 23:50:25,530 [INFO] [REPORT] interview_report cached interview_id=40
+2026-01-27 23:50:40,213 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-27 23:50:40,213 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.1m phase_signal=end_if_you_want user_message=hello
+2026-01-27 23:50:42,233 [INFO] [MODEL RESPONSE] phase=coding reply_len=1090 llm_time=2.020s
+2026-01-27 23:50:42,237 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.1m
+2026-01-27 23:50:42,705 [INFO] [PERF][coding_only] total=2.915s gate=0.422s test=0.000s llm=2.020s tts=0.468s
+2026-01-27 23:51:01,525 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-27 23:51:01,525 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.4m phase_signal=end_if_you_want user_message=no I think I got it
+2026-01-27 23:51:01,930 [INFO] [MODEL RESPONSE] phase=coding reply_len=26 llm_time=0.404s
+2026-01-27 23:51:01,930 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.4m
+2026-01-27 23:51:02,133 [INFO] [PERF][coding_only] total=1.541s gate=0.933s test=0.000s llm=0.404s tts=0.202s
+2026-01-27 23:51:25,012 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-27 23:51:25,013 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=0.8m phase_signal=end_if_you_want user_message=so I think I'm going to use a greedy approach so at each step I'm going to take the largest cidr blo...
+2026-01-27 23:51:25,494 [INFO] [MODEL RESPONSE] phase=coding reply_len=60 llm_time=0.481s
+2026-01-27 23:51:25,494 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.8m
+2026-01-27 23:51:25,697 [INFO] [PERF][coding_only] total=1.260s gate=0.575s test=0.000s llm=0.481s tts=0.203s
+2026-01-27 23:51:49,930 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-27 23:51:49,931 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-27 23:51:58,828 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-27 23:51:58,828 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.4m phase_signal=end_if_you_want user_message=here's the code
+2026-01-27 23:51:59,385 [INFO] [MODEL RESPONSE] phase=coding reply_len=71 llm_time=0.557s
+2026-01-27 23:51:59,386 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.4m
+2026-01-27 23:51:59,730 [INFO] [PERF][coding_only] total=10.453s gate=0.653s test=8.897s llm=0.557s tts=0.343s
+2026-01-27 23:52:22,191 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-27 23:52:22,191 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-27 23:52:31,059 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-27 23:52:31,060 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=1.9m phase_signal=end_if_you_want user_message=so block size is basically the minimum of the lower bit or the max block and which Matchbox is the l...
+2026-01-27 23:52:31,612 [INFO] [MODEL RESPONSE] phase=coding reply_len=25 llm_time=0.552s
+2026-01-27 23:52:31,612 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.9m
+2026-01-27 23:52:31,804 [INFO] [PERF][coding_only] total=10.303s gate=0.690s test=8.868s llm=0.552s tts=0.191s
+2026-01-27 23:52:46,761 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-27 23:52:46,761 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-27 23:52:55,663 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-27 23:52:55,663 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.3m phase_signal=end_if_you_want user_message=yeah a little bit is basically the largest block Allowed by alignment which is the lowest set B
+2026-01-27 23:52:56,063 [INFO] [MODEL RESPONSE] phase=coding reply_len=54 llm_time=0.401s
+2026-01-27 23:52:56,064 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.3m
+2026-01-27 23:52:56,257 [INFO] [PERF][coding_only] total=10.013s gate=0.516s test=8.902s llm=0.401s tts=0.193s
+2026-01-27 23:53:07,326 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-27 23:53:07,326 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-27 23:53:16,293 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-27 23:53:16,294 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=2.7m phase_signal=end_if_you_want user_message=call me just that this is a bit operation
+2026-01-27 23:53:16,682 [INFO] [MODEL RESPONSE] phase=coding reply_len=44 llm_time=0.389s
+2026-01-27 23:53:16,683 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-27 23:53:16,871 [INFO] [PERF][coding_only] total=10.050s gate=0.505s test=8.967s llm=0.389s tts=0.187s
+2026-01-27 23:53:30,578 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-27 23:53:30,578 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-27 23:53:39,457 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-27 23:53:39,457 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=3.1m phase_signal=end_if_you_want user_message=what did you say
+2026-01-27 23:53:39,853 [INFO] [MODEL RESPONSE] phase=coding reply_len=37 llm_time=0.395s
+2026-01-27 23:53:39,853 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.1m
+2026-01-27 23:53:40,093 [INFO] [PERF][coding_only] total=10.228s gate=0.712s test=8.879s llm=0.395s tts=0.240s
+2026-01-28 00:02:40,519 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:02:40,520 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-28 00:02:49,430 [INFO] [TEST RUN] phase=coding status=error summary=Execution timed out.
+2026-01-28 00:02:49,430 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.2m phase_signal=end_if_you_want user_message=is there a problem with my code
+2026-01-28 00:02:49,801 [INFO] [MODEL RESPONSE] phase=coding reply_len=51 llm_time=0.371s
+2026-01-28 00:02:49,802 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=12.2m
+2026-01-28 00:02:49,999 [INFO] [PERF][coding_only] total=10.241s gate=0.761s test=8.910s llm=0.371s tts=0.197s
+2026-01-28 00:02:58,897 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:02:58,897 [INFO] [TEST RUN] phase=coding question=IP to CIDR
+2026-01-28 00:03:02,461 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-28 00:03:02,462 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.4m phase_signal=end_if_you_want user_message=what about right now
+2026-01-28 00:03:03,061 [INFO] [MODEL RESPONSE] phase=coding reply_len=51 llm_time=0.599s
+2026-01-28 00:03:03,062 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=12.4m
+2026-01-28 00:03:03,259 [INFO] [PERF][coding_only] total=4.913s gate=0.551s test=0.898s llm=0.599s tts=0.197s
+2026-01-28 00:03:14,906 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:03:14,906 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.6m phase_signal=end_if_you_want user_message=is it still resulting in timeout
+2026-01-28 00:03:16,413 [INFO] [MODEL RESPONSE] phase=coding reply_len=56 llm_time=1.507s
+2026-01-28 00:03:16,414 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=12.6m
+2026-01-28 00:03:16,614 [INFO] [PERF][coding_only] total=2.466s gate=0.758s test=0.000s llm=1.507s tts=0.200s
+2026-01-28 00:03:31,458 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:03:31,458 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=12.9m phase_signal=end_if_you_want user_message=check again I saw the test cases are passing this should be correct
+2026-01-28 00:03:31,935 [INFO] [MODEL RESPONSE] phase=coding reply_len=73 llm_time=0.476s
+2026-01-28 00:03:31,935 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=12.9m
+2026-01-28 00:03:32,286 [INFO] [PERF][coding_only] total=1.267s gate=0.439s test=0.000s llm=0.476s tts=0.351s
+2026-01-28 00:04:07,695 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:04:07,696 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=13.5m phase_signal=end_if_you_want user_message=I'm not sure can you tell me
+2026-01-28 00:04:08,233 [INFO] [MODEL RESPONSE] phase=coding reply_len=66 llm_time=0.537s
+2026-01-28 00:04:08,233 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=13.5m
+2026-01-28 00:04:08,441 [INFO] [PERF][coding_only] total=2.809s gate=2.063s test=0.000s llm=0.537s tts=0.208s
+2026-01-28 00:04:18,038 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:04:18,038 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=13.7m phase_signal=end_if_you_want user_message=okay
+2026-01-28 00:04:18,538 [INFO] [MODEL RESPONSE] phase=coding reply_len=45 llm_time=0.500s
+2026-01-28 00:04:18,539 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=13.7m
+2026-01-28 00:04:18,736 [INFO] [PERF][coding_only] total=1.364s gate=0.666s test=0.000s llm=0.500s tts=0.197s
+2026-01-28 00:04:24,825 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 00:04:24,826 [INFO] [MODEL REQUEST] phase=coding mode=coding_only time_in_phase=13.8m phase_signal=end_if_you_want user_message=no I don't
+2026-01-28 00:04:25,430 [INFO] [MODEL RESPONSE] phase=coding reply_len=78 llm_time=0.604s
+2026-01-28 00:04:25,430 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=13.8m
+2026-01-28 00:04:25,630 [INFO] [PERF][coding_only] total=1.462s gate=0.658s test=0.000s llm=0.604s tts=0.199s
+2026-01-28 00:04:29,155 [INFO] [REPORT] interview_report cached meta only interview_id=43
+2026-01-28 00:04:29,156 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=43
+2026-01-28 00:04:30,931 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-28 00:05:50,239 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 00:05:51,206 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 00:05:51,206 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 00:06:07,957 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.4m phase_signal=keep_going user_message=yeah so I'm also Thomas I am from Chicago I'm major in CS and stats and I want to be a software engi...
+2026-01-28 00:06:08,429 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=140 llm_time=0.000s
+2026-01-28 00:06:08,430 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.4m
+2026-01-28 00:06:29,419 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m phase_signal=keep_going user_message=well I'm very interested in those fears because I found it a startup a while ago call offenses page ...
+2026-01-28 00:06:29,984 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=93 llm_time=0.000s
+2026-01-28 00:06:29,985 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-28 00:06:45,422 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m phase_signal=keep_going user_message=oh my role is to develop a AI fencing referee and I'm responsible for the AI development
+2026-01-28 00:06:45,969 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=117 llm_time=0.000s
+2026-01-28 00:06:45,971 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-28 00:07:05,075 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=awesome main challenges including post estimations and also extracting key points
+2026-01-28 00:07:05,699 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=82 llm_time=0.000s
+2026-01-28 00:07:05,702 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-28 00:07:17,489 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=mom I use track anything and YOLO
+2026-01-28 00:07:18,084 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=43 llm_time=0.000s
+2026-01-28 00:07:18,086 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-28 00:07:34,654 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=what did you say
+2026-01-28 00:07:35,171 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=70 llm_time=0.000s
+2026-01-28 00:07:35,171 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-28 00:07:43,561 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.0m phase_signal=keep_going user_message=use Python to implemented
+2026-01-28 00:07:44,019 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=111 llm_time=0.000s
+2026-01-28 00:07:44,022 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.0m
+2026-01-28 00:07:56,802 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.2m phase_signal=keep_going user_message=right now the accuracy is around 85%
+2026-01-28 00:07:57,370 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=89 llm_time=0.000s
+2026-01-28 00:07:57,373 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.2m
+2026-01-28 00:08:14,400 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.5m phase_signal=keep_going user_message=I mean we have some clubs that are testing our equipment and they're giving pretty good feedback so ...
+2026-01-28 00:08:15,018 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-28 00:08:15,019 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.5m
+2026-01-28 00:08:28,916 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m phase_signal=keep_going user_message=not yet I mean we are still in the in the testing page but but yeah
+2026-01-28 00:08:29,413 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=134 llm_time=0.000s
+2026-01-28 00:08:29,418 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-28 00:08:39,985 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=YOLO mostly
+2026-01-28 00:08:41,183 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-28 00:08:41,188 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-28 00:08:52,823 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.1m phase_signal=keep_going user_message=YOLO
+2026-01-28 00:08:53,604 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=80 llm_time=0.000s
+2026-01-28 00:08:53,608 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.1m
+2026-01-28 00:09:01,157 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.2m phase_signal=keep_going user_message=I use YOLO mostly
+2026-01-28 00:09:01,851 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=77 llm_time=0.000s
+2026-01-28 00:09:01,851 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.2m
+2026-01-28 00:09:15,832 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.5m phase_signal=keep_going user_message=okay I'm using random forest and neural networks
+2026-01-28 00:09:16,317 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-28 00:09:16,321 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.5m
+2026-01-28 00:09:30,563 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.7m phase_signal=keep_going user_message=I'm using those to develop the referee system to train models and I'm also using some Ruby systems
+2026-01-28 00:09:31,126 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=89 llm_time=0.000s
+2026-01-28 00:09:31,130 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.7m
+2026-01-28 00:09:56,008 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.2m phase_signal=keep_going user_message=what did you say
+2026-01-28 00:09:56,532 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-28 00:09:56,532 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.2m
+2026-01-28 00:10:09,478 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.4m phase_signal=keep_going user_message=I actually took the videos myself
+2026-01-28 00:10:10,102 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=75 llm_time=0.000s
+2026-01-28 00:10:10,106 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.4m
+2026-01-28 00:10:19,438 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=like 3,000 video
+2026-01-28 00:10:20,187 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=77 llm_time=0.000s
+2026-01-28 00:10:20,191 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-28 00:10:30,972 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.7m phase_signal=keep_going user_message=oh I use YOLO to process the features
+2026-01-28 00:10:31,706 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=124 llm_time=0.000s
+2026-01-28 00:10:31,712 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.7m
+2026-01-28 00:10:53,087 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=so you'll actually create the training data that data themselves are just videos You'll extract data...
+2026-01-28 00:10:53,764 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-28 00:10:53,767 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-28 00:11:08,571 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.4m phase_signal=end_if_you_want user_message=well YOLO can perform post estimations right so we use post estimations to extract key points from o...
+2026-01-28 00:11:09,466 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=133 llm_time=0.000s
+2026-01-28 00:11:09,472 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.4m
+2026-01-28 00:11:34,776 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.8m phase_signal=end_if_you_want user_message=um so I basically use I mean I mean I used a calculate the velocities and accelerations and all the ...
+2026-01-28 00:11:35,501 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=148 llm_time=0.000s
+2026-01-28 00:11:35,508 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.8m
+2026-01-28 00:11:44,800 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.0m phase_signal=end_if_you_want user_message=I already answered the question random forest and like neural networks
+2026-01-28 00:11:45,204 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-28 00:11:45,205 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.0m
+2026-01-28 00:11:53,298 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.1m phase_signal=end_if_you_want user_message=I just answered the question
+2026-01-28 00:11:55,357 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=94 llm_time=0.000s
+2026-01-28 00:11:55,357 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.1m
+2026-01-28 00:12:04,992 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.3m phase_signal=end_if_you_want user_message=I literally just answered a question
+2026-01-28 00:12:06,319 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=94 llm_time=0.000s
+2026-01-28 00:12:06,320 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.3m
+2026-01-28 04:46:58,350 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 04:46:58,814 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 04:46:58,815 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 04:47:15,978 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.4m phase_signal=keep_going user_message=I am Thomas I'm from Chicago I study CS since that's
+2026-01-28 04:47:16,550 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=133 llm_time=0.000s
+2026-01-28 04:47:16,551 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.4m
+2026-01-28 04:47:35,166 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m phase_signal=keep_going user_message=my interest in CS is stemming from my startup which I started in doing High School
+2026-01-28 04:47:35,715 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 04:47:35,716 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-28 04:47:44,840 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.8m phase_signal=keep_going user_message=so I built in AI fencing referee
+2026-01-28 04:47:45,386 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=107 llm_time=0.000s
+2026-01-28 04:47:45,388 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.8m
+2026-01-28 04:47:59,587 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.1m phase_signal=keep_going user_message=the biggest challenge for me
+2026-01-28 04:48:00,139 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=138 llm_time=0.000s
+2026-01-28 04:48:00,140 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.1m
+2026-01-28 04:48:07,356 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.2m phase_signal=keep_going user_message=my AFS and referee
+2026-01-28 04:48:07,973 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=87 llm_time=0.000s
+2026-01-28 04:48:07,975 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.2m
+2026-01-28 04:48:14,697 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=my AI fencing referee
+2026-01-28 04:48:15,116 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=53 llm_time=0.000s
+2026-01-28 04:48:15,117 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-28 04:48:25,768 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=yeah sure so I view a fraud detection pipeline
+2026-01-28 04:48:26,354 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-28 04:48:26,356 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-28 04:48:40,566 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=so the Major Impact is that we boost the fraud detection rate by 23%
+2026-01-28 04:48:41,172 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=57 llm_time=0.000s
+2026-01-28 04:48:41,174 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-28 04:48:50,882 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.9m phase_signal=keep_going user_message=I love it to use neural networks and machine learning models
+2026-01-28 04:48:51,407 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=58 llm_time=0.000s
+2026-01-28 04:48:51,410 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.9m
+2026-01-28 04:49:01,933 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m phase_signal=keep_going user_message=I use tensorflow models in neural networks and random Forest
+2026-01-28 04:49:02,465 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=115 llm_time=0.000s
+2026-01-28 04:49:02,469 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.1m
+2026-01-28 04:49:21,460 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.4m phase_signal=keep_going user_message=so I basically integrate them you know just using python codes and then I train I train them with ou...
+2026-01-28 04:49:21,992 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-28 04:49:21,995 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.4m
+2026-01-28 04:49:37,593 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m phase_signal=keep_going user_message=so I use label data from Passion sections
+2026-01-28 04:49:38,270 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=68 llm_time=0.000s
+2026-01-28 04:49:38,273 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-28 04:49:48,073 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=no I mean label data for past transactions
+2026-01-28 04:49:48,624 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-28 04:49:48,627 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-28 04:49:58,964 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.1m phase_signal=keep_going user_message=it was about over a hundred million
+2026-01-28 04:49:59,439 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=87 llm_time=0.000s
+2026-01-28 04:49:59,443 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.1m
+2026-01-28 04:50:10,103 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.3m phase_signal=keep_going user_message=I use Snowflake and Spark to handle it
+2026-01-28 04:50:10,651 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=54 llm_time=0.000s
+2026-01-28 04:50:10,653 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.3m
+2026-01-28 04:50:24,253 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.5m phase_signal=keep_going user_message=I'm so snowflake is my data warehouse and Spark is used to handle you know breaking the large amount...
+2026-01-28 04:50:24,723 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=42 llm_time=0.000s
+2026-01-28 04:50:24,725 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.5m
+2026-01-28 04:50:38,933 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.7m phase_signal=keep_going user_message=oh I'm so bad basically deployed the model arms to see ICD pipeline
+2026-01-28 04:50:39,361 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=85 llm_time=0.000s
+2026-01-28 04:50:39,364 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.7m
+2026-01-28 04:50:57,595 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.0m phase_signal=keep_going user_message=I mean that prop that I didn't view that pipeline myself so it was built by somebody else in the tea...
+2026-01-28 04:50:58,104 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-28 04:50:58,107 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.0m
+2026-01-28 04:51:04,555 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.2m phase_signal=keep_going user_message=it hasn't low test
+2026-01-28 04:51:05,818 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=90 llm_time=0.000s
+2026-01-28 04:51:05,818 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.2m
+2026-01-28 04:51:20,678 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.4m phase_signal=keep_going user_message=yeah sure so I use these tests so you know that works
+2026-01-28 04:51:21,202 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=92 llm_time=0.000s
+2026-01-28 04:51:21,205 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.4m
+2026-01-28 04:51:32,946 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.6m phase_signal=keep_going user_message=sorry I can't give you more details
+2026-01-28 04:51:33,625 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=81 llm_time=0.000s
+2026-01-28 04:51:33,625 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.6m
+2026-01-28 04:51:45,741 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m phase_signal=keep_going user_message=yeah sure so I ain't nobody I viewed a video sharing platform using spring boot
+2026-01-28 04:51:46,219 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-28 04:51:46,222 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-28 04:51:58,902 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=on the major purpose is to basically you know a lot of platforms people to share videos comments and...
+2026-01-28 04:51:59,324 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=60 llm_time=0.000s
+2026-01-28 04:51:59,325 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-28 04:52:11,751 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m phase_signal=end_if_you_want user_message=I was specifically responsible for developing spring Boot and the database
+2026-01-28 04:52:12,152 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=34 llm_time=0.000s
+2026-01-28 04:52:12,153 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-28 04:52:18,548 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.4m phase_signal=end_if_you_want user_message=I use postgres equal
+2026-01-28 04:52:19,002 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-28 04:52:19,005 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.4m
+2026-01-28 04:52:29,775 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.6m phase_signal=end_if_you_want user_message=I interact with them through xmls and Jason's
+2026-01-28 04:52:30,412 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=95 llm_time=0.000s
+2026-01-28 04:52:30,416 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.6m
+2026-01-28 04:52:40,352 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.8m phase_signal=end_if_you_want user_message=through xmls
+2026-01-28 04:52:40,844 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=100 llm_time=0.000s
+2026-01-28 04:52:40,848 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.8m
+2026-01-28 04:52:55,773 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.0m phase_signal=end_if_you_want user_message=so XML allow you to use the sequel queries directly
+2026-01-28 04:52:56,396 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=78 llm_time=0.000s
+2026-01-28 04:52:56,397 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.0m
+2026-01-28 04:53:06,081 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.2m phase_signal=end_if_you_want user_message=using my baddest
+2026-01-28 04:53:06,571 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=68 llm_time=0.000s
+2026-01-28 04:53:06,571 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.2m
+2026-01-28 04:53:14,987 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.3m phase_signal=end_if_you_want user_message=yes I did
+2026-01-28 04:53:15,402 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-28 04:53:15,406 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.3m
+2026-01-28 04:53:32,041 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.6m phase_signal=end_if_you_want user_message=oh so I basically integrated it's just like spring boot already is kind of naturally support my bad ...
+2026-01-28 04:53:32,491 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=76 llm_time=0.000s
+2026-01-28 04:53:32,495 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.6m
+2026-01-28 04:53:43,765 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.8m phase_signal=end_if_you_want user_message=to be honest I don't really know cuz I only responsible for the spring boot part
+2026-01-28 04:53:44,306 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=120 llm_time=0.000s
+2026-01-28 04:53:44,310 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.8m
+2026-01-28 04:53:59,739 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.1m phase_signal=end_if_you_want user_message=mom the most challenging part is learning how to use Java to afford back in which is a new experienc...
+2026-01-28 04:54:00,299 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=103 llm_time=0.000s
+2026-01-28 04:54:00,302 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.1m
+2026-01-28 04:54:13,668 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.3m phase_signal=end_if_you_want user_message=so I work under a manager so mostly I communicate through him but also some other senior Engineers s...
+2026-01-28 04:54:14,216 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=33 llm_time=0.000s
+2026-01-28 04:54:14,218 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.3m
+2026-01-28 04:54:24,123 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.5m phase_signal=end_if_you_want user_message=it's like half an hour people exchange ideas checking in on the Jared tickets
+2026-01-28 04:54:24,616 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=36 llm_time=0.000s
+2026-01-28 04:54:24,618 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.5m
+2026-01-28 04:54:41,154 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.8m phase_signal=end_if_you_want user_message=I didn't have to review other people's code as I was an intern so basically I only take comments fro...
+2026-01-28 04:54:41,659 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=70 llm_time=0.000s
+2026-01-28 04:54:41,660 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.8m
+2026-01-28 04:54:49,216 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=7.9m phase_signal=end_if_you_want user_message=yeah that's right
+2026-01-28 04:54:49,767 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=101 llm_time=0.000s
+2026-01-28 04:54:49,771 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=7.9m
+2026-01-28 04:54:58,527 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.1m phase_signal=wrap_up_soon user_message=like I said it's through stand-ups and sprints
+2026-01-28 04:54:59,244 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=145 llm_time=0.000s
+2026-01-28 04:54:59,249 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.1m
+2026-01-28 04:55:05,869 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.2m phase_signal=wrap_up_soon user_message=stand ups and sprints
+2026-01-28 04:55:06,376 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=36 llm_time=0.000s
+2026-01-28 04:55:06,378 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.2m
+2026-01-28 04:55:16,099 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.4m phase_signal=wrap_up_soon user_message=that was friends was to kind of like every two weeks we can wrap up and see how it goes
+2026-01-28 04:55:16,645 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=39 llm_time=0.000s
+2026-01-28 04:55:16,647 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.4m
+2026-01-28 04:55:23,110 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.5m phase_signal=wrap_up_soon user_message=I share my progress
+2026-01-28 04:55:23,755 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=36 llm_time=0.000s
+2026-01-28 04:55:23,757 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.5m
+2026-01-28 04:55:34,969 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=8.7m phase_signal=wrap_up_soon user_message=just you know like if I view a new database or if I Implement a new function or some problems that I...
+2026-01-28 04:55:35,424 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=96 llm_time=0.000s
+2026-01-28 04:55:35,428 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=8.7m
+2026-01-28 04:55:53,452 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.0m phase_signal=wrap_up_soon user_message=a function would be something like it's for instance democrue this is a special feature that we have...
+2026-01-28 04:55:53,976 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-28 04:55:53,979 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.0m
+2026-01-28 04:56:04,760 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.2m phase_signal=wrap_up_soon user_message=I cannot tell you that year it's confidential
+2026-01-28 04:56:05,403 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=152 llm_time=0.000s
+2026-01-28 04:56:05,408 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.2m
+2026-01-28 04:56:18,760 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.4m phase_signal=wrap_up_soon user_message=I saw we already discussed that earlier
+2026-01-28 04:56:19,363 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=111 llm_time=0.000s
+2026-01-28 04:56:19,368 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.4m
+2026-01-28 04:56:26,197 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.5m phase_signal=wrap_up_soon user_message=we already discussed it earlier
+2026-01-28 04:56:26,877 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=133 llm_time=0.000s
+2026-01-28 04:56:26,883 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.5m
+2026-01-28 04:56:39,593 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=9.7m phase_signal=wrap_up_soon user_message=we have also already discussed it
+2026-01-28 04:56:40,199 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=110 llm_time=0.000s
+2026-01-28 04:56:40,199 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=9.7m
+2026-01-28 04:56:57,318 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=10.0m phase_signal=must_end_now user_message=I think we're about time
+2026-01-28 04:56:57,868 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=54 llm_time=0.000s
+2026-01-28 04:56:57,868 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=10.0m
+2026-01-28 04:56:57,868 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=True)
+2026-01-28 04:56:57,868 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-28 04:57:10,035 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=True
+2026-01-28 04:57:10,035 [INFO] [TEST RUN] phase=coding question=Valid Word Abbreviation
+2026-01-28 04:57:10,885 [INFO] [TEST RUN] phase=coding status=fail summary=Some test cases failed.
+2026-01-28 04:57:10,885 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.2m phase_signal=end_if_you_want user_message=cool hello
+2026-01-28 04:57:12,894 [INFO] [MODEL RESPONSE] phase=coding reply_len=1300 llm_time=0.000s
+2026-01-28 04:57:12,898 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.2m
+2026-01-28 04:58:00,236 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 04:58:00,236 [INFO] [TEST RUN] phase=coding question=Valid Word Abbreviation
+2026-01-28 04:58:04,341 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-28 04:58:04,341 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.1m phase_signal=end_if_you_want user_message=I got it
+2026-01-28 04:58:04,731 [INFO] [MODEL RESPONSE] phase=coding reply_len=63 llm_time=0.000s
+2026-01-28 04:58:04,732 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.1m
+2026-01-28 04:58:18,417 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 04:58:18,418 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.3m phase_signal=end_if_you_want user_message=I'm so the time complexity will be linear and there's no space complexity
+2026-01-28 04:58:18,956 [INFO] [MODEL RESPONSE] phase=coding reply_len=54 llm_time=0.000s
+2026-01-28 04:58:18,957 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.3m
+2026-01-28 04:58:29,303 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 04:58:29,303 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.5m phase_signal=end_if_you_want user_message=I mean it's not like no space complexity but space complexity is constant
+2026-01-28 04:58:29,798 [INFO] [MODEL RESPONSE] phase=coding reply_len=46 llm_time=0.000s
+2026-01-28 04:58:29,798 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=1.5m
+2026-01-28 04:58:29,798 [INFO] [PHASE SHIFT] full mode coding -> questions (phase_complete=True force_end=False)
+2026-01-28 04:58:29,799 [INFO] [PHASE TRANSITION] coding -> questions
+2026-01-28 04:58:38,360 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.1m phase_signal=end_if_you_want user_message=so how's the light working in Google
+2026-01-28 04:58:38,918 [INFO] [MODEL RESPONSE] phase=questions reply_len=86 llm_time=0.000s
+2026-01-28 04:58:38,919 [INFO] [PHASE CHECK] phase=questions phase_complete=False time_in_phase=0.1m
+2026-01-28 04:58:51,542 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.4m phase_signal=end_if_you_want user_message=no I'm asking like what's a life like working Google
+2026-01-28 04:58:52,367 [INFO] [MODEL RESPONSE] phase=questions reply_len=124 llm_time=0.000s
+2026-01-28 04:58:52,368 [INFO] [PHASE CHECK] phase=questions phase_complete=True time_in_phase=0.4m
+2026-01-28 04:58:52,368 [INFO] [PHASE SHIFT] full mode questions -> ended
+2026-01-28 04:58:59,129 [INFO] [REPORT] interview_report cached meta only interview_id=45
+2026-01-28 04:58:59,130 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=45
+2026-01-28 04:59:00,998 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-28 06:15:38,982 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 06:15:42,577 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 06:15:42,578 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 06:52:04,680 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=36.5m phase_signal=must_end_now user_message=sorry I was I was in the restroom
+2026-01-28 06:52:05,203 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=88 llm_time=0.000s
+2026-01-28 06:52:05,203 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=36.5m
+2026-01-28 06:52:05,203 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=True)
+2026-01-28 06:52:05,204 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-28 06:52:31,863 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 06:52:32,434 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 06:52:32,434 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 06:52:42,225 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.2m phase_signal=keep_going user_message=sorry I was at the bathroom
+2026-01-28 06:52:42,724 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=60 llm_time=0.000s
+2026-01-28 06:52:42,725 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.2m
+2026-01-28 06:53:00,480 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.5m phase_signal=keep_going user_message=what
+2026-01-28 06:53:00,906 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=103 llm_time=0.000s
+2026-01-28 06:53:00,907 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.5m
+2026-01-28 16:42:04,766 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 16:42:05,630 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 16:42:05,634 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 16:42:22,258 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.4m phase_signal=keep_going user_message=hey I'm Thomas I am from uchicago and my major in CS
+2026-01-28 16:42:25,404 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=142 llm_time=0.000s
+2026-01-28 16:42:25,404 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.4m
+2026-01-28 16:42:46,107 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.8m phase_signal=keep_going user_message=oh well I'm very interested in those fields because I have multiple experiences as a software engine...
+2026-01-28 16:42:46,755 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=113 llm_time=0.000s
+2026-01-28 16:42:46,757 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.8m
+2026-01-28 16:43:02,602 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m phase_signal=keep_going user_message=oh yeah sure so I I help you a fraud protection pipeline
+2026-01-28 16:43:04,394 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-28 16:43:04,396 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-28 16:43:18,179 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=well the main goes pipeline is to basically flag suspicious transactions
+2026-01-28 16:43:18,741 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=61 llm_time=0.000s
+2026-01-28 16:43:18,743 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-28 16:43:32,648 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=all kinds of things like you know why or ACAC and anything really
+2026-01-28 16:43:33,423 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=78 llm_time=0.000s
+2026-01-28 16:43:33,426 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-28 16:43:47,839 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=so I use machine learning and you're on networks as well as large data scale processing
+2026-01-28 16:43:48,342 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=64 llm_time=0.000s
+2026-01-28 16:43:48,344 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-28 16:44:07,976 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m phase_signal=keep_going user_message=yeah sure so I used tensorflow models I use neural networks and random forest and extra boost and al...
+2026-01-28 16:44:09,303 [ERROR] [MODEL ERROR] Gemini API error 503: {
+  "error": {
+    "code": 503,
+    "message": "The model is overloaded. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+2026-01-28 16:44:53,944 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=hello
+2026-01-28 16:44:54,534 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=46 llm_time=0.000s
+2026-01-28 16:44:54,535 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-28 16:45:02,117 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.0m phase_signal=keep_going user_message=okay
+2026-01-28 16:45:02,572 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=73 llm_time=0.000s
+2026-01-28 16:45:02,575 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.0m
+2026-01-28 16:45:13,557 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.2m phase_signal=keep_going user_message=I didn't say I use a tensorflow to train behavior model
+2026-01-28 16:45:14,225 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=102 llm_time=0.000s
+2026-01-28 16:45:14,230 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.2m
+2026-01-28 16:45:36,112 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.6m phase_signal=keep_going user_message=oh yeah yeah sure so I basically use tensorflow to train models that detect login anomalies transact...
+2026-01-28 16:45:36,859 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=34 llm_time=0.000s
+2026-01-28 16:45:36,861 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.6m
+2026-01-28 16:45:56,107 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.9m phase_signal=keep_going user_message=well that really improved accuracy but you know I use Behavior models and then we can output you kno...
+2026-01-28 16:45:56,846 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-28 16:45:56,850 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.9m
+2026-01-28 16:46:07,305 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.1m phase_signal=keep_going user_message=around like 23% boost
+2026-01-28 16:46:08,023 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=86 llm_time=0.000s
+2026-01-28 16:46:08,027 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.1m
+2026-01-28 16:46:18,385 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.3m phase_signal=keep_going user_message=oh my most recent project is about my startup call offenses page
+2026-01-28 16:46:18,977 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-28 16:46:18,979 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.3m
+2026-01-28 16:46:30,518 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=so it's my startup and basically I help you a AI fencing referee and analytic system
+2026-01-28 16:46:31,197 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=63 llm_time=0.000s
+2026-01-28 16:46:31,201 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-28 16:46:46,604 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.8m phase_signal=keep_going user_message=so basically provide fencers with information about you know how they did you know the velocity is a...
+2026-01-28 16:46:47,144 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=38 llm_time=0.000s
+2026-01-28 16:46:47,146 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.8m
+2026-01-28 16:46:58,662 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.0m phase_signal=keep_going user_message=by using post estimations to extract key points and then use those key points to the calculations
+2026-01-28 16:46:59,451 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-28 16:46:59,454 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.0m
+2026-01-28 16:47:07,892 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=I thought you already asked a question
+2026-01-28 16:47:08,850 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-28 16:47:08,850 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.1m
+2026-01-28 16:47:19,094 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m phase_signal=end_if_you_want user_message=a tough one will be performing post estimations
+2026-01-28 16:47:19,901 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=42 llm_time=0.000s
+2026-01-28 16:47:19,904 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-28 16:47:34,049 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.6m phase_signal=end_if_you_want user_message=well because we have to track the positions of defenses consistently even though if they are occasio...
+2026-01-28 16:47:34,577 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=58 llm_time=0.000s
+2026-01-28 16:47:34,580 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.6m
+2026-01-28 16:47:44,002 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.7m phase_signal=end_if_you_want user_message=so I use track anything from Facebook to do it
+2026-01-28 16:47:44,586 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=56 llm_time=0.000s
+2026-01-28 16:47:44,588 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.7m
+2026-01-28 16:47:52,646 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.9m phase_signal=end_if_you_want user_message=like I said post estimations
+2026-01-28 16:47:53,637 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=120 llm_time=0.000s
+2026-01-28 16:47:53,641 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.9m
+2026-01-28 16:48:04,563 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.1m phase_signal=end_if_you_want user_message=I don't have to work with others because I'm mostly working by myself
+2026-01-28 16:48:05,165 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=76 llm_time=0.000s
+2026-01-28 16:48:05,169 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.1m
+2026-01-28 16:48:13,637 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.2m phase_signal=end_if_you_want user_message=I don't have to work with others I'm working by myself
+2026-01-28 16:48:14,676 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=70 llm_time=0.000s
+2026-01-28 16:48:14,680 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.2m
+2026-01-28 16:48:28,470 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.5m phase_signal=end_if_you_want user_message=I'm most comfortable with Java but I can also do Python and some other languages as well
+2026-01-28 16:48:29,469 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=47 llm_time=0.000s
+2026-01-28 16:48:29,472 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.5m
+2026-01-28 16:48:37,499 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.6m phase_signal=end_if_you_want user_message=why why do you keep asking the same question
+2026-01-28 16:48:38,146 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=60 llm_time=0.000s
+2026-01-28 16:48:38,147 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=6.6m
+2026-01-28 16:56:58,778 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 16:56:59,346 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 16:56:59,350 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 16:57:14,320 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m phase_signal=keep_going user_message=hi I'm Thomas I am from uchicago and I'm major in CS and stats
+2026-01-28 16:57:14,945 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=124 llm_time=0.000s
+2026-01-28 16:57:14,946 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-28 16:57:34,389 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m phase_signal=keep_going user_message=oh yeah sure so my rock you to software is a software engineer I'm mainly responsible for developing...
+2026-01-28 16:57:35,163 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=73 llm_time=0.000s
+2026-01-28 16:57:35,165 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-28 16:57:56,634 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m phase_signal=keep_going user_message=oh am I personally sing the hardest part is to handle large-scale data so we have over 100 million t...
+2026-01-28 16:57:57,633 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-28 16:57:57,635 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-28 16:58:14,287 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=so I basically use spark as a replacement for pandas on spark can break the data frames into chunks ...
+2026-01-28 16:58:14,806 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=84 llm_time=0.000s
+2026-01-28 16:58:14,809 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-28 16:58:34,537 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.7m phase_signal=keep_going user_message=well like I said we have a large amount of data and the datas are labeled so we know that in these a...
+2026-01-28 16:58:35,147 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-28 16:58:35,150 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.7m
+2026-01-28 16:58:52,431 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.0m phase_signal=keep_going user_message=almost try with a bunch of different models we've tried tensorflowing neural networks we've also hav...
+2026-01-28 16:58:53,022 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=82 llm_time=0.000s
+2026-01-28 16:58:53,025 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.0m
+2026-01-28 16:59:10,027 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.3m phase_signal=keep_going user_message=on the best model is The Ensemble model because I physically picked you know the top three to four b...
+2026-01-28 16:59:10,798 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=59 llm_time=0.000s
+2026-01-28 16:59:10,801 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.3m
+2026-01-28 16:59:18,052 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.4m phase_signal=keep_going user_message=like 22%
+2026-01-28 16:59:20,570 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=115 llm_time=0.000s
+2026-01-28 16:59:20,574 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.4m
+2026-01-28 16:59:34,903 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m phase_signal=keep_going user_message=I'm sorry I was working on building a video sharing platform
+2026-01-28 16:59:35,478 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=67 llm_time=0.000s
+2026-01-28 16:59:35,483 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-28 16:59:50,033 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.9m phase_signal=keep_going user_message=I mean learning how to view the back end with Java is a steep learning curve for me because I haven'...
+2026-01-28 16:59:50,618 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=52 llm_time=0.000s
+2026-01-28 16:59:50,624 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.9m
+2026-01-28 16:59:59,185 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.1m phase_signal=keep_going user_message=I already told you
+2026-01-28 16:59:59,698 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=106 llm_time=0.000s
+2026-01-28 16:59:59,703 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.1m
+2026-01-28 17:00:11,004 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.3m phase_signal=keep_going user_message=I'm using Java to Beauty back end
+2026-01-28 17:00:11,529 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=83 llm_time=0.000s
+2026-01-28 17:00:11,534 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.3m
+2026-01-28 17:00:20,337 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.4m phase_signal=keep_going user_message=I'm mainly using spring Boot and my dad is for the backhand
+2026-01-28 17:00:20,823 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=33 llm_time=0.000s
+2026-01-28 17:00:20,825 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.4m
+2026-01-28 17:00:27,508 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.5m phase_signal=keep_going user_message=I'm using postgresql
+2026-01-28 17:00:28,067 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=65 llm_time=0.000s
+2026-01-28 17:00:28,070 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.5m
+2026-01-28 17:00:40,448 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.8m phase_signal=keep_going user_message=I'm not quite sure I think it's angular but I didn't develop them myself
+2026-01-28 17:00:41,127 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=99 llm_time=0.000s
+2026-01-28 17:00:41,133 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.8m
+2026-01-28 17:00:48,116 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.9m phase_signal=keep_going user_message=spring boot
+2026-01-28 17:00:48,651 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=78 llm_time=0.000s
+2026-01-28 17:00:48,654 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.9m
+2026-01-28 22:15:37,850 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.1m phase_signal=keep_going user_message=hello
+2026-01-28 22:15:38,307 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=66 llm_time=0.000s
+2026-01-28 22:15:38,311 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.1m
+2026-01-28 22:15:53,430 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.3m phase_signal=keep_going user_message=hey I'm Thomas I am from uchicago major NCS and stats
+2026-01-28 22:15:54,022 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=141 llm_time=0.000s
+2026-01-28 22:15:54,025 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.3m
+2026-01-28 22:16:14,211 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=0.7m phase_signal=keep_going user_message=so my interest in these fields are coming from my experiences with my own startup call offenses page...
+2026-01-28 22:16:14,898 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=97 llm_time=0.000s
+2026-01-28 22:16:14,902 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=0.7m
+2026-01-28 22:16:31,650 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.0m phase_signal=keep_going user_message=yeah sure so major I mean we're mainly trying to build a AI fencing referee and analytic platform
+2026-01-28 22:16:32,177 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=80 llm_time=0.000s
+2026-01-28 22:16:32,181 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.0m
+2026-01-28 22:16:49,836 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.3m phase_signal=keep_going user_message=um so it does a lot of things it can referee defensive game it can analyze it and give feedback to t...
+2026-01-28 22:16:50,291 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=50 llm_time=0.000s
+2026-01-28 22:16:50,296 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.3m
+2026-01-28 22:17:06,089 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.5m phase_signal=keep_going user_message=so I basically leverage to use a machine learning model to try I mean use a machine learning model t...
+2026-01-28 22:17:06,560 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=58 llm_time=0.000s
+2026-01-28 22:17:06,565 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.5m
+2026-01-28 22:17:23,103 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=1.8m phase_signal=keep_going user_message=um so I use a combinations of different models I use on classification models the the classic ones a...
+2026-01-28 22:17:23,660 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=69 llm_time=0.000s
+2026-01-28 22:17:23,667 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=1.8m
+2026-01-28 22:17:40,488 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.1m phase_signal=keep_going user_message=on the most challenging part for me is to perform post estimations on so I use track anything and al...
+2026-01-28 22:17:41,200 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=48 llm_time=0.000s
+2026-01-28 22:17:41,206 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.1m
+2026-01-28 22:17:53,595 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.3m phase_signal=keep_going user_message=um so we're exciting key points so such as you know the X and Y coordinates of the joints of defense...
+2026-01-28 22:17:54,070 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=61 llm_time=0.000s
+2026-01-28 22:17:54,076 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.3m
+2026-01-28 22:18:15,817 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=2.7m phase_signal=keep_going user_message=we have a lot of like processing we have like data cleanings we have a rule days operations because ...
+2026-01-28 22:18:16,254 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=61 llm_time=0.000s
+2026-01-28 22:18:16,262 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=2.7m
+2026-01-28 22:18:30,951 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.0m phase_signal=keep_going user_message=comma cannot give you too much detail it's confidential this is how we generate profit basically
+2026-01-28 22:18:31,638 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=132 llm_time=0.000s
+2026-01-28 22:18:31,651 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.0m
+2026-01-28 22:18:51,996 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.3m phase_signal=keep_going user_message=yeah sure so I help you a fraud detection pipeline that basically flag a transaction if it is suspic...
+2026-01-28 22:18:52,530 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=58 llm_time=0.000s
+2026-01-28 22:18:52,539 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.3m
+2026-01-28 22:19:01,436 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.5m phase_signal=keep_going user_message=the transactions that might be fraudulent
+2026-01-28 22:19:02,018 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-28 22:19:02,024 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.5m
+2026-01-28 22:19:27,017 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=3.9m phase_signal=keep_going user_message=I mean I don't know how to give you like an example but basically we are trying to see you know thro...
+2026-01-28 22:19:27,845 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=152 llm_time=0.000s
+2026-01-28 22:19:27,865 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=3.9m
+2026-01-28 22:19:54,912 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.4m phase_signal=keep_going user_message=and we used we we use a lot of different things sorry theaters are from Snowflake and we use spark t...
+2026-01-28 22:19:55,452 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=117 llm_time=0.000s
+2026-01-28 22:19:55,469 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.4m
+2026-01-28 22:20:04,612 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.5m phase_signal=keep_going user_message=on my recent project is actually the Q2 internship
+2026-01-28 22:20:06,442 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=143 llm_time=0.000s
+2026-01-28 22:20:06,457 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.5m
+2026-01-28 22:20:26,597 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=4.9m phase_signal=keep_going user_message=yes so we are using mostly tensorflow models we use on neural networks gradient boost and also some ...
+2026-01-28 22:20:27,228 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=62 llm_time=0.000s
+2026-01-28 22:20:27,239 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=4.9m
+2026-01-28 22:20:48,632 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.3m phase_signal=wrap_up_soon user_message=yeah it's one of the models that we use because I mean it is just a very basic model that's mean wid...
+2026-01-28 22:20:49,409 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=74 llm_time=0.000s
+2026-01-28 22:20:49,424 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.3m
+2026-01-28 22:21:00,706 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.5m phase_signal=wrap_up_soon user_message=because it is performing pretty good and you know it can boost our accuracy
+2026-01-28 22:21:01,411 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=119 llm_time=0.000s
+2026-01-28 22:21:01,429 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.5m
+2026-01-28 22:21:19,050 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.8m phase_signal=wrap_up_soon user_message=so we measured the improvements through comparing with the old Pipeline and we show a significant in...
+2026-01-28 22:21:19,520 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=82 llm_time=0.000s
+2026-01-28 22:21:19,534 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.8m
+2026-01-28 22:21:28,308 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=5.9m phase_signal=wrap_up_soon user_message=about 23%
+2026-01-28 22:21:29,064 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=55 llm_time=0.000s
+2026-01-28 22:21:29,077 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=False time_in_phase=5.9m
+2026-01-28 22:21:39,148 [INFO] [MODEL REQUEST] phase=intro_resume mode=full time_in_phase=6.1m phase_signal=must_end_now user_message=I didn't know but all I know is that improved by 23%
+2026-01-28 22:21:39,653 [INFO] [MODEL RESPONSE] phase=intro_resume reply_len=97 llm_time=0.000s
+2026-01-28 22:21:39,654 [INFO] [PHASE CHECK] phase=intro_resume phase_complete=True time_in_phase=6.1m
+2026-01-28 22:21:39,654 [INFO] [PHASE SHIFT] full mode intro_resume -> coding (phase_complete=True force_end=True)
+2026-01-28 22:21:39,654 [INFO] [PHASE TRANSITION] intro_resume -> coding
+2026-01-28 22:21:49,110 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-28 22:21:49,111 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.2m phase_signal=end_if_you_want user_message=yep of course
+2026-01-28 22:21:50,249 [INFO] [MODEL RESPONSE] phase=coding reply_len=814 llm_time=0.000s
+2026-01-28 22:21:50,254 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.2m
+2026-01-28 22:21:50,254 [ERROR] [TTS ERROR] Cannot synthesize empty text.
+2026-01-28 22:21:55,294 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-28 22:21:55,294 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.3m phase_signal=end_if_you_want user_message=hello
+2026-01-28 22:21:56,153 [INFO] [MODEL RESPONSE] phase=coding reply_len=506 llm_time=0.000s
+2026-01-28 22:21:56,154 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.3m
+2026-01-28 22:22:11,712 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-28 22:22:11,712 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.5m phase_signal=end_if_you_want user_message=no I think I'm going to use
+2026-01-28 22:22:12,356 [INFO] [MODEL RESPONSE] phase=coding reply_len=44 llm_time=0.000s
+2026-01-28 22:22:12,357 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.5m
+2026-01-28 22:22:20,540 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-28 22:22:20,540 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=0.7m phase_signal=end_if_you_want user_message=I'm going to use that for search
+2026-01-28 22:22:21,460 [INFO] [MODEL RESPONSE] phase=coding reply_len=39 llm_time=0.000s
+2026-01-28 22:22:21,461 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=0.7m
+2026-01-28 22:22:36,813 [INFO] [TEST GATE] phase=coding fallback=False complete=False model=False
+2026-01-28 22:22:36,813 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.0m phase_signal=end_if_you_want user_message=I'm going to use a DFS
+2026-01-28 22:22:37,255 [INFO] [MODEL RESPONSE] phase=coding reply_len=40 llm_time=0.000s
+2026-01-28 22:22:37,255 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.0m
+2026-01-28 22:22:53,189 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:22:53,189 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:22:53,232 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:22:53,232 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.2m phase_signal=end_if_you_want user_message=here's my code
+2026-01-28 22:22:53,754 [INFO] [MODEL RESPONSE] phase=coding reply_len=60 llm_time=0.000s
+2026-01-28 22:22:53,755 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.2m
+2026-01-28 22:23:17,426 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:23:17,426 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:23:17,477 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:23:17,477 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=1.6m phase_signal=end_if_you_want user_message=yeah yeah sure so basically we are performing DFS so we we iterate through each position and then we...
+2026-01-28 22:23:18,718 [INFO] [MODEL RESPONSE] phase=coding reply_len=73 llm_time=0.000s
+2026-01-28 22:23:18,719 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=1.6m
+2026-01-28 22:23:48,315 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:23:48,316 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:23:48,364 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:23:48,364 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.1m phase_signal=end_if_you_want user_message=yeah sure so we started with the one on the top left corner and then so then reflect the first first...
+2026-01-28 22:23:48,855 [INFO] [MODEL RESPONSE] phase=coding reply_len=34 llm_time=0.000s
+2026-01-28 22:23:48,856 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.1m
+2026-01-28 22:23:57,461 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:23:57,461 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:23:57,512 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:23:57,513 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.3m phase_signal=end_if_you_want user_message=it will still be correct because DFS will never run
+2026-01-28 22:23:58,491 [INFO] [MODEL RESPONSE] phase=coding reply_len=51 llm_time=0.000s
+2026-01-28 22:23:58,492 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.3m
+2026-01-28 22:24:19,798 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:24:19,798 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:24:19,849 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:24:19,849 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.7m phase_signal=end_if_you_want user_message=it was still handle it correctly because DFS will not run right so basically it will it will you kno...
+2026-01-28 22:24:20,431 [INFO] [MODEL RESPONSE] phase=coding reply_len=76 llm_time=0.000s
+2026-01-28 22:24:20,432 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.7m
+2026-01-28 22:24:30,020 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:24:30,020 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:24:30,070 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:24:30,070 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=2.8m phase_signal=end_if_you_want user_message=I just told you
+2026-01-28 22:24:30,799 [INFO] [MODEL RESPONSE] phase=coding reply_len=43 llm_time=0.000s
+2026-01-28 22:24:30,800 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=2.8m
+2026-01-28 22:24:48,156 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:24:48,156 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:24:48,206 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:24:48,206 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.1m phase_signal=end_if_you_want user_message=so basically in the for Loop starting from line 16 in the for looters and if statement at line 18 an...
+2026-01-28 22:24:48,932 [INFO] [MODEL RESPONSE] phase=coding reply_len=51 llm_time=0.000s
+2026-01-28 22:24:48,932 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.1m
+2026-01-28 22:24:58,451 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:24:58,452 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:24:58,496 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:24:58,496 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.3m phase_signal=end_if_you_want user_message=because because it's an empty grid and the condition will never met
+2026-01-28 22:24:58,992 [INFO] [MODEL RESPONSE] phase=coding reply_len=58 llm_time=0.000s
+2026-01-28 22:24:58,993 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.3m
+2026-01-28 22:25:15,240 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:25:15,241 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:25:15,297 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:25:15,298 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.6m phase_signal=end_if_you_want user_message=on then we will start the DFS on the very first position and then it will run the entire grid
+2026-01-28 22:25:15,802 [INFO] [MODEL RESPONSE] phase=coding reply_len=64 llm_time=0.000s
+2026-01-28 22:25:15,803 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.6m
+2026-01-28 22:25:26,998 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:25:26,998 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:25:27,042 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:25:27,042 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=3.8m phase_signal=end_if_you_want user_message=it will not because on the problem states that it only contains one or zero
+2026-01-28 22:25:27,485 [INFO] [MODEL RESPONSE] phase=coding reply_len=89 llm_time=0.000s
+2026-01-28 22:25:27,485 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=3.8m
+2026-01-28 22:26:01,837 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:26:01,837 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:26:01,880 [INFO] [TEST RUN] phase=coding status=error summary=Runtime error.
+2026-01-28 22:26:01,880 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=4.4m phase_signal=end_if_you_want user_message=is there is it a problem
+2026-01-28 22:26:02,724 [INFO] [MODEL RESPONSE] phase=coding reply_len=57 llm_time=0.000s
+2026-01-28 22:26:02,724 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.4m
+2026-01-28 22:26:11,621 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:26:11,622 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=4.5m phase_signal=end_if_you_want user_message=well I don't know why it hasn't runtime error
+2026-01-28 22:26:12,237 [INFO] [MODEL RESPONSE] phase=coding reply_len=73 llm_time=0.000s
+2026-01-28 22:26:12,237 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.5m
+2026-01-28 22:26:21,744 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:26:21,745 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=4.7m phase_signal=end_if_you_want user_message=I don't know on can you give me a hint
+2026-01-28 22:26:22,263 [INFO] [MODEL RESPONSE] phase=coding reply_len=58 llm_time=0.000s
+2026-01-28 22:26:22,264 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.7m
+2026-01-28 22:26:30,605 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:26:30,605 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=4.8m phase_signal=end_if_you_want user_message=I don't know why it has a runtime error
+2026-01-28 22:26:31,205 [INFO] [MODEL RESPONSE] phase=coding reply_len=100 llm_time=0.000s
+2026-01-28 22:26:31,206 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=4.8m
+2026-01-28 22:26:48,185 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:26:48,185 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=5.1m phase_signal=end_if_you_want user_message=no I want to know like why why there's a runtime error
+2026-01-28 22:26:48,673 [INFO] [MODEL RESPONSE] phase=coding reply_len=67 llm_time=0.000s
+2026-01-28 22:26:48,673 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.1m
+2026-01-28 22:26:58,776 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:26:58,776 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=5.3m phase_signal=end_if_you_want user_message=and why is this happening
+2026-01-28 22:26:59,205 [INFO] [MODEL RESPONSE] phase=coding reply_len=56 llm_time=0.000s
+2026-01-28 22:26:59,206 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.3m
+2026-01-28 22:27:08,379 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=False
+2026-01-28 22:27:08,379 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=5.5m phase_signal=end_if_you_want user_message=no I want to know like why why is it happening
+2026-01-28 22:27:08,810 [INFO] [MODEL RESPONSE] phase=coding reply_len=105 llm_time=0.000s
+2026-01-28 22:27:08,810 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.5m
+2026-01-28 22:27:25,636 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:27:25,636 [INFO] [TEST RUN] phase=coding question=Number of Islands
+2026-01-28 22:27:28,253 [INFO] [TEST RUN] phase=coding status=pass summary=All tests passed.
+2026-01-28 22:27:28,253 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=5.8m phase_signal=end_if_you_want user_message=what about this
+2026-01-28 22:27:28,666 [INFO] [MODEL RESPONSE] phase=coding reply_len=61 llm_time=0.000s
+2026-01-28 22:27:28,666 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=5.8m
+2026-01-28 22:27:38,004 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:27:38,004 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.0m phase_signal=end_if_you_want user_message=sorry I at a market visited Island
+2026-01-28 22:27:38,621 [INFO] [MODEL RESPONSE] phase=coding reply_len=50 llm_time=0.000s
+2026-01-28 22:27:38,622 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.0m
+2026-01-28 22:27:50,161 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:27:50,161 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.2m phase_signal=end_if_you_want user_message=on it is end times end like which is the road times The Columns basically
+2026-01-28 22:27:50,790 [INFO] [MODEL RESPONSE] phase=coding reply_len=55 llm_time=0.000s
+2026-01-28 22:27:50,791 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.2m
+2026-01-28 22:28:00,040 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:28:00,040 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.3m phase_signal=end_if_you_want user_message=it's the number of rows times number of columns
+2026-01-28 22:28:01,713 [INFO] [MODEL RESPONSE] phase=coding reply_len=39 llm_time=0.000s
+2026-01-28 22:28:01,714 [INFO] [PHASE CHECK] phase=coding phase_complete=False time_in_phase=6.3m
+2026-01-28 22:28:12,485 [INFO] [TEST GATE] phase=coding fallback=False complete=True model=True
+2026-01-28 22:28:12,485 [INFO] [MODEL REQUEST] phase=coding mode=full time_in_phase=6.5m phase_signal=end_if_you_want user_message=it's the same oh wait there's no space complexity except the stack of the DFS
+2026-01-28 22:28:13,056 [INFO] [MODEL RESPONSE] phase=coding reply_len=45 llm_time=0.000s
+2026-01-28 22:28:13,056 [INFO] [PHASE CHECK] phase=coding phase_complete=True time_in_phase=6.5m
+2026-01-28 22:28:13,057 [INFO] [PHASE SHIFT] full mode coding -> questions (phase_complete=True force_end=False)
+2026-01-28 22:28:13,057 [INFO] [PHASE TRANSITION] coding -> questions
+2026-01-28 22:28:21,039 [INFO] [MODEL REQUEST] phase=questions mode=full time_in_phase=0.1m phase_signal=end_if_you_want user_message=but I don't have any questions
+2026-01-28 22:28:21,498 [INFO] [MODEL RESPONSE] phase=questions reply_len=39 llm_time=0.000s
+2026-01-28 22:28:21,499 [INFO] [PHASE CHECK] phase=questions phase_complete=True time_in_phase=0.1m
+2026-01-28 22:28:21,499 [INFO] [PHASE SHIFT] full mode questions -> ended
+2026-01-28 22:28:23,577 [INFO] [REPORT] interview_report cached meta only interview_id=50
+2026-01-28 22:28:23,577 [INFO] [REPORT] interview_report generating model=gemini-2.5-flash-lite interview_id=50
+2026-01-28 22:28:25,442 [INFO] [REPORT] interview_report generated keys=['overall_score', 'recommendation', 'summary', 'category_scores', 'strengths', 'improvements', 'notable_moments', 'rubric_details']
+2026-01-28 22:28:58,851 [INFO] [REPORT] interview_report cached interview_id=50

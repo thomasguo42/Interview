@@ -56,7 +56,7 @@ from .state import (
 PHASE_COMPLETE_TOKEN = "[SECTION_COMPLETE]"
 
 FULL_PHASE_RULES = {
-    PHASE_INTRO_RESUME: {"min": 5.0, "max": 10.0, "next": PHASE_CODING},
+    PHASE_INTRO_RESUME: {"min": 5.0, "max": 6.0, "next": PHASE_CODING},
     PHASE_CODING: {"min": 0.0, "max": 30.0, "next": PHASE_QUESTIONS},
     PHASE_QUESTIONS: {"min": 0.0, "max": 5.0, "next": None},
 }
@@ -205,21 +205,138 @@ def create_app() -> Flask:
         topics: list[str] = []
         if "project" in lowered or "most recent" in lowered or "recent work" in lowered:
             topics.append("recent_project")
-        if "challenge" in lowered or "difficult" in lowered or "problem" in lowered:
+        if (
+            "challenge" in lowered
+            or "difficult" in lowered
+            or "problem" in lowered
+            or "hard" in lowered
+            or "tough" in lowered
+            or "learning curve" in lowered
+            or "steep" in lowered
+            or "struggle" in lowered
+        ):
             topics.append("challenge")
-        if "skill" in lowered or "technology" in lowered or "tech stack" in lowered or "tools" in lowered:
+        if (
+            "skill" in lowered
+            or "technology" in lowered
+            or "technolog" in lowered
+            or "tech stack" in lowered
+            or "tools" in lowered
+            or "stack" in lowered
+            or "language" in lowered
+            or "framework" in lowered
+        ):
             topics.append("skills")
         if "role" in lowered or "responsib" in lowered or "contribut" in lowered:
             topics.append("role")
         if "impact" in lowered or "result" in lowered or "outcome" in lowered:
             topics.append("impact")
-        if "team" in lowered or "collaborat" in lowered or "stakeholder" in lowered:
+        if (
+            "team" in lowered
+            or "collaborat" in lowered
+            or "stakeholder" in lowered
+            or "work with" in lowered
+            or "worked with" in lowered
+            or "others" in lowered
+            or "together" in lowered
+        ):
             topics.append("collaboration")
         if "next" in lowered or "excited" in lowered or "interested" in lowered:
             topics.append("next")
         return topics
 
-    def _select_resume_followup(asked: Dict[str, int]) -> str:
+    def _user_signaled_repeat(text: str) -> bool:
+        if not text:
+            return False
+        lowered = text.lower()
+        signals = [
+            "already told you",
+            "already answered",
+            "i already answered",
+            "i already told you",
+            "you asked",
+            "keep asking",
+            "repeating",
+            "repeat",
+            "i said",
+            "as i said",
+            "i told you",
+        ]
+        return any(sig in lowered for sig in signals)
+
+    def _persist_phase_meta(interview: Interview, phase_key: str, meta: Dict[str, Any]) -> None:
+        import copy
+        report = dict(interview.report or {})
+        phase_meta = dict(report.get("_phase_meta") or {})
+        phase_meta[phase_key] = copy.deepcopy(meta)
+        report["_phase_meta"] = phase_meta
+        interview.report = report
+
+    def _extract_questions(text: str) -> list[str]:
+        if not text:
+            return []
+        import re
+        if "?" in text:
+            parts = [seg.strip() for seg in text.split("?") if seg.strip()]
+        else:
+            parts = []
+            # Heuristic: treat short leading sentences that start with a question word as questions.
+            candidate = re.split(r"[.\n]", text.strip(), maxsplit=1)[0].strip()
+            if candidate:
+                parts = [candidate]
+        questions: list[str] = []
+        for part in parts:
+            # Keep only likely question sentences.
+            if re.search(r"\b(what|why|how|tell|walk|describe|explain|where|when|which|who)\b", part.lower()):
+                questions.append(part)
+        return questions
+
+    def _normalize_question(text: str) -> str:
+        if not text:
+            return ""
+        import re
+        lowered = text.lower()
+        lowered = re.sub(r"[^a-z0-9\s]", " ", lowered)
+        lowered = re.sub(r"\s+", " ", lowered).strip()
+        # Remove common filler to improve match robustness.
+        stopwords = {
+            "can", "could", "would", "please", "tell", "me", "about", "your", "you", "share", "walk",
+            "through", "explain", "describe", "give", "details", "more", "on", "the", "a", "an", "to",
+            "and", "do", "does", "did", "is", "are", "was", "were", "it", "that", "this",
+        }
+        tokens = [tok for tok in lowered.split() if tok not in stopwords]
+        return " ".join(tokens)
+
+    def _is_question_repeat(new_q: str, prior: list[str]) -> bool:
+        if not new_q or not prior:
+            return False
+        import re
+        import difflib
+        norm_new = _normalize_question(new_q)
+        if not norm_new:
+            return False
+        new_tokens = set(norm_new.split())
+        for old in prior:
+            norm_old = _normalize_question(old)
+            if not norm_old:
+                continue
+            if norm_old == norm_new:
+                return True
+            ratio = difflib.SequenceMatcher(None, norm_new, norm_old).ratio()
+            if ratio >= 0.82:
+                return True
+            if norm_old in norm_new or norm_new in norm_old:
+                return True
+            old_tokens = set(norm_old.split())
+            if not old_tokens:
+                continue
+            overlap = len(new_tokens & old_tokens) / max(1, len(new_tokens | old_tokens))
+            if overlap >= 0.6:
+                return True
+        return False
+
+    def _select_resume_followup(asked: Dict[str, int], recent_questions: list[str] | None = None) -> str:
+        recent_questions = recent_questions or []
         followups = [
             ("recent_project", "What was your most recent project about?"),
             ("role", "What was your role and scope on that work?"),
@@ -231,14 +348,108 @@ def create_app() -> Flask:
         ]
         for key, prompt in followups:
             if asked.get(key, 0) == 0:
-                return prompt
+                if not _is_question_repeat(prompt, recent_questions):
+                    return prompt
+                asked[key] = asked.get(key, 0) + 1
         return "Anything else from your background you want to highlight?"
+
+    def _tokenize_text(text: str) -> list[str]:
+        if not text:
+            return []
+        import re
+        lowered = text.lower()
+        lowered = re.sub(r"[^a-z0-9\\s]", " ", lowered)
+        lowered = re.sub(r"\\s+", " ", lowered).strip()
+        stopwords = {
+            "the", "a", "an", "and", "or", "to", "of", "in", "on", "for", "with", "at", "by", "from",
+            "my", "our", "your", "their", "this", "that", "these", "those", "it", "its", "is", "are",
+            "was", "were", "be", "been", "being", "as", "into", "about", "over", "under", "between",
+            "you", "me", "we", "they", "he", "she", "them", "i",
+        }
+        return [tok for tok in lowered.split() if tok and tok not in stopwords]
+
+    def _split_sentences(text: str) -> list[str]:
+        if not text:
+            return []
+        import re
+        # Split on sentence boundaries, keep it simple for TTS style output.
+        parts = re.split(r"[.!?]+\\s*", text.strip())
+        return [p.strip() for p in parts if p.strip()]
+
+    def _normalize_sentence(text: str) -> str:
+        if not text:
+            return ""
+        import re
+        lowered = text.lower()
+        lowered = re.sub(r"[^a-z0-9\\s]", " ", lowered)
+        lowered = re.sub(r"\\s+", " ", lowered).strip()
+        return lowered
+
+    def _is_sentence_repeat(sentence: str, prior: list[str]) -> bool:
+        if not sentence or not prior:
+            return False
+        import difflib
+        norm_new = _normalize_sentence(sentence)
+        if not norm_new:
+            return False
+        new_tokens = set(_tokenize_text(norm_new))
+        for old in prior:
+            norm_old = _normalize_sentence(old)
+            if not norm_old:
+                continue
+            if norm_old == norm_new:
+                return True
+            ratio = difflib.SequenceMatcher(None, norm_new, norm_old).ratio()
+            if ratio >= 0.82:
+                return True
+            old_tokens = set(_tokenize_text(norm_old))
+            if not old_tokens:
+                continue
+            overlap = len(new_tokens & old_tokens) / max(1, len(new_tokens | old_tokens))
+            if overlap >= 0.7:
+                return True
+        return False
+
+    def _tokens_overlap(a: list[str], b: list[str]) -> float:
+        if not a or not b:
+            return 0.0
+        set_a = set(a)
+        set_b = set(b)
+        return len(set_a & set_b) / max(1, len(set_a | set_b))
+
+    def _extract_experience_label(text: str) -> str:
+        if not text:
+            return ""
+        import re
+        lowered = text.lower()
+        # Look for descriptive phrases around common experience keywords.
+        keywords = [
+            "project", "platform", "system", "service", "app", "product",
+            "pipeline", "model", "research", "thesis", "internship",
+        ]
+        for kw in keywords:
+            match = re.search(rf"([a-z0-9\\s\\-]{{0,40}}\\b{kw}\\b[a-z0-9\\s\\-]{{0,40}})", lowered)
+            if match:
+                phrase = match.group(1).strip()
+                phrase = re.sub(r"\\s+", " ", phrase)
+                # Trim to a reasonable length.
+                tokens = phrase.split()
+                if len(tokens) > 6:
+                    tokens = tokens[-6:]
+                return " ".join(tokens)
+        # Fallback: attempt to capture organization after "at/with/for".
+        match = re.search(r"\\b(?:at|with|for)\\s+([a-z0-9\\-]+(?:\\s+[a-z0-9\\-]+){0,2})", lowered)
+        if match:
+            return match.group(1).strip()
+        return ""
 
     def _apply_resume_prompt_guards(
         interview: Interview,
         reply_text: str,
         user_message: str,
         time_in_phase: float,
+        conversation_len: int,
+        conversation: List[Dict[str, Any]],
     ) -> str:
         if interview.mode != "full" or interview.current_phase != PHASE_INTRO_RESUME:
             return reply_text
@@ -250,9 +461,55 @@ def create_app() -> Flask:
         meta = interview.report.setdefault("_phase_meta", {}).setdefault("intro_resume", {})
         asked: Dict[str, int] = meta.setdefault("asked", {})
         answered: Dict[str, int] = meta.setdefault("answered", {})
+        recent_questions: list[str] = meta.setdefault("recent_questions", [])
+        experience_history: list[Dict[str, Any]] = meta.setdefault("experience_history", [])
+        recent_sentences: list[str] = meta.setdefault("recent_sentences", [])
 
         for topic in _detect_resume_topics(user_message):
             answered[topic] = answered.get(topic, 0) + 1
+
+        experience_label = _extract_experience_label(user_message)
+        if experience_label:
+            exp_tokens = _tokenize_text(experience_label)
+            current_tokens = meta.get("current_experience_tokens") or []
+            if exp_tokens and _tokens_overlap(exp_tokens, current_tokens) < 0.5:
+                experience_history.append({
+                    "label": experience_label,
+                    "tokens": exp_tokens,
+                    "last_turn": conversation_len,
+                })
+                meta["experience_history"] = experience_history[-6:]
+            meta["current_experience_label"] = experience_label
+            meta["current_experience_tokens"] = exp_tokens
+
+        extracted_questions = _extract_questions(reply_text)
+        repeated_question = _is_question_repeat(
+            extracted_questions[0] if extracted_questions else "",
+            recent_questions,
+        )
+        sentence_repeat = False
+        reply_sentences = _split_sentences(reply_text)
+        for sent in reply_sentences:
+            if _is_sentence_repeat(sent, recent_sentences):
+                sentence_repeat = True
+                break
+        if conversation:
+            last_model_text = ""
+            for turn in reversed(conversation):
+                if turn.get("role") == "model":
+                    parts = turn.get("parts", [])
+                    last_model_text = " ".join(
+                        part.get("text", "")
+                        for part in parts
+                        if isinstance(part, dict) and part.get("text")
+                    ).strip()
+                    break
+            if last_model_text and extracted_questions:
+                last_questions = _extract_questions(last_model_text)
+                if last_questions and _is_question_repeat(extracted_questions[0], [last_questions[0]]):
+                    repeated_question = True
+        if _user_signaled_repeat(user_message):
+            repeated_question = True
 
         prompt_topics = _detect_resume_topics(reply_text)
         for topic in prompt_topics:
@@ -262,15 +519,39 @@ def create_app() -> Flask:
 
         repeated = any(asked.get(topic, 0) > 1 for topic in prompt_topics)
         already_answered = any(answered.get(topic, 0) > 0 for topic in prompt_topics)
+        current_tokens = meta.get("current_experience_tokens") or []
 
-        # Hard stop after 10 minutes regardless of model behavior
-        if time_in_phase >= 10.0:
-            return _build_resume_wrap_message()
+        circle_back = False
+        if experience_history:
+            reply_tokens = _tokenize_text(reply_text)
+            user_tokens = _tokenize_text(user_message)
+            for exp in experience_history:
+                exp_tokens = exp.get("tokens") or []
+                if not exp_tokens or exp_tokens == current_tokens:
+                    continue
+                if _tokens_overlap(reply_tokens, exp_tokens) >= 0.6:
+                    # Allow if the candidate explicitly brought it back up.
+                    if _tokens_overlap(user_tokens, exp_tokens) < 0.4:
+                        circle_back = True
+                        break
 
-        if repeated or already_answered:
-            return _select_resume_followup(asked)
+        # Hard stop after 6 minutes regardless of model behavior
+        if time_in_phase >= 6.0:
+            result = _build_resume_wrap_message()
+        elif repeated_question or sentence_repeat or repeated or already_answered or circle_back:
+            result = _select_resume_followup(asked, recent_questions)
+        else:
+            result = reply_text
 
-        return reply_text
+        if extracted_questions:
+            recent_questions.append(extracted_questions[0])
+        meta["recent_questions"] = recent_questions[-8:]
+        if reply_sentences:
+            recent_sentences.extend(reply_sentences)
+        meta["recent_sentences"] = recent_sentences[-20:]
+        _persist_phase_meta(interview, "intro_resume", meta)
+
+        return result
 
     def _detect_coding_topics(text: str) -> list[str]:
         if not text:
@@ -416,6 +697,7 @@ def create_app() -> Flask:
             meta.pop("improvement_window_start_turn", None)
         else:
             meta["improvement_window_start_turn"] = meta["pass_turn_count"]
+        _persist_phase_meta(interview, "coding", meta)
 
     def _select_coding_followup(asked: Dict[str, int]) -> str | None:
         followups = [
@@ -469,23 +751,24 @@ def create_app() -> Flask:
         was_acknowledged = any(acknowledged.get(topic, 0) > 0 for topic in prompt_topics)
 
         # Hard cap: ask time/space complexity at most twice, regardless of correctness.
+        result = reply_text
         if (
             asked_cap.get("time_complexity", 0) > 2
             or asked_cap.get("space_complexity", 0) > 2
         ):
             if tests_passing:
-                return _build_coding_wrap_message(interview)
-            return _select_coding_followup(asked)
+                result = _build_coding_wrap_message(interview)
+            else:
+                result = _select_coding_followup(asked)
+        elif tests_passing and prompt_topics and repeated and was_acknowledged:
+            # Only block/close repetition once the topic has been acknowledged as answered correctly.
+            result = _build_coding_wrap_message(interview)
+        elif repeated and prompt_topics and was_acknowledged:
+            # If they're repeating but haven't acknowledged an answer yet, let it continue.
+            result = _select_coding_followup(asked)
 
-        # Only block/close repetition once the topic has been acknowledged as answered correctly.
-        if tests_passing and prompt_topics and repeated and was_acknowledged:
-            return _build_coding_wrap_message(interview)
-
-        # If they're repeating but haven't acknowledged an answer yet, let it continue.
-        if repeated and prompt_topics and was_acknowledged:
-            return _select_coding_followup(asked)
-
-        return reply_text
+        _persist_phase_meta(interview, "coding", meta)
+        return result
 
     def _maybe_force_coding_wrap(
         interview: Interview,
@@ -594,8 +877,8 @@ def create_app() -> Flask:
         if max_minutes > 0.0 and time_in_phase >= max_minutes:
             return "must_end_now"
 
-        # Encourage wrap-up in resume after ~8 minutes
-        if interview.mode == "full" and current_phase == PHASE_INTRO_RESUME and time_in_phase >= 8.0:
+        # Encourage wrap-up in resume after ~5 minutes
+        if interview.mode == "full" and current_phase == PHASE_INTRO_RESUME and time_in_phase >= 5.0:
             return "wrap_up_soon"
 
         # Must continue if we haven't hit the minimum time
@@ -1380,6 +1663,8 @@ def create_app() -> Flask:
                 reply_text,
                 user_message,
                 time_in_phase,
+                len(conversation),
+                conversation,
             )
             reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
             reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))

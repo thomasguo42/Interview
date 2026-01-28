@@ -259,6 +259,10 @@ button:disabled {
     margin-bottom: 0.35rem;
 }
 
+.message .text {
+    white-space: pre-wrap;
+}
+
 .message.user {
     background: #2563eb;
     color: #fff;

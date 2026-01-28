@@ -850,8 +850,12 @@ async function fetchStatus() {
       interviewPaused = false;
       disableInterviewControls();
       setStatus("Interview ended. View the report below.", "info");
+      await applyPhaseUIFromStatus(status, true);
       await fetchInterviewReport();
       return;
+    }
+    if (!interviewActive) {
+      await applyPhaseUIFromStatus(status, true);
     }
     if (interviewActive) {
       enableInterviewControls();
@@ -1369,6 +1373,55 @@ function updateTimerDisplay() {
     `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')} / ${totalTarget}:00`;
 }
 
+async function applyPhaseUIFromStatus(status, allowInactive = false) {
+  if (!status) return;
+  if (!allowInactive && !status.interviewActive) return;
+
+  currentPhase = status.phase;
+  currentMode = status.mode || currentMode;
+  const phaseNames = {
+    intro_resume: "Phase 1: Intro + Resume",
+    coding: "Phase 2: Coding Problem",
+    questions: "Phase 3: Your Questions",
+    ood_design: "OOD: Design Phase",
+    ood_implementation: "OOD: Implementation Phase"
+  };
+
+  elements.phaseIndicator.textContent = phaseNames[currentPhase] || currentPhase;
+
+  // Force transition is disabled for the new phased flow
+  if (elements.forceCodingBtn) {
+    elements.forceCodingBtn.style.display = "none";
+  }
+
+  if (currentMode === "ood") {
+    elements.oodWorkspace.style.display = "block";
+    elements.codeEditorSection.style.display = "none";
+    elements.problemPanel.style.display = "none";
+    if (!oodMonacoEditor) {
+      await initializeOodCodeEditor(status.language || "python");
+    }
+  } else if (currentPhase === 'coding' || currentMode === "coding_only") {
+    console.log("CODING PHASE ACTIVE - showing code editor");
+    elements.codeEditorSection.style.display = "block";
+    elements.problemPanel.style.display = "block";
+    if (!monacoEditor) {
+      console.log("Monaco Editor not initialized, initializing now...");
+      const language = status.language || "python";
+      await initializeMonacoEditor(language);
+    }
+    if (pendingSnapshotCode && monacoEditor) {
+      monacoEditor.setValue(pendingSnapshotCode);
+    }
+    applyStarterCodeIfEmpty();
+  } else {
+    if (currentMode !== "coding_only") {
+      elements.codeEditorSection.style.display = "none";
+      elements.problemPanel.style.display = "none";
+    }
+  }
+}
+
 async function updatePhaseUI() {
   // Fetch current phase from server
   try {
@@ -1377,51 +1430,7 @@ async function updatePhaseUI() {
     if (!response.ok) return;
 
     const status = await response.json();
-    if (!status.interviewActive) return;
-
-    currentPhase = status.phase;
-    currentMode = status.mode || currentMode;
-    const phaseNames = {
-      intro_resume: "Phase 1: Intro + Resume",
-      coding: "Phase 2: Coding Problem",
-      questions: "Phase 3: Your Questions",
-      ood_design: "OOD: Design Phase",
-      ood_implementation: "OOD: Implementation Phase"
-    };
-
-    elements.phaseIndicator.textContent = phaseNames[currentPhase] || currentPhase;
-
-    // Force transition is disabled for the new phased flow
-    if (elements.forceCodingBtn) {
-      elements.forceCodingBtn.style.display = "none";
-    }
-
-    // Show/hide code editor and problem panel based on phase
-    if (currentPhase === 'coding') {
-      console.log("CODING PHASE ACTIVE - showing code editor");
-      elements.codeEditorSection.style.display = "block";
-      elements.forceCodingBtn.style.display = "none";
-
-      // Initialize Monaco if not already done
-      if (!monacoEditor) {
-        console.log("Monaco Editor not initialized, initializing now...");
-        const language = status.language || "python";
-        await initializeMonacoEditor(language);
-      }
-
-      // Always show problem panel in coding phase (even if problem not formally "presented" yet)
-      elements.problemPanel.style.display = "block";
-      applyStarterCodeIfEmpty();
-    } else {
-      // For coding_only mode, NEVER hide the code editor (it starts in coding phase)
-      if (currentMode !== "coding_only") {
-        elements.codeEditorSection.style.display = "none";
-        elements.problemPanel.style.display = "none";
-      } else {
-        console.log("Coding-only mode - keeping code editor visible");
-      }
-    }
-
+    await applyPhaseUIFromStatus(status, false);
   } catch (error) {
     console.error("Failed to update phase UI:", error);
   }

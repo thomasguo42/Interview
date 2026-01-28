@@ -64,7 +64,7 @@ class GeminiClient:
         data = response.json()
         try:
             parts = data["candidates"][0]["content"]["parts"]
-            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+            combined_text = "\n".join(part.get("text", "") for part in parts if "text" in part).strip()
             if not combined_text:
                 raise KeyError("Empty response text")
             return combined_text
@@ -227,7 +227,7 @@ class GeminiClient:
         data = response.json()
         try:
             parts = data["candidates"][0]["content"]["parts"]
-            combined_text = " ".join(part.get("text", "") for part in parts if "text" in part).strip()
+            combined_text = "\n".join(part.get("text", "") for part in parts if "text" in part).strip()
             if not combined_text:
                 raise KeyError("Empty response text")
             return combined_text
@@ -687,7 +687,7 @@ class GeminiClient:
             "mode": mode,
             "time_in_phase_minutes": round(time_in_phase, 2),
             "total_time_minutes": round(total_time, 2),
-            "minutes_until_coding_window": round(max(0.0, 10.0 - total_time), 2),
+            "minutes_until_coding_window": round(max(0.0, 5.0 - total_time), 2),
             "minutes_until_questions_window": round(max(0.0, 35.0 - total_time), 2),
             "minutes_remaining_total": round(max(0.0, 40.0 - total_time), 2),
             "seconds_since_candidate_spoke": round(float(silence_duration or 0.0), 1),
@@ -709,7 +709,7 @@ class GeminiClient:
             "the time spent in the current phase, and whether the candidate appears ready.\n"
             "Only recommend a transition when it feels natural and consistent with the discussion.\n"
             "If the current dialogue still fits the phase objectives, do not transition yet.\n"
-            "For full mode, enforce hard timing windows: do not transition to coding before 10 minutes total, "
+            "For full mode, enforce hard timing windows: do not transition to coding before 5 minutes total, "
             "and transition to questions around 35 minutes total.\n"
             "Respond ONLY with strict JSON. Do not include any extra commentary."
         )
@@ -1095,7 +1095,7 @@ This is the current session context. Your job is to:
 3. Ask questions about their experience, projects, and skills
 4. Build rapport and set context for the technical discussion
 
-This discussion typically lasts 5-10 minutes. You will receive signals about when to end.
+This discussion typically lasts up to 6 minutes. You will receive signals about when to end.
 
 CONTEXT:
 {interviewer_line}
@@ -1131,9 +1131,10 @@ DURING THE CONVERSATION - RESPONSE STYLE
 
 YOUR ROLE: You are a friendly, curious interviewer learning about the candidate.
 
-LENGTH: Keep responses SHORT
-- Target: 10-15 words per question
-- Maximum: One sentence for follow-ups
+LENGTH: Keep responses concise but flexible
+- Target: 1-2 sentences per turn
+- Allow 3-4 sentences only when you need to clarify or follow up on multiple details
+- Keep each sentence short and focused
 - Listen MORE than you talk
 
 CONVERSATION FLOW:
@@ -1143,6 +1144,11 @@ CONVERSATION FLOW:
 4. Ask another question
 5. Repeat
 6. If a topic stalls, rephrase once, then switch to another resume item
+
+DEPTH GUIDANCE:
+- Use details from their last response to dig deeper (scope, impact, tradeoffs, decisions, ownership)
+- Ask for specifics: "What part did you own?" "What was the impact?" "Why did you choose that approach?"
+- If they mention a project or tech, follow the thread for 1-2 more turns before switching topics
 
 TONE:
 ✓ Conversational and natural
@@ -1355,8 +1361,10 @@ WHEN CANDIDATE GREETS YOU:
    - Use the selected question above (if provided)
    - Difficulty: MEDIUM preferred when the bank does not specify
    - Include the required function signature verbatim
+   - Format the problem block as multiple lines and paragraphs, not a single line
+   - Use blank lines between sections (statement, signature, examples)
    - Ensure the problem statement and examples use ONLY the types from the required signature
-   - Include examples in the markers
+   - Include at least 3 examples in the markers, each with input and output
 3. Outside markers, keep spoken text under 15 words: "Take a minute to think about your approach."
 4. Ask: "Any questions on the problem?"
 
@@ -1416,7 +1424,9 @@ YOUR TASK NOW:
 
 2. Present the problem inside [PROBLEM_START]...[PROBLEM_END] markers:
    - State the problem naturally (don't just copy-paste)
-   - Give example inputs/outputs
+   - Format the problem block as multiple lines and paragraphs, not a single line
+   - Use blank lines between sections (statement, signature, examples)
+   - Give at least 3 example inputs/outputs
    - Ask if they have clarifying questions
    - Include the required function signature verbatim
    - Ensure the problem statement and examples use ONLY the types from the required signature
