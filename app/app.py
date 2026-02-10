@@ -194,9 +194,19 @@ def create_app() -> Flask:
         cleaned = re.sub(r"\[CODE_START\].*?\[CODE_END\]", "", text, flags=re.DOTALL)
         cleaned = re.sub(r"\[CODE_START\].*$", "", cleaned, flags=re.DOTALL)
         cleaned = re.sub(r"\[PROBLEM_START\].*?\[PROBLEM_END\]", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"<<PROBLEM_START>>.*?<<PROBLEM_END>>", "", cleaned, flags=re.DOTALL)
         cleaned = cleaned.replace(PHASE_COMPLETE_TOKEN, "")
         cleaned = cleaned.strip()
         return _strip_markdown_symbols(cleaned)
+
+    def _limit_tts_sentences(text: str, max_sentences: int = 2) -> str:
+        if not text:
+            return ""
+        sentences = _split_sentences(text)
+        if not sentences:
+            return text
+        limited = sentences[:max(1, max_sentences)]
+        return ". ".join(limited).strip()
 
     def _detect_resume_topics(text: str) -> list[str]:
         if not text:
@@ -712,6 +722,18 @@ def create_app() -> Flask:
                 return prompt
         return "Any other considerations you'd mention before we move on?"
 
+    def _select_coding_debug_followup(summary: str) -> str:
+        summary_lower = (summary or "").lower()
+        if "compile" in summary_lower:
+            return "There's a compilation issue. What part of the code do you think is causing it?"
+        if "timeout" in summary_lower:
+            return "It looks like it's timing out. Where could an infinite loop or heavy work happen?"
+        if "runtime" in summary_lower:
+            return "There's a runtime error. Where might a null or index issue occur?"
+        if "fail" in summary_lower:
+            return "Some tests failed. Can you walk through a case that might break your logic?"
+        return "Let's focus on fixing the failing tests. Where do you think the issue is?"
+
     def _apply_coding_prompt_guards(
         interview: Interview,
         reply_text: str,
@@ -746,12 +768,27 @@ def create_app() -> Flask:
 
         evaluation = interview.code_evaluation or {}
         tests_passing = str(evaluation.get("status", "")).strip() == "pass"
+        tests_failing = str(evaluation.get("status", "")).strip() in {"fail", "error"}
 
         repeated = any(asked.get(topic, 0) > 1 for topic in prompt_topics)
         was_acknowledged = any(acknowledged.get(topic, 0) > 0 for topic in prompt_topics)
 
         # Hard cap: ask time/space complexity at most twice, regardless of correctness.
         result = reply_text
+        if tests_failing and prompt_topics:
+            non_debug_topics = {
+                "time_complexity",
+                "space_complexity",
+                "edge_cases",
+                "optimizations",
+                "readability",
+                "tests",
+                "next_steps",
+            }
+            if any(topic in non_debug_topics for topic in prompt_topics):
+                result = _select_coding_debug_followup(str(evaluation.get("summary", "")))
+                _persist_phase_meta(interview, "coding", meta)
+                return result
         if (
             asked_cap.get("time_complexity", 0) > 2
             or asked_cap.get("space_complexity", 0) > 2
@@ -989,6 +1026,44 @@ def create_app() -> Flask:
         payload.pop("_phase_meta", None)
         return payload
 
+    def _public_code_evaluation(evaluation: Dict[str, Any] | None) -> Dict[str, Any]:
+        if not isinstance(evaluation, dict) or not evaluation:
+            return {}
+        status = str(evaluation.get("status", "")).strip()
+        summary = str(evaluation.get("summary", "")).strip()
+        return {"status": status, "summary": summary} if (status or summary) else {}
+
+    def _detect_no_questions(text: str) -> bool:
+        if not text:
+            return False
+        lowered = text.lower().strip()
+        signals = [
+            "no",
+            "nope",
+            "none",
+            "nothing",
+            "no questions",
+            "no more questions",
+            "that's all",
+            "thats all",
+            "i'm good",
+            "im good",
+        ]
+        return any(sig == lowered or sig in lowered for sig in signals)
+
+    def _apply_questions_prompt_guard(
+        interview: Interview,
+        reply_text: str,
+        user_message: str,
+    ) -> str:
+        if interview.mode != "full" or interview.current_phase != PHASE_QUESTIONS:
+            return reply_text
+        if PHASE_COMPLETE_TOKEN in reply_text:
+            return reply_text
+        if _detect_no_questions(user_message):
+            return f"Thanks for your questions. It was great chatting with you.\n{PHASE_COMPLETE_TOKEN}"
+        return reply_text
+
     def _apply_phase_completion(interview: Interview, phase_complete: bool) -> None:
         if interview.mode != "full":
             return
@@ -1038,6 +1113,41 @@ def create_app() -> Flask:
             interview.phase_started_at = _now()
             interview.phase_turn_start_index = len(interview.conversation or [])
             return
+
+    def _generate_phase_greeting(
+        interview: Interview,
+        client: GeminiClient | OpenAIClient,
+    ) -> str:
+        resume_text = interview.resume.text if interview.resume else None
+        phase_signal = _calculate_phase_signal(interview, _calculate_time_in_phase(interview))
+        return client.generate_structured_interview_reply(
+            interview_state={
+                "current_phase": interview.current_phase,
+                "language": interview.language,
+                "mode": interview.mode,
+                "model": interview.model,
+                "problem_presented": interview.problem_presented,
+                "code_snapshots": interview.code_snapshots,
+                "coding_question": interview.coding_question,
+                "code_evaluation": interview.code_evaluation,
+                "coding_summary": interview.coding_summary,
+                "optimization": (interview.report.get("_phase_meta", {}).get("coding", {}).get("optimization", {})),
+                "company_context": interview.company_context,
+                "ood_question": interview.ood_question,
+                "candidate_name": interview.candidate_name,
+                "phase_turn_start_index": interview.phase_turn_start_index,
+            },
+            conversation=[],
+            resume_text=resume_text,
+            user_message="Start the next phase now.",
+            current_code=interview.current_code or "",
+            code_changed=False,
+            time_in_phase=_calculate_time_in_phase(interview),
+            total_time=_calculate_total_time(interview),
+            silence_duration=0.0,
+            code_idle_duration=0.0,
+            phase_signal=phase_signal,
+        )
 
         logger.info("[PHASE SHIFT] full mode %s -> ended", current_phase)
         interview.status = "ended"
@@ -1230,7 +1340,7 @@ def create_app() -> Flask:
     def create_interview():
         mode = (request.form.get("mode") or "full").strip()
         language = (request.form.get("language") or "python").strip().lower()
-        model_name = (request.form.get("model") or config.GEMINI_MODEL or "").strip()
+        model_name = (config.GEMINI_MODEL or "").strip()
         resume_id = request.form.get("resume_id")
         company_profile_id = request.form.get("company_profile_id")
 
@@ -1355,6 +1465,7 @@ def create_app() -> Flask:
         with _db() as db:
             user = _ensure_logged_in(db)
             interview = _load_interview(db, interview_id, user.id)
+            coding_question = interview.coding_question or {}
             return jsonify({
                 "status": interview.status,
                 "mode": interview.mode,
@@ -1363,6 +1474,14 @@ def create_app() -> Flask:
                 "currentCode": interview.current_code or "",
                 "conversation": _flatten_conversation(list(interview.conversation or [])),
                 "report": _report_payload(interview.report or {}),
+                "codeEvaluation": _public_code_evaluation(interview.code_evaluation or {}),
+                "problemPresented": bool(interview.problem_presented),
+                "codingQuestion": {
+                    "title": coding_question.get("title", ""),
+                    "signature": (coding_question.get("signatures") or {}).get(interview.language, ""),
+                    "starterCode": coding_question.get("starter_code", ""),
+                    "problemDescription": coding_question.get("problem_description", ""),
+                } if interview.mode != "ood" else None,
             })
 
     @app.route("/api/interviews/<int:interview_id>/start", methods=["POST"])
@@ -1394,8 +1513,7 @@ def create_app() -> Flask:
             if not was_started and interview.phase_started_at:
                 interview.phase_turn_start_index = len(interview.conversation or [])
 
-            if interview.mode == "ood" and not interview.ood_question:
-                interview.ood_question = get_stock_match_engine_question()
+            # OOD question should be chosen by the interviewer model when needed.
 
             coding_question = None
             if interview.mode != "ood" and not interview.coding_question:
@@ -1407,9 +1525,61 @@ def create_app() -> Flask:
                         return jsonify({"error": "Failed to generate test cases for the selected question."}), 500
                     coding_question["signatures"] = format_signatures_for_prompt(test_spec)
                     coding_question["starter_code"] = build_starter_code(test_spec, interview.language)
+                    try:
+                        client = get_llm_client(interview.model)
+                        coding_question["problem_description"] = client.generate_problem_description(
+                            coding_question,
+                            interview.language,
+                        )
+                    except Exception as exc:
+                        logger.warning("[PROBLEM DESC] generation failed: %s", exc)
                     interview.coding_question = coding_question
 
             _set_updated(interview)
+            reply_text = None
+            reply_audio = None
+            if not was_started:
+                try:
+                    client = get_llm_client(interview.model)
+                    resume_text = interview.resume.text if interview.resume else None
+                    interview_state = {
+                        "current_phase": interview.current_phase,
+                        "language": interview.language,
+                        "mode": interview.mode,
+                        "model": interview.model,
+                        "problem_presented": interview.problem_presented,
+                        "code_snapshots": interview.code_snapshots,
+                        "coding_question": interview.coding_question,
+                        "code_evaluation": interview.code_evaluation,
+                        "coding_summary": interview.coding_summary,
+                        "optimization": (interview.report.get("_phase_meta", {}).get("coding", {}).get("optimization", {})),
+                        "company_context": interview.company_context,
+                        "ood_question": interview.ood_question,
+                        "candidate_name": interview.candidate_name,
+                        "phase_turn_start_index": interview.phase_turn_start_index,
+                    }
+                    reply_text = client.generate_structured_interview_reply(
+                        interview_state=interview_state,
+                        conversation=interview.conversation or [],
+                        resume_text=resume_text,
+                        user_message="Start the interview now.",
+                        current_code=interview.current_code or "",
+                        code_changed=False,
+                        time_in_phase=_calculate_time_in_phase(interview),
+                        total_time=_calculate_total_time(interview),
+                        silence_duration=0.0,
+                        code_idle_duration=0.0,
+                        phase_signal=_calculate_phase_signal(interview, _calculate_time_in_phase(interview)),
+                    )
+                    if reply_text:
+                        _append_turn(interview, "", reply_text)
+                        tts_text = _strip_code_markers(reply_text)
+                        if interview.current_phase in {PHASE_INTRO_RESUME, PHASE_CODING}:
+                            tts_text = _limit_tts_sentences(tts_text, 4)
+                        reply_audio = kokoro.synthesize_base64(tts_text)
+                except Exception as exc:
+                    logger.warning("[START GREETING] failed: %s", exc)
+
             db.commit()
 
             response_data = {
@@ -1419,6 +1589,9 @@ def create_app() -> Flask:
                 "mode": interview.mode,
                 "model": interview.model,
             }
+            if reply_text and reply_audio:
+                response_data["reply"] = reply_text
+                response_data["replyAudio"] = reply_audio
             if interview.mode != "ood":
                 coding_question = interview.coding_question or {}
                 response_data["codingQuestion"] = {
@@ -1545,6 +1718,20 @@ def create_app() -> Flask:
             try:
                 client = get_llm_client(interview.model)
 
+                if (
+                    interview.mode != "ood"
+                    and interview.current_phase == PHASE_CODING
+                    and interview.coding_question
+                    and not interview.coding_question.get("problem_description")
+                ):
+                    try:
+                        interview.coding_question["problem_description"] = client.generate_problem_description(
+                            interview.coding_question,
+                            interview.language,
+                        )
+                    except Exception as exc:
+                        logger.warning("[PROBLEM DESC] generation failed: %s", exc)
+
                 if interview.current_phase == PHASE_CODING:
                     coding_question = interview.coding_question or {}
                     question_title = coding_question.get("title", "")
@@ -1633,19 +1820,37 @@ def create_app() -> Flask:
                     user_message[:100] + "..." if len(user_message) > 100 else user_message,
                 )
                 llm_start = time.perf_counter() if perf_enabled else 0.0
-                reply_text = client.generate_structured_interview_reply(
-                    interview_state=interview_state,
-                    conversation=conversation,
-                    resume_text=resume_text,
-                    user_message=user_message,
-                    current_code=current_code,
-                    code_changed=code_changed,
-                    time_in_phase=time_in_phase,
-                    total_time=total_time,
-                    silence_duration=silence_duration,
-                    code_idle_duration=code_idle_duration,
-                    phase_signal=phase_signal,
-                )
+                reply_text = ""
+                use_wrap_model = False
+                if interview.current_phase == PHASE_CODING:
+                    evaluation = interview.code_evaluation or {}
+                    if str(evaluation.get("status", "")).strip() == "pass":
+                        meta = _get_coding_meta(interview)
+                        if not meta.get("wrap_model_used"):
+                            use_wrap_model = True
+                if use_wrap_model:
+                    reply_text = client.generate_coding_wrapup_reply(
+                        user_message=user_message,
+                        language=interview.language,
+                        mode=interview.mode,
+                    )
+                    meta = _get_coding_meta(interview)
+                    meta["wrap_model_used"] = True
+                    _persist_phase_meta(interview, "coding", meta)
+                else:
+                    reply_text = client.generate_structured_interview_reply(
+                        interview_state=interview_state,
+                        conversation=conversation,
+                        resume_text=resume_text,
+                        user_message=user_message,
+                        current_code=current_code,
+                        code_changed=code_changed,
+                        time_in_phase=time_in_phase,
+                        total_time=total_time,
+                        silence_duration=silence_duration,
+                        code_idle_duration=code_idle_duration,
+                        phase_signal=phase_signal,
+                    )
                 if perf_enabled:
                     llm_reply_time = time.perf_counter() - llm_start
                 logger.info(
@@ -1667,6 +1872,7 @@ def create_app() -> Flask:
                 conversation,
             )
             reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
+            reply_text = _apply_questions_prompt_guard(interview, reply_text, user_message)
             reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))
             if (
                 interview.current_phase == PHASE_CODING
@@ -1689,6 +1895,9 @@ def create_app() -> Flask:
             if interview.current_phase == PHASE_CODING and phase_complete:
                 if not _should_allow_coding_end(interview, len(conversation)):
                     phase_complete = False
+            if interview.current_phase == PHASE_QUESTIONS and phase_complete:
+                interview.status = "ended"
+                interview.ended_at = _now()
             logger.info(
                 "[PHASE CHECK] phase=%s phase_complete=%s time_in_phase=%.1fm",
                 phase_before_transition,
@@ -1704,8 +1913,16 @@ def create_app() -> Flask:
                     phase_before_transition,
                     interview.current_phase,
                 )
+                try:
+                    phase_greeting = _generate_phase_greeting(interview, client)
+                    if phase_greeting:
+                        reply_text = f"{reply_text}\n{phase_greeting}".strip()
+                except Exception as exc:
+                    logger.warning("[PHASE GREETING] failed: %s", exc)
 
             tts_text = _strip_code_markers(reply_text)
+            if interview.current_phase in {PHASE_INTRO_RESUME, PHASE_CODING}:
+                tts_text = _limit_tts_sentences(tts_text, 4)
 
             try:
                 tts_start = time.perf_counter() if perf_enabled else 0.0
@@ -1757,6 +1974,7 @@ def create_app() -> Flask:
                 "replyAudio": reply_audio,
                 "phase": interview.current_phase,
                 "interviewEnded": interview_ended,
+                "codeEvaluation": _public_code_evaluation(interview.code_evaluation or {}),
             })
 
     @app.route("/api/update_code", methods=["POST"])

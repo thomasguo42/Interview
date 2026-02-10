@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
     timeDisplay: document.getElementById("time-display"),
     reportSection: document.getElementById("report-section"),
     reportBody: document.getElementById("report-body"),
+    testResultsSection: document.getElementById("test-results-section"),
+    testResultsBody: document.getElementById("test-results-body"),
     problemPanel: document.getElementById("problem-panel"),
     problemStatement: document.getElementById("problem-statement"),
     codeEditorSection: document.getElementById("code-editor-section"),
@@ -459,9 +461,48 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastSpeechTime = Date.now();
   let problemStatementSet = false; // Track if initial problem is set
   let pendingSnapshotCode = "";
+  let pendingSnapshotProblemText = "";
+  let pendingSnapshotConversation = null;
   let problemUpdatesCount = 0; // Track number of updates
   let starterCode = "";
   let starterCodeApplied = false;
+
+  function applyPendingSnapshotCode(editorInstance) {
+    // Snapshot code is meant to hydrate the editor once on load/re-entry.
+    // If we keep re-applying it (e.g. via updatePhaseUI polling), it will
+    // overwrite user edits and make the editor feel "not editable".
+    if (!pendingSnapshotCode || !editorInstance) return;
+    editorInstance.setValue(pendingSnapshotCode);
+    lastSyncedCode = pendingSnapshotCode;
+    pendingSnapshotCode = "";
+  }
+
+  function hydrateProblemFromSnapshotIfNeeded() {
+    if (currentMode === "ood") return;
+    if (currentPhase !== "coding" && currentMode !== "coding_only") return;
+    if (problemStatementSet) return;
+
+    // Prefer exact [PROBLEM_START]/[PROBLEM_END] blocks from conversation if present.
+    if (Array.isArray(pendingSnapshotConversation) && pendingSnapshotConversation.length) {
+      for (let i = pendingSnapshotConversation.length - 1; i >= 0; i -= 1) {
+        const entry = pendingSnapshotConversation[i];
+        if (!entry || entry.role !== "model" || typeof entry.text !== "string") continue;
+        const problemPayload = extractProblemBlock(entry.text);
+        if (problemPayload.problem) {
+          setProblemStatement(problemPayload.problem);
+          pendingSnapshotProblemText = "";
+          pendingSnapshotConversation = null;
+          return;
+        }
+      }
+    }
+
+    if (pendingSnapshotProblemText && pendingSnapshotProblemText.trim()) {
+      setProblemStatement(pendingSnapshotProblemText);
+    }
+    pendingSnapshotProblemText = "";
+    pendingSnapshotConversation = null;
+  }
 
   // OOD interview state
   let oodMonacoEditor = null; // Separate editor for OOD sessions
@@ -862,6 +903,7 @@ async function fetchStatus() {
       if (elements.resetButton) {
         elements.resetButton.disabled = false;
       }
+      await applyPhaseUIFromStatus(status, true);
       setStatus("Interview ready. Click start to begin.", "success");
     }
   } catch (error) {
@@ -869,36 +911,47 @@ async function fetchStatus() {
   }
 }
 
-async function loadInterviewSnapshot() {
-  if (!interviewId) return;
-  try {
-    const response = await fetch(`/api/interviews/${interviewId}/snapshot`, {
-      method: "GET",
-      credentials: "same-origin",
-    });
-    if (!response.ok) throw new Error("Failed to fetch interview snapshot");
-    const data = await response.json();
-
-    if (Array.isArray(data.conversation) && data.conversation.length) {
-      elements.conversationLog.innerHTML = "";
-      data.conversation.forEach(entry => {
-        const role = entry.role === "model" ? "model" : "user";
-        const speaker = role === "model" ? "Interviewer" : "You";
-        appendMessage(speaker, entry.text, role);
+  async function loadInterviewSnapshot() {
+    if (!interviewId) return;
+    try {
+      const response = await fetch(`/api/interviews/${interviewId}/snapshot`, {
+        method: "GET",
+        credentials: "same-origin",
       });
-    }
+      if (!response.ok) throw new Error("Failed to fetch interview snapshot");
+      const data = await response.json();
+
+      if (Array.isArray(data.conversation) && data.conversation.length) {
+        elements.conversationLog.innerHTML = "";
+        data.conversation.forEach(entry => {
+          const role = entry.role === "model" ? "model" : "user";
+          const speaker = role === "model" ? "Interviewer" : "You";
+          appendMessage(speaker, entry.text, role);
+        });
+      }
 
     if (data.report && Object.keys(data.report).length) {
       renderInterviewReport(data.report);
     }
 
-    if (typeof data.currentCode === "string" && data.currentCode.trim()) {
-      pendingSnapshotCode = data.currentCode;
+    if (data.codeEvaluation) {
+      renderTestResults(data.codeEvaluation);
     }
-  } catch (error) {
-    console.warn("Snapshot load failed:", error);
+
+      if (typeof data.currentCode === "string" && data.currentCode.trim()) {
+        pendingSnapshotCode = data.currentCode;
+      }
+
+      if (data && data.codingQuestion && typeof data.codingQuestion.problemDescription === "string") {
+        pendingSnapshotProblemText = data.codingQuestion.problemDescription;
+      }
+      if (Array.isArray(data.conversation) && data.conversation.length) {
+        pendingSnapshotConversation = data.conversation;
+      }
+    } catch (error) {
+      console.warn("Snapshot load failed:", error);
+    }
   }
-}
 
 // Enable start button for coding-only mode even without resume
 function updateStartButtonForMode() {
@@ -1074,9 +1127,7 @@ elements.startButton?.addEventListener("click", async () => {
     if (data.mode === "ood") {
       console.log("OOD MODE - initializing unified OOD code editor");
       await initializeOodCodeEditor(data.language);
-      if (pendingSnapshotCode && oodMonacoEditor) {
-        oodMonacoEditor.setValue(pendingSnapshotCode);
-      }
+      applyPendingSnapshotCode(oodMonacoEditor);
       // Show OOD workspace
       elements.oodWorkspace.style.display = "block";
       // Hide regular code editor and problem panel
@@ -1086,9 +1137,7 @@ elements.startButton?.addEventListener("click", async () => {
       // Initialize Monaco Editor FIRST (before updatePhaseUI)
       await initializeMonacoEditor(data.language);
       console.log("Monaco Editor initialized");
-      if (pendingSnapshotCode && monacoEditor) {
-        monacoEditor.setValue(pendingSnapshotCode);
-      }
+      applyPendingSnapshotCode(monacoEditor);
       applyStarterCodeIfEmpty();
 
       // Hide OOD workspace
@@ -1110,7 +1159,27 @@ elements.startButton?.addEventListener("click", async () => {
     // Start timers
     startTimers();
 
-    // Enable microphone and set up audio monitoring
+    const openingReply = data.reply;
+    const openingAudio = data.replyAudio;
+    if (openingReply && openingAudio) {
+      const { text, code } = extractGeminiCode(openingReply);
+      const problemPayload = extractProblemBlock(text);
+      const spokenText = problemPayload.text;
+      if (problemPayload.problem) {
+        setProblemStatement(problemPayload.problem);
+      } else {
+        extractProblemStatement(spokenText);
+      }
+      appendMessage("Interviewer", stripMarkdownMarkers(spokenText), "model");
+      if (code && monacoEditor) {
+        monacoEditor.setValue(code);
+        await sendCodeSnapshot();
+        appendSystemMessage("Gemini updated the code editor");
+      }
+      await playReply(openingAudio, spokenText);
+    }
+
+    // Enable microphone and set up audio monitoring AFTER initial greeting
     micEnabled = true;
     updateControlStates();
 
@@ -1118,7 +1187,7 @@ elements.startButton?.addEventListener("click", async () => {
     await setupAudioMonitoring();
 
     tryStartListening();
-    setStatus("Interview started! Speak when ready.", "success");
+    setStatus("Interview started! Your turn.", "success");
 
     // Add system message
     if (data.mode === "coding_only") {
@@ -1401,6 +1470,7 @@ async function applyPhaseUIFromStatus(status, allowInactive = false) {
     if (!oodMonacoEditor) {
       await initializeOodCodeEditor(status.language || "python");
     }
+    applyPendingSnapshotCode(oodMonacoEditor);
   } else if (currentPhase === 'coding' || currentMode === "coding_only") {
     console.log("CODING PHASE ACTIVE - showing code editor");
     elements.codeEditorSection.style.display = "block";
@@ -1410,10 +1480,9 @@ async function applyPhaseUIFromStatus(status, allowInactive = false) {
       const language = status.language || "python";
       await initializeMonacoEditor(language);
     }
-    if (pendingSnapshotCode && monacoEditor) {
-      monacoEditor.setValue(pendingSnapshotCode);
-    }
+    applyPendingSnapshotCode(monacoEditor);
     applyStarterCodeIfEmpty();
+    hydrateProblemFromSnapshotIfNeeded();
   } else {
     if (currentMode !== "coding_only") {
       elements.codeEditorSection.style.display = "none";
@@ -1625,6 +1694,9 @@ async function handleUserUtterance(transcript) {
     if (data.phase) {
       currentPhase = data.phase;
       await updatePhaseUI();
+    }
+    if (data.codeEvaluation) {
+      renderTestResults(data.codeEvaluation);
     }
 
     console.log("Audio received, length:", data.replyAudio.length);
@@ -1846,6 +1918,27 @@ function appendMessage(speaker, text, role) {
 
 function appendSystemMessage(text) {
   appendMessage("System", text, "system");
+}
+
+function renderTestResults(evaluation) {
+  if (!elements.testResultsSection || !elements.testResultsBody) return;
+  if (!evaluation || typeof evaluation !== "object") {
+    elements.testResultsSection.style.display = "none";
+    return;
+  }
+  const status = (evaluation.status || "").toString().toLowerCase();
+  const summary = (evaluation.summary || "").toString().trim();
+  if (!status && !summary) {
+    elements.testResultsSection.style.display = "none";
+    return;
+  }
+  elements.testResultsBody.classList.remove("pass", "fail", "error");
+  if (status) {
+    elements.testResultsBody.classList.add(status);
+  }
+  const label = status ? status.toUpperCase() : "RESULT";
+  elements.testResultsBody.textContent = `${label}: ${summary || "Test results updated."}`;
+  elements.testResultsSection.style.display = "block";
 }
 
 async function fetchInterviewReport() {

@@ -106,6 +106,8 @@ class GeminiClient:
             "- NEVER use filler words like 'um', 'uh', 'hmm', 'well', 'so'\n"
             "- Speak clearly and directly - write EXACTLY what should be spoken out loud\n"
             "- For code or technical terms, just say them plainly"
+            "\nIMPORTANT:\n"
+            "- The interviewer always initiates the conversation. Do not wait for the candidate to greet.\n"
         )
         if resume_text:
             system_prompt += (
@@ -397,6 +399,135 @@ class GeminiClient:
 
         report["rubric_details"] = rubric_details
         return report
+
+    def generate_coding_wrapup_reply(
+        self,
+        user_message: str,
+        language: str,
+        mode: str,
+    ) -> str:
+        system_prompt = (
+            "You are a senior engineer conducting a LIVE VOICE coding interview. "
+            "This is mid-interview and ALL TESTS ARE PASSING. "
+            "Your goal is to wrap up: ask 1 brief question about edge cases or optimizations, "
+            "then be ready to conclude. Keep it to 1-2 short sentences. "
+            "Do NOT mention tests or counts. Do NOT use markdown."
+        )
+        prompt = (
+            f"Language: {language}\n"
+            f"Mode: {mode}\n"
+            f"Candidate just said: {user_message}\n"
+            "Respond now."
+        )
+        payload = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [{"text": system_prompt}],
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{"text": prompt}],
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.4,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 200,
+            },
+        }
+        response = requests.post(
+            self.API_URL_TEMPLATE.format(model=self.model),
+            params={"key": self.api_key},
+            json=payload,
+            timeout=30,
+        )
+        if response.status_code != 200:
+            logging.error(
+                "Gemini API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+        data = response.json()
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            combined_text = "\n".join(part.get("text", "") for part in parts if "text" in part).strip()
+            if not combined_text:
+                raise KeyError("Empty response text")
+            return combined_text
+        except (KeyError, IndexError) as exc:
+            logging.error("Unexpected Gemini wrapup payload: %s", data)
+            raise GeminiError("Gemini API returned an invalid wrapup payload") from exc
+
+    def generate_problem_description(
+        self,
+        question: Dict[str, Any],
+        language: str,
+    ) -> str:
+        system_prompt = (
+            "You are generating a coding problem description for an interview. "
+            "Return ONLY the problem description content (no markers, no markdown, no extra commentary)."
+        )
+        title = str(question.get("title", "") or "").strip()
+        difficulty = str(question.get("difficulty", "") or "").strip()
+        signature = ""
+        signatures = question.get("signatures") if isinstance(question, dict) else None
+        if isinstance(signatures, dict):
+            signature = str(signatures.get(language, "") or "").strip()
+        instructions = (
+            "Write a clear problem statement and include EXACTLY ONE example with input and output. "
+            "The example must be a general case (not an edge case) and include a brief walkthrough "
+            "explaining why the output is correct.\n"
+            "Include the required function signature verbatim.\n"
+            "Do NOT include multiple examples. Do NOT include solution steps.\n"
+            "Output as plain text with blank lines between sections.\n\n"
+            f"Title: {title}\n"
+            f"Difficulty: {difficulty}\n"
+            f"Required signature: {signature}\n"
+        )
+        payload = {
+            "systemInstruction": {
+                "role": "system",
+                "parts": [{"text": system_prompt}],
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{"text": instructions}],
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.3,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 800,
+            },
+        }
+        response = requests.post(
+            self.API_URL_TEMPLATE.format(model=self.model),
+            params={"key": self.api_key},
+            json=payload,
+            timeout=30,
+        )
+        if response.status_code != 200:
+            logging.error(
+                "Gemini API error: status=%s body=%s",
+                response.status_code,
+                response.text,
+            )
+            raise GeminiError(f"Gemini API error {response.status_code}: {response.text}")
+        data = response.json()
+        try:
+            parts = data["candidates"][0]["content"]["parts"]
+            combined_text = "\n".join(part.get("text", "") for part in parts if "text" in part).strip()
+            if not combined_text:
+                raise KeyError("Empty response text")
+            return combined_text
+        except (KeyError, IndexError) as exc:
+            logging.error("Unexpected Gemini problem payload: %s", data)
+            raise GeminiError("Gemini API returned an invalid problem payload") from exc
 
     def _parse_json_from_text(self, text: str) -> Dict[str, Any]:
         """Parse JSON from text, handling markdown code fences and extra whitespace."""
@@ -1272,7 +1403,8 @@ CRITICAL REMINDERS
                         )
                     elif status in {"fail", "error"}:
                         evaluation_block += (
-                            "Guidance: The solution likely has issues. You may question correctness and ask for fixes.\n"
+                            "Guidance: The solution has issues. Focus on debugging and fixing the failures. "
+                            "Do NOT ask about complexity, edge cases, or optimizations until tests pass.\n"
                         )
                     evaluation_block += "Use this only to guide your feedback.\n\n"
 
@@ -1354,17 +1486,14 @@ CRITICAL REMINDERS
 LANGUAGE: {language_display}
 {completion_window}{code_display}{visibility_instructions}{evaluation_block}{optimization_block}
 {selected_question_block}
+PROBLEM DESCRIPTION (READ VERBATIM INSIDE MARKERS):
+{coding_question.get("problem_description", "") if isinstance(coding_question, dict) else ""}
 
-WHEN CANDIDATE GREETS YOU:
+FIRST RESPONSE ONLY:
 1. Brief greeting: "Hi! Ready for a coding problem?"
 2. Present problem in [PROBLEM_START]...[PROBLEM_END] markers
-   - Use the selected question above (if provided)
-   - Difficulty: MEDIUM preferred when the bank does not specify
-   - Include the required function signature verbatim
-   - Format the problem block as multiple lines and paragraphs, not a single line
-   - Use blank lines between sections (statement, signature, examples)
-   - Ensure the problem statement and examples use ONLY the types from the required signature
-   - Include at least 3 examples in the markers, each with input and output
+   - Use the provided PROBLEM DESCRIPTION verbatim
+   - Do NOT alter or add to it
 3. Outside markers, keep spoken text under 15 words: "Take a minute to think about your approach."
 4. Ask: "Any questions on the problem?"
 
@@ -1393,11 +1522,14 @@ WHAT YOU CAN DO:
 ✅ Challenge their thinking: "Walk me through an example" "What happens when N is 1?"
 ✅ Stay silent and let them think
 ✅ Acknowledge: "Okay" "I see" "Keep going"
+✅ If they ask for help, you may give a gentle, high-level hint or direction (not a full solution)
+✅ Hints must be abstract (e.g., "Consider ordering", "Think about constraints") and never name a specific data structure or algorithm
 
 IF THEY ASK FOR HELP:
 - "What part are you stuck on?"
 - "Walk me through your thinking"
 - "What have you tried so far?"
+ - If still stuck and they explicitly ask for a hint, give ONE high-level hint only
 
 IF THEY BEG FOR THE ANSWER:
 - "I can't give you the solution - what ideas do you have?"
@@ -1414,22 +1546,15 @@ DEFAULT: 1-2 sentence responses. Let them work."""
 LANGUAGE: {language_display}
 {timing_block}{completion_window}{code_display}{visibility_instructions}{evaluation_block}{optimization_block}
 {selected_question_block}
+PROBLEM DESCRIPTION (READ VERBATIM INSIDE MARKERS):
+{coding_question.get("problem_description", "") if isinstance(coding_question, dict) else ""}
 
 YOUR TASK NOW:
-1. Use the selected question above if provided
-   - If none is provided, select a LeetCode-style problem from your knowledge
-   - Difficulty: MEDIUM-HARD preferred, or EASY with MEDIUM-HARD follow-ups
-   - Choose a problem that reasonably takes ~25 minutes to solve with discussion
-   - Pick something relevant to their resume/experience if possible
-
+1. Brief greeting: "Hi! Let's do a coding problem."
 2. Present the problem inside [PROBLEM_START]...[PROBLEM_END] markers:
-   - State the problem naturally (don't just copy-paste)
-   - Format the problem block as multiple lines and paragraphs, not a single line
-   - Use blank lines between sections (statement, signature, examples)
-   - Give at least 3 example inputs/outputs
+   - Copy the provided PROBLEM DESCRIPTION verbatim
+   - Do NOT add or remove examples
    - Ask if they have clarifying questions
-   - Include the required function signature verbatim
-   - Ensure the problem statement and examples use ONLY the types from the required signature
    - Do not read the examples out loud; keep spoken text brief outside the markers
 
 3. GUIDE THEM TO DISCUSS APPROACH FIRST:
@@ -1459,11 +1584,14 @@ WHAT YOU CAN DO:
 ✅ Challenge their thinking: "Walk me through an example" "What happens when N is 1?"
 ✅ Stay silent and let them think
 ✅ Acknowledge without helping: "Okay" "I see" "Keep going"
+✅ If they ask for help, you may give a gentle, high-level hint or direction (not a full solution)
+✅ Hints must be abstract (e.g., "Consider ordering", "Think about constraints") and never name a specific data structure or algorithm
 
 IF THEY ASK FOR HELP:
 - "What part are you stuck on?"
 - "Walk me through your thinking"
 - "What have you tried so far?"
+ - If still stuck and they explicitly ask for a hint, give ONE high-level hint only
 
 IF THEY BEG FOR THE ANSWER:
 - "I can't give you the solution - what ideas do you have?"
@@ -1507,6 +1635,9 @@ WHAT YOU CAN DO:
 ✅ Acknowledge: "Okay" "I see" "Keep going"
 ✅ Check in: "How's it going?" (every 2-3 minutes)
 ✅ Vary your questions; rephrase once if needed, then move on
+✅ If tests are failing or there is an error, focus on fixing it; do NOT ask about complexity or edge cases until tests pass
+✅ If they ask for help, you may give a gentle, high-level hint or direction (not a full solution)
+✅ Hints must be abstract (e.g., "Consider ordering", "Think about constraints") and never name a specific data structure or algorithm
 
 CODE EDITOR ACCESS:
 {visibility_instructions.strip()}
@@ -1515,6 +1646,7 @@ IF THEY ASK FOR HELP:
 - "What part are you stuck on?"
 - "Talk through your approach"
 - "What have you tried?"
+ - If still stuck and they explicitly ask for a hint, give ONE high-level hint only
 
 IF THEY ASK FOR THE ANSWER:
 - "I can't give you the solution"
@@ -1545,6 +1677,14 @@ REMEMBER: Struggling IS the interview. Silence is okay. Let them work.
 
         elif current_phase == state.PHASE_QUESTIONS:
             resume_context = f"\n\nCANDIDATE'S RESUME:\n{resume_text}\n" if resume_text else "\n[No resume provided]"
+            company_context_block = ""
+            if company_context:
+                company_context_block = (
+                    "\nCOMPANY CONTEXT:\n"
+                    f"- Company: {company_context.get('company','')}\n"
+                    f"- Role: {company_context.get('role','')}\n"
+                    f"- Details: {company_context.get('details','')}\n"
+                )
             # Build phase ending instructions based on signal
             if phase_signal == "must_end_now":
                 questions_ending = """ENDING NOW - TIME IS UP:
@@ -1559,11 +1699,12 @@ REMEMBER: Struggling IS the interview. Silence is okay. Let them work.
 
             phase_instructions = f"""QUESTIONS SESSION - THEIR TURN:
 You only answer their questions and then end.
-{resume_context}
+{resume_context}{company_context_block}
 
 STYLE:
 - Keep answers conversational and genuine (2-3 sentences each)
-- Make up reasonable details about team, tech stack, culture
+- Base your answers on the COMPANY CONTEXT above (team details, tech stack, culture)
+- If details are missing, keep it generic and plausible
 - Be helpful and encouraging
 
 {questions_ending}
@@ -1621,7 +1762,7 @@ YOUR ROLE - STRICT AND CHALLENGING:
 You are a SENIOR ARCHITECT conducting a rigorous OOD interview. Be SMART, STRICT, and CRITICAL.
 
 PRESENTATION (First interaction only):
-When the candidate greets you, present the OOD problem clearly and concisely. State the problem, basic requirements, and ask them to start designing.
+You must greet first, then present the OOD problem clearly and concisely. State the problem, basic requirements, and ask them to start designing.
 
 DURING DESIGN DISCUSSION:
 - The candidate should be LEADING the design - YOU are evaluating, not guiding

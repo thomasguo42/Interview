@@ -17,7 +17,7 @@
     <div id="interview-timer" class="interview-timer" style="display:none;">
         <div class="timer-content">
             <span id="phase-indicator" class="phase-badge">Phase 1: Introduction</span>
-            <span id="time-display" class="time-display">0:00 / 60:00</span>
+            <span id="time-display" class="time-display">0:00 / 40:00</span>
             <button id="force-coding-btn" class="force-transition-btn" style="display:none;">
                 Force Coding Phase →
             </button>
@@ -67,7 +67,7 @@
                     <input type="radio" name="interview-mode" value="coding_only">
                     <div class="mode-card">
                         <div class="mode-title">Coding Only</div>
-                        <div class="mode-desc">Skip straight to coding problem (35-40 minutes of pure coding)</div>
+                        <div class="mode-desc">Skip straight to coding problem (40 minutes of pure coding)</div>
                     </div>
                 </label>
                 <label class="mode-option">
@@ -88,13 +88,7 @@
                 <option value="cpp">C++</option>
             </select>
         </div>
-        <div class="language-selector">
-            <label for="model-select">Interview Model:</label>
-            <select id="model-select">
-                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-                <option value="gpt-4o-mini">GPT-4o mini</option>
-            </select>
-        </div>
+        <input type="hidden" id="model-select" value="gemini-2.5-flash-lite">
         <div class="controls">
             <button id="start-btn" disabled>Start Interview</button>
             <button id="stop-btn" disabled>Stop Interview</button>

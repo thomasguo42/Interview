@@ -71,12 +71,7 @@
             <option value="java">Java</option>
             <option value="cpp">C++</option>
         </select>
-        <label>Model</label>
-        <select name="model" required>
-            {% for model in supported_models %}
-            <option value="{{ model }}">{{ model }}</option>
-            {% endfor %}
-        </select>
+        <input type="hidden" name="model" value="gemini-2.5-flash-lite">
         <label>Resume (required for full mode)</label>
         <select name="resume_id">
             <option value="">No resume</option>

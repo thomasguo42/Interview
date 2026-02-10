@@ -234,6 +234,63 @@ class OpenAIClient:
         report["rubric_details"] = rubric_details
         return report
 
+    def generate_coding_wrapup_reply(
+        self,
+        user_message: str,
+        language: str,
+        mode: str,
+    ) -> str:
+        system_prompt = (
+            "You are a senior engineer conducting a LIVE VOICE coding interview. "
+            "This is mid-interview and ALL TESTS ARE PASSING. "
+            "Your goal is to wrap up: ask 1 brief question about edge cases or optimizations, "
+            "then be ready to conclude. Keep it to 1-2 short sentences. "
+            "Do NOT mention tests or counts. Do NOT use markdown."
+        )
+        prompt = (
+            f"Language: {language}\n"
+            f"Mode: {mode}\n"
+            f"Candidate just said: {user_message}\n"
+            "Respond now."
+        )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        return self._post_messages(messages, max_tokens=200, temperature=0.4, top_p=0.9)
+
+    def generate_problem_description(
+        self,
+        question: Dict[str, Any],
+        language: str,
+    ) -> str:
+        system_prompt = (
+            "You are generating a coding problem description for an interview. "
+            "Return ONLY the problem description content (no markers, no markdown, no extra commentary)."
+        )
+        title = str(question.get("title", "") or "").strip()
+        difficulty = str(question.get("difficulty", "") or "").strip()
+        signature = ""
+        signatures = question.get("signatures") if isinstance(question, dict) else None
+        if isinstance(signatures, dict):
+            signature = str(signatures.get(language, "") or "").strip()
+        instructions = (
+            "Write a clear problem statement and include EXACTLY ONE example with input and output. "
+            "The example must be a general case (not an edge case) and include a brief walkthrough "
+            "explaining why the output is correct.\n"
+            "Include the required function signature verbatim.\n"
+            "Do NOT include multiple examples. Do NOT include solution steps.\n"
+            "Output as plain text with blank lines between sections.\n\n"
+            f"Title: {title}\n"
+            f"Difficulty: {difficulty}\n"
+            f"Required signature: {signature}\n"
+        )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": instructions},
+        ]
+        return self._post_messages(messages, max_tokens=800, temperature=0.3, top_p=0.9)
+
     def evaluate_code_optimization(
         self,
         question: Dict[str, Any],
