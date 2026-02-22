@@ -1,0 +1,63 @@
+stage1_config_path: config/stage1.yaml
+
+period:
+  start_date: 2016-01-01
+  end_date: 2026-02-16
+  holdout_years: 2
+  include_forward_period: true
+
+portfolio:
+  initial_capital: 100000.0
+  target_positions: 35
+  max_positions: 50
+  max_weight_per_name: 0.05
+  turnover_max_name_changes: 15
+  turnover_initial_rebalance_exempt: true
+  min_trade_notional: 200.0
+  integer_shares: true
+
+execution:
+  liquidity_adv_fraction: 0.01
+  stale_price_max_days: 5
+  stale_liquidation_penalty_bps: 50.0
+  calendar_primary: data/clean/trading_calendar_nyse.parquet
+  calendar_fallback: data/clean/trading_calendar.parquet
+
+risk_overlay:
+  enabled_for_combo_overlay: true
+  spy_floor_weight: 0.40
+  defensive_ticker: BIL
+
+benchmarks:
+  default_cost_scenario: base
+  symbols: [SPY, BIL]
+
+storage:
+  clean_root: data/clean
+  output_root: data/backtests
+  equity_prices: equity_prices_daily.parquet
+  etf_prices: etf_prices_daily.parquet
+  universe: tradable_universe_daily.parquet
+  panel: daily_panel.parquet
+  insiders_agg: insiders_daily_agg.parquet
+  institutions_agg: institutions_daily_agg.parquet
+  master_security: master_security.parquet
+  equity_prices_adj: equity_prices_daily_adj.parquet
+  etf_prices_adj: etf_prices_daily_adj.parquet
+
+strategies:
+  combo_alias_to_raw: true
+  insider_window_calendar_days: 90
+  combo_weights:
+    momentum: 0.5
+    insiders: 0.25
+    institutions: 0.25
+  combo_winsor_lower_q: 0.01
+  combo_winsor_upper_q: 0.99
+
+validation:
+  run_delay_sanity_check: true
+  delay_sanity_days: 1
+  rebalance_audit_sample_size: 50
+  rebalance_audit_seed: 17
+  autorun_missing_benchmarks: true

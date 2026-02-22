@@ -245,7 +245,10 @@ class OpenAIClient:
             "This is mid-interview and ALL TESTS ARE PASSING. "
             "Your goal is to wrap up: ask 1 brief question about edge cases or optimizations, "
             "then be ready to conclude. Keep it to 1-2 short sentences. "
-            "Do NOT mention tests or counts. Do NOT use markdown."
+            "Do NOT mention tests or counts.\n\n"
+            "IMPORTANT: Output STRICT JSON ONLY, no markdown, no code fences.\n"
+            'Return {"say": ["..."], "phase_complete": false, "next_phase": null, "end_interview": false}.\n'
+            '"say" must be 1-2 short, speakable sentences.'
         )
         prompt = (
             f"Language: {language}\n"

@@ -411,7 +411,10 @@ class GeminiClient:
             "This is mid-interview and ALL TESTS ARE PASSING. "
             "Your goal is to wrap up: ask 1 brief question about edge cases or optimizations, "
             "then be ready to conclude. Keep it to 1-2 short sentences. "
-            "Do NOT mention tests or counts. Do NOT use markdown."
+            "Do NOT mention tests or counts.\n\n"
+            "IMPORTANT: Output STRICT JSON ONLY, no markdown, no code fences.\n"
+            'Return {"say": ["..."], "phase_complete": false, "next_phase": null, "end_interview": false}.\n'
+            '"say" must be 1-2 short, speakable sentences.'
         )
         prompt = (
             f"Language: {language}\n"
@@ -1945,17 +1948,42 @@ SCENARIO: Reviewing completed solution
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-KEY RULES YOU MUST FOLLOW:
-• Target: 10-20 words per response (under 15 is ideal)
-• Direct and conversational
-• ONE thought per response
-• Ask questions instead of explaining
-• No filler, no repetition
-• Sound like a phone conversation
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	KEY RULES YOU MUST FOLLOW:
+	• Target: 10-20 words per response (under 15 is ideal)
+	• Direct and conversational
+	• ONE thought per response
+	• Ask questions instead of explaining
+	• No filler, no repetition
+	• Sound like a phone conversation
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	"""
+        output_contract = """
+IMPORTANT OVERRIDE:
+Your raw output is parsed by the server. The candidate will NOT see the raw JSON.
+Regardless of other instructions about formatting, you MUST output STRICT JSON ONLY.
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+Return exactly ONE JSON object and nothing else (no markdown, no code fences, no commentary).
+
+Schema:
+{
+  "say": ["string", "..."],
+  "problem": ["string", "..."],
+  "code": ["string", "..."],
+  "phase_complete": true | false,
+  "next_phase": "intro_resume" | "coding" | "questions" | "ood_design" | "ood_implementation" | null,
+  "end_interview": true | false
+}
+
+Rules:
+- "say" is required and must contain at least 1 short, speakable sentence.
+- Put the coding problem statement ONLY in "problem" (otherwise [] or omit).
+- Put any code you want applied to the editor ONLY in "code" (otherwise [] or omit).
+- Do NOT include [SECTION_COMPLETE], [PROBLEM_START], [PROBLEM_END], [CODE_START], [CODE_END] in "say".
+- To transition phases or end, set phase_complete=true (and set next_phase when appropriate).
 """
 
-        return base_prompt + structure + phase_instructions + response_examples
+        return base_prompt + structure + phase_instructions + response_examples + output_contract
 
     def _normalize_editor_code(self, code: Optional[str]) -> str:
         """Normalize editor snapshot so placeholders don't appear as real code."""

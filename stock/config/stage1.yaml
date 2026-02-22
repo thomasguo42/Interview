@@ -1,0 +1,191 @@
+project:
+  timezone: US/Eastern
+  decision_timing: after_close
+  rebalance_frequency: weekly
+  execution_timing: next_trading_day_open
+  start_date: 2016-01-01
+  end_date: 2026-02-16
+  holdout_years: 2
+
+storage:
+  raw_root: data/raw
+  clean_root: data/clean
+  manifest_root: data/manifests
+
+universe:
+  min_price: 5.0
+  min_adv20_dollar: 10000000.0
+  min_market_cap: 300000000.0
+
+etf_allowlist:
+  - SPY
+  - BIL
+  - SHY
+  - IEF
+  - TLT
+
+costs:
+  base:
+    equities_bps_per_side: 10
+    etfs_bps_per_side: 5
+  conservative:
+    equities_bps_per_side: 25
+    etfs_bps_per_side: 10
+
+validation:
+  min_equity_eligible_unique: 50
+  min_equity_eligible_rows: 1000
+  extreme_jump_threshold: 0.8
+  max_extreme_jump_ratio: 0.01
+  max_missing_active_ratio: 0.05
+  max_zero_volume_ratio: 0.05
+  min_fundamental_coverage_ratio: 0.50
+  max_start_date_gap_days: 90
+  market_cap_alignment_sample_size: 200000
+  max_market_cap_missing_ratio: 0.01
+  max_market_cap_mismatch_ratio: 0.01
+  market_cap_match_rtol: 0.000001
+  market_cap_match_atol: 0.001
+
+nasdaq:
+  base_url: https://data.nasdaq.com/api/v3
+  api_key_env: NASDAQ_DATA_LINK_API_KEY
+  page_size: 10000
+  request_timeout_seconds: 60
+  max_retries: 5
+  retry_backoff_seconds: 1.5
+  prefer_local_zip: true
+  datasets:
+    master:
+      datatable: SHARADAR/TICKERS
+      local_zip_path: SHARADAR_TICKERS_2_7ef16c1ffc4112bb028c13f3e3743955.zip
+      filters: {}
+      required_columns:
+        - permaticker
+        - ticker
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        start_date: [firstpricedate, firstquarter]
+        end_date: [lastpricedate, lastquarter]
+        security_type: [category, securitytype, type]
+        exchange: [exchange]
+        country: [country]
+        is_adr: [isadr, adr]
+        is_otc: [isotc, otc]
+
+    equity_prices:
+      datatable: SHARADAR/SEP
+      local_zip_path: SHARADAR_SEP_2_859257754bc3ab8d93aba176274ae9d2.zip
+      filters:
+        date.gte: "{start_date}"
+        date.lte: "{end_date}"
+      required_columns:
+        - date
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        date: [date]
+        open: [open]
+        high: [high]
+        low: [low]
+        close: [close]
+        close_adj: [closeadj, close]
+        volume: [volume]
+        volume_adj: [volumeadj, volume]
+
+    etf_prices:
+      datatable: SHARADAR/SFP
+      local_zip_path: SHARADAR_SFP_2_f68db1660f86c3c743d5e937214ac747.zip
+      filters:
+        date.gte: "{start_date}"
+        date.lte: "{end_date}"
+      ticker_filter_column: ticker
+      required_columns:
+        - date
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        date: [date]
+        open: [open]
+        high: [high]
+        low: [low]
+        close: [close]
+        close_adj: [closeadj, close]
+        volume: [volume]
+        volume_adj: [volumeadj, volume]
+
+    actions:
+      datatable: SHARADAR/ACTIONS
+      local_zip_path: SHARADAR_ACTIONS_2_d28e7e0286910303825ce92caf792496.zip
+      filters:
+        date.gte: "{start_date}"
+        date.lte: "{end_date}"
+      required_columns:
+        - date
+        - ticker
+      field_candidates:
+        ticker: [ticker]
+        date: [date]
+        action: [action]
+        value: [value]
+        contraticker: [contraticker]
+        contraname: [contraname]
+
+    fundamentals:
+      datatable: SHARADAR/SF1
+      local_zip_path: SHARADAR_SF1_3_dfdfde546963baae0818841e49bc4427.zip
+      enforce_lastupdated_cutoff: false
+      filters:
+        dimension: ARQ
+        datekey.gte: "{start_date}"
+        datekey.lte: "{end_date}"
+      required_columns:
+        - ticker
+        - datekey
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        report_period: [calendardate, reportperiod]
+        availability_date: [datekey, filingdate, accepteddate, publisheddate]
+        lastupdated: [lastupdated]
+        market_cap: [marketcap]
+
+    insiders:
+      datatable: SHARADAR/SF2
+      local_zip_path: SHARADAR_SF2_2_4d7bb742c3823b4926230eee3d6f0d53.zip
+      filters:
+        filingdate.gte: "{start_date}"
+        filingdate.lte: "{end_date}"
+      required_columns:
+        - ticker
+        - filingdate
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        availability_date: [filingdate, filed, date]
+        transaction_date: [transactiondate, transdate, date]
+        shares: [shares, transactionshares]
+        transaction_price: [transactionpricepershare, transactionprice, price]
+        transaction_code: [transactioncode, transactiontype, code]
+        insider_role: [officertitle, role]
+        lastupdated: [lastupdated]
+
+    institutions:
+      datatable: SHARADAR/SF3
+      local_zip_path: "SHARADAR_SF3_2_4d1961ca5b0d2fcbb4851fd57f82f461 (1).zip"
+      filters:
+        calendardate.gte: "{start_date}"
+        calendardate.lte: "{end_date}"
+      availability_lag_days: 60
+      required_columns:
+        - ticker
+        - calendardate
+      field_candidates:
+        permaticker: [permaticker]
+        ticker: [ticker]
+        availability_date: [filingdate, filed, date, datekey, calendardate]
+        report_period: [reportperiod, calendardate]
+        holder_id: [holderid, managerid, cik, investorname]
+        shares: [shares, sharesheld, units]
+        lastupdated: [lastupdated]

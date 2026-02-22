@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 import hashlib
 import logging
+import json
+import re
 
 from flask import (
     Flask,
@@ -175,6 +177,87 @@ def create_app() -> Flask:
             cleaned = text.replace(PHASE_COMPLETE_TOKEN, "").strip()
             return True, cleaned
         return False, text
+
+    def _parse_llm_reply_envelope(raw_text: str) -> Dict[str, Any] | None:
+        """
+        Best-effort parsing for a strict JSON envelope returned by the model.
+
+        Envelope schema (expected):
+        {
+          "say": ["..."],
+          "problem": ["..."],
+          "code": ["..."],
+          "phase_complete": true|false,
+          "next_phase": "intro_resume"|"coding"|"questions"|...|null,
+          "end_interview": true|false
+        }
+        """
+        if not raw_text:
+            return None
+        cleaned = raw_text.strip()
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE).strip()
+            cleaned = re.sub(r"\s*```$", "", cleaned).strip()
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            cleaned = cleaned[start : end + 1]
+        try:
+            obj = json.loads(cleaned)
+        except Exception:
+            return None
+        if not isinstance(obj, dict):
+            return None
+        if not any(key in obj for key in ("say", "phase_complete", "next_phase", "end_interview", "problem", "code")):
+            return None
+        return obj
+
+    def _render_llm_reply_envelope(
+        envelope: Dict[str, Any],
+        *,
+        allow_phase_complete: bool,
+    ) -> str | None:
+        def _to_lines(value: Any) -> List[str]:
+            if value is None:
+                return []
+            if isinstance(value, list):
+                return [str(v) for v in value if v is not None]
+            if isinstance(value, str):
+                text = value.strip("\n")
+                return text.splitlines() if text else []
+            return [str(value)]
+
+        say_lines = _to_lines(envelope.get("say"))
+        problem_lines = _to_lines(envelope.get("problem"))
+        code_lines = _to_lines(envelope.get("code"))
+
+        say_text = "\n".join(line.rstrip() for line in say_lines).strip()
+        if not say_text:
+            # Avoid sending empty strings into TTS.
+            say_text = "Okay."
+
+        reply_text = say_text
+
+        problem_text = "\n".join(line.rstrip() for line in problem_lines).strip()
+        if problem_text:
+            reply_text = f"{reply_text}\n\n[PROBLEM_START]\n{problem_text}\n[PROBLEM_END]"
+
+        code_text = "\n".join(line.rstrip("\n") for line in code_lines).rstrip()
+        if code_text:
+            reply_text = f"{reply_text}\n\n[CODE_START]\n{code_text}\n[CODE_END]"
+
+        phase_complete = bool(envelope.get("phase_complete"))
+        next_phase = envelope.get("next_phase")
+        end_interview = bool(envelope.get("end_interview"))
+
+        # Treat an explicit next_phase as a completion request; backend still enforces timing/tests.
+        if isinstance(next_phase, str) and next_phase.strip():
+            phase_complete = True
+
+        if allow_phase_complete and (phase_complete or end_interview):
+            reply_text = f"{reply_text}\n{PHASE_COMPLETE_TOKEN}"
+
+        return reply_text.strip() if reply_text else None
 
     def _strip_markdown_symbols(text: str) -> str:
         import re
@@ -1033,35 +1116,111 @@ def create_app() -> Flask:
         summary = str(evaluation.get("summary", "")).strip()
         return {"status": status, "summary": summary} if (status or summary) else {}
 
+    def _normalize_user_text(text: str) -> str:
+        """Lowercase and remove punctuation for simple intent heuristics."""
+        if not text:
+            return ""
+        lowered = text.lower()
+        lowered = re.sub(r"[^a-z0-9?\s]", " ", lowered)
+        lowered = re.sub(r"\s+", " ", lowered).strip()
+        return lowered
+
+    def _looks_like_question(text: str) -> bool:
+        if not text:
+            return False
+        normalized = _normalize_user_text(text)
+        if "?" in normalized:
+            return True
+        starters = (
+            "who ",
+            "what ",
+            "when ",
+            "where ",
+            "why ",
+            "how ",
+            "can ",
+            "could ",
+            "would ",
+            "do ",
+            "does ",
+            "did ",
+            "is ",
+            "are ",
+            "should ",
+        )
+        return normalized.startswith(starters)
+
     def _detect_no_questions(text: str) -> bool:
         if not text:
             return False
-        lowered = text.lower().strip()
-        signals = [
-            "no",
-            "nope",
-            "none",
-            "nothing",
-            "no questions",
-            "no more questions",
-            "that's all",
-            "thats all",
-            "i'm good",
-            "im good",
+        normalized = _normalize_user_text(text)
+
+        # Common variants we want to catch, beyond just "no questions".
+        patterns = [
+            r"\bno\s+(more\s+)?questions?\b",
+            r"\bi\s+have\s+no\s+questions?\b",
+            r"\bi\s+do\s+not\s+have\s+any\s+questions?\b",
+            r"\bi\s+don\s*t\s+have\s+any\s+questions?\b",
+            r"\bi\s+dont\s+have\s+any\s+questions?\b",
+            r"\bnone\b.*\bquestions?\b",
+            r"\bnothing\b.*\bquestions?\b",
+            r"\bthats\s+all\b",
+            r"\bthat\s+is\s+all\b",
+            r"\bi\s*m\s+good\b",
+            r"\bim\s+good\b",
         ]
-        return any(sig == lowered or sig in lowered for sig in signals)
+        if any(re.search(pat, normalized) for pat in patterns):
+            return True
+
+        # Extremely short negative responses after being prompted for questions.
+        if normalized in {"no", "nope", "none", "nothing"}:
+            return True
+
+        return False
 
     def _apply_questions_prompt_guard(
         interview: Interview,
         reply_text: str,
         user_message: str,
+        conversation: List[Dict[str, Any]] | None = None,
     ) -> str:
         if interview.mode != "full" or interview.current_phase != PHASE_QUESTIONS:
             return reply_text
         if PHASE_COMPLETE_TOKEN in reply_text:
             return reply_text
         if _detect_no_questions(user_message):
-            return f"Thanks for your questions. It was great chatting with you.\n{PHASE_COMPLETE_TOKEN}"
+            return f"No problem. Thanks for your time.\n{PHASE_COMPLETE_TOKEN}"
+
+        # If the model is looping on the "questions opening" prompt, break the loop.
+        def _last_model_text(conv: List[Dict[str, Any]] | None) -> str:
+            if not conv:
+                return ""
+            for turn in reversed(conv):
+                if turn.get("role") != "model":
+                    continue
+                parts = turn.get("parts") or []
+                if not isinstance(parts, list):
+                    continue
+                text = " ".join(
+                    (part.get("text") or "").strip()
+                    for part in parts
+                    if isinstance(part, dict) and part.get("text")
+                ).strip()
+                if text:
+                    return text
+            return ""
+
+        reply_lower = (reply_text or "").lower()
+        last_lower = _last_model_text(conversation).lower()
+        opening_phrases = (
+            "what questions do you have for me",
+            "move to your questions",
+        )
+        if any(phrase in reply_lower for phrase in opening_phrases) and any(phrase in last_lower for phrase in opening_phrases):
+            if _looks_like_question(user_message):
+                # Answer the meta question briefly and then prompt once.
+                return "I'm your interviewer for this mock session. What questions do you have for me?"
+            return f"No worries. We'll wrap up here. Thanks again.\n{PHASE_COMPLETE_TOKEN}"
         return reply_text
 
     def _apply_phase_completion(interview: Interview, phase_complete: bool) -> None:
@@ -1571,6 +1730,11 @@ def create_app() -> Flask:
                         code_idle_duration=0.0,
                         phase_signal=_calculate_phase_signal(interview, _calculate_time_in_phase(interview)),
                     )
+                    envelope = _parse_llm_reply_envelope(reply_text or "")
+                    if envelope:
+                        rendered = _render_llm_reply_envelope(envelope, allow_phase_complete=False)
+                        if rendered:
+                            reply_text = rendered
                     if reply_text:
                         _append_turn(interview, "", reply_text)
                         tts_text = _strip_code_markers(reply_text)
@@ -1851,6 +2015,11 @@ def create_app() -> Flask:
                         code_idle_duration=code_idle_duration,
                         phase_signal=phase_signal,
                     )
+                envelope = _parse_llm_reply_envelope(reply_text or "")
+                if envelope:
+                    rendered = _render_llm_reply_envelope(envelope, allow_phase_complete=True)
+                    if rendered:
+                        reply_text = rendered
                 if perf_enabled:
                     llm_reply_time = time.perf_counter() - llm_start
                 logger.info(
@@ -1872,8 +2041,18 @@ def create_app() -> Flask:
                 conversation,
             )
             reply_text = _apply_coding_prompt_guards(interview, reply_text, user_message)
-            reply_text = _apply_questions_prompt_guard(interview, reply_text, user_message)
+            reply_text = _apply_questions_prompt_guard(interview, reply_text, user_message, conversation)
             reply_text = _maybe_force_coding_wrap(interview, reply_text, len(conversation))
+            if (
+                interview.current_phase == PHASE_CODING
+                and interview.mode == "full"
+                and str((interview.code_evaluation or {}).get("status", "")).strip() == "pass"
+                and "move to your questions" in (reply_text or "").lower()
+                and PHASE_COMPLETE_TOKEN not in (reply_text or "")
+            ):
+                # If the model verbally transitions but forgets the completion token, enforce it
+                # so the backend actually advances to the questions phase.
+                reply_text = _build_coding_wrap_message(interview)
             if (
                 interview.current_phase == PHASE_CODING
                 and interview.mode == "full"
@@ -1916,6 +2095,11 @@ def create_app() -> Flask:
                 try:
                     phase_greeting = _generate_phase_greeting(interview, client)
                     if phase_greeting:
+                        greeting_envelope = _parse_llm_reply_envelope(phase_greeting)
+                        if greeting_envelope:
+                            rendered_greeting = _render_llm_reply_envelope(greeting_envelope, allow_phase_complete=False)
+                            if rendered_greeting:
+                                phase_greeting = rendered_greeting
                         reply_text = f"{reply_text}\n{phase_greeting}".strip()
                 except Exception as exc:
                     logger.warning("[PHASE GREETING] failed: %s", exc)

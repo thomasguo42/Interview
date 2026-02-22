@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Tooling caches / build artifacts
+.ruff_cache/
+.mypy_cache/
+.coverage
+dist/
+build/
+*.egg-info/
+
+# Local data/artifacts (do not track)
+data/
+
+# Large vendor bundles (do not track)
+SHARADAR_*.zip

@@ -6,12 +6,31 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 
+# --- Local dev artifacts (do not track) ---
+.venv-backups/
+ports.log
+.pytest_cache/
+
+# --- App runtime artifacts (do not track) ---
+storage/app.db
+storage/logs/
+storage/resumes/**
+!storage/resumes/.gitkeep
+webui/webui.db
+webui/vector_db/
+webui/cache/
+webui/uploads/
+
 # --- HEAVY DATA (Do not track these!) ---
 results/
 blade_touch_rule/
 data/
 models/
 wandb/
+
+# --- Stock pipeline data bundles/artifacts (do not track) ---
+stock/SHARADAR_*.zip
+stock/data/
 
 # --- Large File Safety Net ---
 *.pt

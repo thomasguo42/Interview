@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-pipeline"
+version = "0.1.0"
+description = "Stage-1 data foundation and point-in-time pipeline for stock selection"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas>=2.2.0,<3",
+  "pyarrow>=15.0.0,<20",
+  "requests>=2.31.0,<3",
+  "PyYAML>=6.0.0,<7",
+  "pandas-market-calendars>=4.4.0,<6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0,<9",
+]
+
+[project.scripts]
+stock-stage1 = "stock_pipeline.cli:main"
+stock-stage2 = "stock_pipeline.stage2_cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
